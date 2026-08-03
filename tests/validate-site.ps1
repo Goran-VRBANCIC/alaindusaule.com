@@ -1,0 +1,78 @@
+$ErrorActionPreference = 'Stop'
+
+$projectRoot = Split-Path -Parent $PSScriptRoot
+$pages = @(
+    'index.html',
+    'livres/leau-ou-le-chaos.html',
+    'presse.html',
+    'mentions-legales.html',
+    '404.html'
+)
+$failures = [System.Collections.Generic.List[string]]::new()
+
+function Assert-True {
+    param(
+        [bool]$Condition,
+        [string]$Message
+    )
+
+    if (-not $Condition) {
+        $failures.Add($Message)
+    }
+}
+
+foreach ($page in $pages) {
+    $path = Join-Path $projectRoot $page
+    Assert-True (Test-Path -LiteralPath $path) "$page est absent"
+
+    if (-not (Test-Path -LiteralPath $path)) {
+        continue
+    }
+
+    $html = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+    Assert-True ($html -match '<html lang="fr-FR"') "$page doit déclarer fr-FR"
+    Assert-True ($html -match '<meta name="viewport"') "$page doit déclarer viewport"
+    Assert-True ($html -match '<meta name="description"') "$page doit avoir une description"
+    Assert-True ($html -match '<link rel="canonical"') "$page doit avoir une canonical"
+    Assert-True (([regex]::Matches($html, '<h1(?:\s|>)', 'IgnoreCase')).Count -eq 1) "$page doit avoir un seul h1"
+    Assert-True ($html -match 'class="skip-link"') "$page doit avoir un lien d’évitement"
+    Assert-True ($html -match 'assets/css/site\.css|\.\./assets/css/site\.css') "$page doit charger site.css"
+    Assert-True ($html -notmatch 'TODO|TBD|placeholder') "$page contient un marqueur incomplet"
+    Assert-True ($html -notmatch '<img[^>]+src="https?://') "$page ne doit pas charger d’image distante"
+
+    foreach ($match in [regex]::Matches($html, '(?:href|src)="([^"#]+)"', 'IgnoreCase')) {
+        $target = $match.Groups[1].Value
+        if ($target -match '^(?:https?:|mailto:|data:)') {
+            continue
+        }
+
+        $targetPath = ($target -split '[?#]')[0]
+        if ([string]::IsNullOrWhiteSpace($targetPath)) {
+            continue
+        }
+
+        $resolved = [IO.Path]::GetFullPath((Join-Path (Split-Path $path) $targetPath))
+        Assert-True (Test-Path -LiteralPath $resolved) "$page référence un fichier absent : $target"
+    }
+}
+
+$indexPath = Join-Path $projectRoot 'index.html'
+$bookPath = Join-Path $projectRoot 'livres/leau-ou-le-chaos.html'
+$pressPath = Join-Path $projectRoot 'presse.html'
+$index = if (Test-Path -LiteralPath $indexPath) { Get-Content -LiteralPath $indexPath -Raw -Encoding UTF8 } else { '' }
+$book = if (Test-Path -LiteralPath $bookPath) { Get-Content -LiteralPath $bookPath -Raw -Encoding UTF8 } else { '' }
+$press = if (Test-Path -LiteralPath $pressPath) { Get-Content -LiteralPath $pressPath -Raw -Encoding UTF8 } else { '' }
+
+Assert-True ($index -match '"@type"\s*:\s*"WebSite"') 'Accueil : schema WebSite absent'
+Assert-True ($index -match '"@type"\s*:\s*"Person"') 'Accueil : schema Person absent'
+Assert-True ($book -match '"@type"\s*:\s*"Book"') 'Livre : schema Book absent'
+Assert-True ($book -match '9782322839933') 'Livre : ISBN absent'
+Assert-True ($press -match 'alaindusaule@gmail\.com') 'Presse : email public absent'
+Assert-True (($index + $book + $press) -notmatch 'author-portrait|portrait-auteur') 'Aucun portrait auteur ne doit être publié'
+
+if ($failures.Count -gt 0) {
+    $failures | ForEach-Object { Write-Error $_ -ErrorAction Continue }
+    exit 1
+}
+
+Write-Host "Validation réussie : $($pages.Count) pages contrôlées."
