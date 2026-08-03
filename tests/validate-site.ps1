@@ -70,6 +70,21 @@ Assert-True ($book -match '9782322839933') 'Livre : ISBN absent'
 Assert-True ($press -match 'alaindusaule@gmail\.com') 'Presse : email public absent'
 Assert-True (($index + $book + $press) -notmatch 'author-portrait|portrait-auteur') 'Aucun portrait auteur ne doit être publié'
 
+$robotsPath = Join-Path $projectRoot 'robots.txt'
+$sitemapPath = Join-Path $projectRoot 'sitemap.xml'
+Assert-True (Test-Path -LiteralPath $robotsPath) 'robots.txt est absent'
+Assert-True (Test-Path -LiteralPath $sitemapPath) 'sitemap.xml est absent'
+
+if (Test-Path -LiteralPath $robotsPath) {
+    $robots = Get-Content -LiteralPath $robotsPath -Raw
+    Assert-True ($robots -match 'Sitemap: https://alaindusaule\.com/sitemap\.xml') 'robots.txt doit référencer le sitemap canonique'
+}
+
+if (Test-Path -LiteralPath $sitemapPath) {
+    [xml]$sitemap = Get-Content -LiteralPath $sitemapPath -Raw
+    Assert-True ($sitemap.urlset.url.Count -eq 4) 'sitemap.xml doit contenir 4 URLs indexables'
+}
+
 if ($failures.Count -gt 0) {
     $failures | ForEach-Object { Write-Error $_ -ErrorAction Continue }
     exit 1
