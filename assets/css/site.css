@@ -156,12 +156,20 @@ li {
   text-transform: uppercase;
 }
 
+.eyebrow--sun {
+  color: var(--sun);
+}
+
 .lead {
   max-width: 58ch;
   color: var(--ink-soft);
   font-family: var(--serif);
   font-size: clamp(1.35rem, 2.5vw, 1.75rem);
   line-height: 1.42;
+}
+
+.lead--light {
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .fine-print {
@@ -185,6 +193,14 @@ li {
 
 .section--water a {
   color: var(--paper);
+}
+
+.section--water .button--light {
+  color: var(--water-deep);
+}
+
+.section--water .button--light:hover {
+  color: var(--water-deep);
 }
 
 .section-heading {
@@ -506,7 +522,7 @@ li {
   max-width: 28ch;
   margin-bottom: 1.5rem;
   font-family: var(--serif);
-  font-size: clamp(2rem, 5vw, 3.75rem);
+  font-size: clamp(1.7rem, 5vw, 3.75rem);
   line-height: 1.13;
 }
 
@@ -702,6 +718,10 @@ li {
 .site-footer .wordmark,
 .site-footer a {
   color: var(--paper);
+}
+
+.site-footer .fine-print {
+  color: rgba(255, 255, 255, 0.76);
 }
 
 .footer-links {

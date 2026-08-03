@@ -85,6 +85,20 @@ if (Test-Path -LiteralPath $sitemapPath) {
     Assert-True ($sitemap.urlset.url.Count -eq 4) 'sitemap.xml doit contenir 4 URLs indexables'
 }
 
+$cssPath = Join-Path $projectRoot 'assets/css/site.css'
+Assert-True (Test-Path -LiteralPath $cssPath) 'site.css est absent'
+if (Test-Path -LiteralPath $cssPath) {
+    $css = Get-Content -LiteralPath $cssPath -Raw -Encoding UTF8
+    Assert-True ($css -match '\.section--water\s+\.button--light\s*\{[^}]*color:\s*var\(--water-deep\)') 'Le bouton clair doit conserver un texte sombre sur fond blanc'
+    Assert-True ($css -match '\.site-footer\s+\.fine-print\s*\{[^}]*color:\s*rgba\(255,\s*255,\s*255') 'Le texte secondaire du pied de page doit rester lisible sur fond sombre'
+}
+
+$cover640Avif = Join-Path $projectRoot 'assets/images/cover/leau-ou-le-chaos-640.avif'
+$cover640Webp = Join-Path $projectRoot 'assets/images/cover/leau-ou-le-chaos-640.webp'
+Assert-True (Test-Path -LiteralPath $cover640Avif) 'La couverture AVIF 640 px est absente'
+Assert-True (Test-Path -LiteralPath $cover640Webp) 'La couverture WebP 640 px est absente'
+Assert-True ($index -match 'leau-ou-le-chaos-640\.avif') 'Accueil : la variante AVIF 640 px doit être déclarée'
+
 if ($failures.Count -gt 0) {
     $failures | ForEach-Object { Write-Error $_ -ErrorAction Continue }
     exit 1
