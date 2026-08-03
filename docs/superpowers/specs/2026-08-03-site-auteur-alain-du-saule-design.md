@@ -1,7 +1,7 @@
 # Site auteur Alain du Saule — Spécification de design
 
 Date : 3 août 2026  
-Statut : design validé, en attente de validation de la spécification écrite
+Statut : approuvé par l’auteur le 3 août 2026
 
 ## 1. Objectif
 
