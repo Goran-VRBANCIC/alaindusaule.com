@@ -56,6 +56,18 @@ foreach ($page in $pages) {
     }
 }
 
+$publicOrigin = 'https://alaindusaule.fr'
+foreach ($page in $pages) {
+    $path = Join-Path $projectRoot $page
+    if (-not (Test-Path -LiteralPath $path)) {
+        continue
+    }
+
+    $html = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+    Assert-True ($html -notmatch 'https://alaindusaule\.com') "$page référence encore le domaine .com"
+    Assert-True ($html -match [regex]::Escape($publicOrigin)) "$page ne référence pas le domaine canonique .fr"
+}
+
 $textExtensions = @('.html', '.js', '.md', '.txt')
 $trackedTextFiles = & git -C $projectRoot ls-files | Where-Object {
     $textExtensions -contains [IO.Path]::GetExtension($_).ToLowerInvariant()
@@ -97,12 +109,16 @@ Assert-True (Test-Path -LiteralPath $sitemapPath) 'sitemap.xml est absent'
 
 if (Test-Path -LiteralPath $robotsPath) {
     $robots = Get-Content -LiteralPath $robotsPath -Raw
-    Assert-True ($robots -match 'Sitemap: https://alaindusaule\.com/sitemap\.xml') 'robots.txt doit référencer le sitemap canonique'
+    Assert-True ($robots -match 'Sitemap: https://alaindusaule\.fr/sitemap\.xml') 'robots.txt doit référencer le sitemap canonique .fr'
+    Assert-True ($robots -notmatch 'alaindusaule\.com') 'robots.txt référence encore le domaine .com'
 }
 
 if (Test-Path -LiteralPath $sitemapPath) {
     [xml]$sitemap = Get-Content -LiteralPath $sitemapPath -Raw
     Assert-True ($sitemap.urlset.url.Count -eq 4) 'sitemap.xml doit contenir 4 URLs indexables'
+    $sitemapLocations = @($sitemap.urlset.url.loc)
+    Assert-True (($sitemapLocations | Where-Object { $_ -notlike 'https://alaindusaule.fr/*' }).Count -eq 0) 'sitemap.xml contient une URL hors du domaine .fr'
+    Assert-True (($sitemapLocations -join "`n") -notmatch 'alaindusaule\.com') 'sitemap.xml référence encore le domaine .com'
 }
 
 $cssPath = Join-Path $projectRoot 'assets/css/site.css'
@@ -118,6 +134,17 @@ $cover640Webp = Join-Path $projectRoot 'assets/images/cover/leau-ou-le-chaos-640
 Assert-True (Test-Path -LiteralPath $cover640Avif) 'La couverture AVIF 640 px est absente'
 Assert-True (Test-Path -LiteralPath $cover640Webp) 'La couverture WebP 640 px est absente'
 Assert-True ($index -match 'leau-ou-le-chaos-640\.avif') 'Accueil : la variante AVIF 640 px doit être déclarée'
+
+$pressPdfPath = Join-Path $projectRoot 'assets/documents/communique-presse-leau-ou-le-chaos.pdf'
+$pdfTextTool = Get-Command pdftotext -ErrorAction SilentlyContinue
+Assert-True (Test-Path -LiteralPath $pressPdfPath) 'Le communiqué de presse PDF est absent'
+Assert-True ($null -ne $pdfTextTool) 'pdftotext est requis pour contrôler le communiqué de presse'
+
+if ((Test-Path -LiteralPath $pressPdfPath) -and $null -ne $pdfTextTool) {
+    $pdfTextExecutable = $pdfTextTool.Source
+    $pdfText = (& $pdfTextExecutable -layout $pressPdfPath -) -join "`n"
+    Assert-True ($pdfText -notmatch '(?i)[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}') 'Le communiqué de presse expose une adresse email complète'
+}
 
 if ($failures.Count -gt 0) {
     $failures | ForEach-Object { Write-Error $_ -ErrorAction Continue }
