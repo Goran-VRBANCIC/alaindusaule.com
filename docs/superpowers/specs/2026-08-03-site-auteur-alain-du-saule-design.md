@@ -130,7 +130,7 @@ L’auteur a volontairement choisi de ne pas publier de photographie. Aucun port
 4. Angles d’interview.
 5. Téléchargement du communiqué de presse local.
 6. Couverture Web téléchargeable.
-7. Contact : `[contact-removed]`.
+7. Contact via un bouton protégé qui ouvre le logiciel de messagerie.
 
 ## 7. Canaux d’achat et liens externes
 
@@ -210,7 +210,7 @@ Les PNG 300 dpi de plusieurs mégaoctets ne sont jamais servis directement.
 - Un lien marchand n’est publié que s’il répond et correspond au bon ISBN.
 - Si un distributeur devient indisponible, le reste du bloc d’achat reste fonctionnel.
 - La page 404 ramène vers l’accueil et la page du livre.
-- Le site ne contient aucun formulaire nécessitant un backend. Le contact utilise une adresse visible et un lien `mailto:`.
+- Le site ne contient aucun formulaire nécessitant un backend. Le contact utilise un bouton protégé qui reconstruit la destination uniquement lors de l’interaction.
 - Les informations d’hébergement ne sont pas inventées. La page d’informations légales se limite aux éléments confirmés dans le périmètre de cette version et ne prétend pas constituer un avis juridique.
 
 ## 13. Vérification avant livraison

@@ -301,6 +301,8 @@ li {
   border: 2px solid var(--water-deep);
   color: var(--paper);
   background: var(--water-deep);
+  cursor: pointer;
+  font-family: inherit;
   font-size: 0.94rem;
   font-weight: 750;
   line-height: 1.2;

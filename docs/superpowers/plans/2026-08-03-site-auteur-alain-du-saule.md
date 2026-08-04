@@ -85,7 +85,7 @@ Assert-True ($index -match '"@type"\s*:\s*"WebSite"') 'Accueil : schema WebSite 
 Assert-True ($index -match '"@type"\s*:\s*"Person"') 'Accueil : schema Person absent'
 Assert-True ($book -match '"@type"\s*:\s*"Book"') 'Livre : schema Book absent'
 Assert-True ($book -match '9782322839933') 'Livre : ISBN absent'
-Assert-True ($press -match 'alaindusaule@gmail\.com') 'Presse : email public absent'
+Assert-True ($press -match 'data-contact-button') 'Presse : bouton de contact protégé absent'
 Assert-True (($index + $book + $press) -notmatch '<img[^>]+(?:portrait|auteur|alain)') 'Aucun portrait auteur ne doit être publié'
 
 if ($failures.Count -gt 0) {
@@ -315,7 +315,7 @@ git commit -m "feat: add L'eau ou le chaos page"
 
 - [ ] **Step 1: Construire `presse.html`**
 
-Inclure la biographie approuvée : cadre polyvalent, entrepreneur et professionnel de l’informatique depuis plus de vingt ans ; développement logiciel, gestion de projet, formation, management et transformation des systèmes d’information. Ne publier ni portrait, ni âge, ni identité civile. Ajouter fiche bibliographique, angles d’interview, liens vers le communiqué PDF et la couverture presse, puis `mailto:[contact-removed]`.
+Inclure la biographie approuvée : cadre polyvalent, entrepreneur et professionnel de l’informatique depuis plus de vingt ans ; développement logiciel, gestion de projet, formation, management et transformation des systèmes d’information. Ne publier ni portrait, ni âge, ni identité civile. Ajouter fiche bibliographique, angles d’interview, liens vers le communiqué PDF et la couverture presse, puis un bouton de contact protégé qui ouvre le logiciel de messagerie sans publier l’adresse dans le HTML.
 
 - [ ] **Step 2: Construire `mentions-legales.html`**
 

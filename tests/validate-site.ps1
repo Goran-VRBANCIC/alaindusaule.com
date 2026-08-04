@@ -56,6 +56,21 @@ foreach ($page in $pages) {
     }
 }
 
+$textExtensions = @('.html', '.js', '.md', '.txt')
+$trackedTextFiles = & git -C $projectRoot ls-files | Where-Object {
+    $textExtensions -contains [IO.Path]::GetExtension($_).ToLowerInvariant()
+}
+
+foreach ($relativePath in $trackedTextFiles) {
+    $trackedPath = Join-Path $projectRoot $relativePath
+    $source = Get-Content -LiteralPath $trackedPath -Raw -Encoding UTF8
+    Assert-True ($source -notmatch '(?i)[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}') "$relativePath expose une adresse email complète"
+
+    if ([IO.Path]::GetExtension($relativePath) -eq '.html') {
+        Assert-True ($source -notmatch '(?i)(?:href|action)=["'']mailto:') "$relativePath expose un lien mailto direct"
+    }
+}
+
 $indexPath = Join-Path $projectRoot 'index.html'
 $bookPath = Join-Path $projectRoot 'livres/leau-ou-le-chaos.html'
 $pressPath = Join-Path $projectRoot 'presse.html'
@@ -67,7 +82,12 @@ Assert-True ($index -match '"@type"\s*:\s*"WebSite"') 'Accueil : schema WebSite 
 Assert-True ($index -match '"@type"\s*:\s*"Person"') 'Accueil : schema Person absent'
 Assert-True ($book -match '"@type"\s*:\s*"Book"') 'Livre : schema Book absent'
 Assert-True ($book -match '9782322839933') 'Livre : ISBN absent'
-Assert-True ($press -match 'alaindusaule@gmail\.com') 'Presse : email public absent'
+$contactScriptPath = Join-Path $projectRoot 'assets/js/contact.js'
+Assert-True (Test-Path -LiteralPath $contactScriptPath) 'Le script de contact protégé est absent'
+Assert-True ($index -match '<button[^>]+data-contact-button') 'Accueil : bouton de contact protégé absent'
+Assert-True ($index -match '<script[^>]+src="assets/js/contact\.js"') 'Accueil : script de contact absent'
+Assert-True (([regex]::Matches($press, 'data-contact-button')).Count -eq 2) 'Presse : deux boutons de contact protégés sont requis'
+Assert-True ($press -match '<script[^>]+src="assets/js/contact\.js"') 'Presse : script de contact absent'
 Assert-True (($index + $book + $press) -notmatch 'author-portrait|portrait-auteur') 'Aucun portrait auteur ne doit être publié'
 
 $robotsPath = Join-Path $projectRoot 'robots.txt'
