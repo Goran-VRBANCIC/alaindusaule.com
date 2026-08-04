@@ -30,6 +30,18 @@ foreach ($page in $pages) {
     }
 
     $html = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+    Assert-True ($html -match '<script[^>]+src="(?:\.\./)?assets/js/contact\.js"') "$page doit charger le script de contact"
+
+    $contactLinks = [regex]::Matches(
+        $html,
+        '<a\b[^>]*href="[^"]*#contact"[^>]*>',
+        'IgnoreCase'
+    )
+    Assert-True ($contactLinks.Count -gt 0) "$page doit proposer un lien de contact"
+    foreach ($contactLink in $contactLinks) {
+        Assert-True ($contactLink.Value -match '\bdata-contact-button\b') "$page contient un lien de contact sans déclencheur"
+    }
+
     Assert-True ($html -match '<html lang="fr-FR"') "$page doit déclarer fr-FR"
     Assert-True ($html -match '<meta name="viewport"') "$page doit déclarer viewport"
     Assert-True ($html -match '<meta name="description"') "$page doit avoir une description"
@@ -98,7 +110,7 @@ $contactScriptPath = Join-Path $projectRoot 'assets/js/contact.js'
 Assert-True (Test-Path -LiteralPath $contactScriptPath) 'Le script de contact protégé est absent'
 Assert-True ($index -match '<button[^>]+data-contact-button') 'Accueil : bouton de contact protégé absent'
 Assert-True ($index -match '<script[^>]+src="assets/js/contact\.js"') 'Accueil : script de contact absent'
-Assert-True (([regex]::Matches($press, 'data-contact-button')).Count -eq 2) 'Presse : deux boutons de contact protégés sont requis'
+Assert-True (([regex]::Matches($press, '<button[^>]+data-contact-button')).Count -eq 2) 'Presse : deux boutons de contact protégés sont requis'
 Assert-True ($press -match '<script[^>]+src="assets/js/contact\.js"') 'Presse : script de contact absent'
 Assert-True (($index + $book + $press) -notmatch 'author-portrait|portrait-auteur') 'Aucun portrait auteur ne doit être publié'
 
