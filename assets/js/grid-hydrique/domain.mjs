@@ -50,3 +50,53 @@ export function measurementFreshness(value, now = new Date()) {
   if (age <= 7 * 24 * 60 * 60 * 1000) return "recent";
   return "stale";
 }
+
+export function piezoObservationsToGeoJson(observations, now = new Date()) {
+  const latest = latestByStation(observations, "code_bss", "date_mesure");
+  const features = [];
+
+  for (const observation of latest.values()) {
+    if (!Number.isFinite(observation.longitude) || !Number.isFinite(observation.latitude)) continue;
+    const hasDepth = Number.isFinite(observation.profondeur_nappe);
+    const value = hasDepth ? observation.profondeur_nappe : observation.niveau_eau_ngf;
+    features.push({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [observation.longitude, observation.latitude] },
+      properties: {
+        kind: "piezo",
+        stationCode: observation.code_bss,
+        measuredAt: observation.date_mesure,
+        value,
+        unit: "m",
+        valueLabel: hasDepth ? "Profondeur de la nappe" : "Niveau de la nappe (NGF)",
+        freshness: measurementFreshness(observation.date_mesure, now),
+      },
+    });
+  }
+
+  return { type: "FeatureCollection", features };
+}
+
+export function hydroObservationsToGeoJson(observations, now = new Date()) {
+  const latest = latestByStation(observations, "code_station", "date_obs");
+  const features = [];
+
+  for (const observation of latest.values()) {
+    if (!Number.isFinite(observation.longitude) || !Number.isFinite(observation.latitude)) continue;
+    features.push({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [observation.longitude, observation.latitude] },
+      properties: {
+        kind: "hydro",
+        stationCode: observation.code_station,
+        measuredAt: observation.date_obs,
+        value: Number.isFinite(observation.resultat_obs) ? observation.resultat_obs / 1000 : null,
+        unit: "m",
+        valueLabel: "Hauteur d’eau",
+        freshness: measurementFreshness(observation.date_obs, now),
+      },
+    });
+  }
+
+  return { type: "FeatureCollection", features };
+}
