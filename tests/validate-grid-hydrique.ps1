@@ -18,11 +18,14 @@ if (Test-Path -LiteralPath $pagePath) {
     $mapSectionPosition = $html.IndexOf('<section class="water-map-section"')
     $kpiSectionPosition = $html.IndexOf('<section id="indicateurs"')
     $liveSummaryPosition = $html.IndexOf('<div class="container water-live-summary"')
+    $mapLayoutPosition = $html.IndexOf('<div class="water-map-layout"')
+    $layerControlsPosition = $html.IndexOf('<div class="container water-layer-controls"')
     Assert-True ($mapSectionPosition -ge 0) 'La section cartographique est absente'
     Assert-True ($kpiSectionPosition -ge 0) 'La section des indicateurs est absente'
     Assert-True ($mapSectionPosition -lt $kpiSectionPosition) 'La carte doit apparaitre avant les indicateurs'
-    Assert-True ($liveSummaryPosition -gt $mapSectionPosition) 'Le resume des donnees doit appartenir a la section cartographique'
-    Assert-True ($html -match 'class="water-layer-controls" role="group" aria-label="Couches de la carte"') 'Les controles de couches ne forment pas un groupe accessible'
+    Assert-True ($liveSummaryPosition -gt $layerControlsPosition) 'Le resume doit suivre la carte et ses controles dans le DOM mobile'
+    Assert-True ($mapLayoutPosition -lt $layerControlsPosition) 'Le canevas doit preceder les controles dans le DOM mobile'
+    Assert-True ($html -match 'class="[^"]*water-layer-controls" role="group" aria-label="Couches de la carte"') 'Les controles de couches ne forment pas un groupe accessible'
     Assert-True ($html -match '<html lang="fr-FR"') 'La langue fr-FR est absente'
     Assert-True ($html -match '<link rel="canonical" href="https://alaindusaule\.fr/grid-hydrique/"') 'La canonical est incorrecte'
     Assert-True (([regex]::Matches($html, '<h1(?:\s|>)', 'IgnoreCase')).Count -eq 1) 'La page doit avoir un seul h1'
@@ -49,14 +52,7 @@ if (Test-Path -LiteralPath $cssPath) {
     Assert-True ($css -match '@media\s*\(min-width:\s*48rem\)[\s\S]*?\.water-map\s*\{[^}]*min-height:\s*clamp\(32rem,\s*65svh,\s*46rem\)') 'La hauteur desktop de la carte est incorrecte'
     Assert-True ($css -notmatch '\.water-map-layout\s*\{[^}]*grid-template-columns') 'Le panneau de detail comprime encore la carte'
     Assert-True ($css -notmatch '\.station-detail\s*\{[^}]*position:\s*sticky') 'Le panneau de detail doit rester sous la carte'
-    Assert-True ($css -match '\.water-live-summary\s*\{[^}]*order:\s*6') 'Le resume doit passer sous la carte sur mobile'
-    Assert-True ($css -match '\.water-map-layout\s*\{[^}]*(?:^|[\r\n])\s*order:\s*1') 'Le canevas doit preceder la legende sur mobile'
-    Assert-True ($css -match '\.water-map-heading\s*\{[^}]*display:\s*contents') 'Le titre mobile doit liberer les controles sous le canevas'
-    Assert-True ($css -match '\.water-layer-controls\s*\{[^}]*(?:^|[\r\n])\s*order:\s*2') 'Les controles doivent suivre le canevas sur mobile'
-    Assert-True ($css -match '\.station-detail\s*\{[^}]*(?:^|[\r\n])\s*order:\s*5') 'Le detail doit suivre les aides de carte sur mobile'
-    Assert-True ($css -match '@media\s*\(min-width:\s*48rem\)[\s\S]*?\.water-live-summary\s*\{[^}]*order:\s*0') 'Le resume doit rester avant la carte sur desktop'
-    Assert-True ($css -match '@media\s*\(min-width:\s*48rem\)[\s\S]*?\.water-map-layout\s*\{[^}]*(?:^|[\r\n])\s*order:\s*0') 'Le canevas doit retrouver son ordre desktop'
-    Assert-True ($css -match '@media\s*\(min-width:\s*48rem\)[\s\S]*?\.water-map-heading\s*\{[^}]*display:\s*flex') 'Le titre et les controles doivent retrouver leur ligne desktop'
+    Assert-True ($css -notmatch '\.(?:water-live-summary|water-map-layout|water-layer-controls|station-detail)\s*\{[^}]*(?:^|[\r\n])\s*order:') 'Les elements interactifs ne doivent pas diverger de ordre DOM'
     Assert-True ($css -match '@media\s*\(max-width:\s*35\.99rem\)[\s\S]*?\.nav-list\s*\{[\s\S]*?flex-wrap:\s*wrap') 'La navigation mobile doit revenir a la ligne'
     Assert-True ($css -match 'content-visibility:\s*auto') 'Le contenu narratif différé est absent'
     Assert-True ($css -match 'color-scheme:\s*light') 'Le rendu clair explicite est absent'
@@ -103,6 +99,8 @@ if (Test-Path -LiteralPath $dashboardPath) {
     Assert-True ($dashboard -match '15\s*\*\s*60\s*\*\s*1000') 'L’intervalle de quinze minutes est absent'
     Assert-True ($dashboard -match 'visibilitychange') 'La suspension en arrière-plan est absente'
     Assert-True ($dashboard -match 'Promise\.allSettled') 'La dégradation indépendante des sources est absente'
+    Assert-True ($dashboard -match 'matchMedia\("\(min-width: 48rem\)"\)') 'Le breakpoint DOM responsive est absent'
+    Assert-True ($dashboard -match 'desktopLayoutMedia\.addEventListener\("change"') 'Le DOM ne suit pas les changements de largeur'
 }
 
 if ($failures.Count -gt 0) {

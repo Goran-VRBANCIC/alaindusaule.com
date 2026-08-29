@@ -27,6 +27,13 @@ const detailElement = document.querySelector("#station-detail");
 const layerControlsElement = document.querySelector(".water-layer-controls");
 const refreshButton = document.querySelector("[data-refresh-water]");
 const sourceUpdatesElement = document.querySelector("[data-source-updates]");
+const mapSectionElement = document.querySelector(".water-map-section");
+const mapHeadingElement = document.querySelector(".water-map-heading");
+const mapLayoutElement = document.querySelector(".water-map-layout");
+const mapLegendElement = document.querySelector(".water-map-legend");
+const mapInstructionsElement = document.querySelector("#map-keyboard-instructions");
+const liveSummaryElement = document.querySelector(".water-live-summary");
+const desktopLayoutMedia = globalThis.matchMedia("(min-width: 48rem)");
 
 let waterMap;
 let viewportController;
@@ -41,6 +48,27 @@ let lastSuccessfulRefresh = 0;
 let refreshTimer;
 let refreshInProgress = false;
 const sourceDates = { vigieau: "en attente", piezo: "en attente", hydro: "en attente" };
+
+function syncResponsiveDom() {
+  if (!mapSectionElement || !mapHeadingElement || !mapLayoutElement || !layerControlsElement || !mapLegendElement || !mapInstructionsElement || !detailElement || !liveSummaryElement) return;
+  if (desktopLayoutMedia.matches) {
+    mapSectionElement.insertBefore(liveSummaryElement, mapHeadingElement);
+    mapHeadingElement.append(layerControlsElement);
+    mapInstructionsElement.after(mapLayoutElement);
+    mapLayoutElement.after(detailElement);
+  } else {
+    mapHeadingElement.after(mapLayoutElement);
+    mapLayoutElement.after(layerControlsElement);
+    layerControlsElement.after(mapLegendElement);
+    mapLegendElement.after(mapInstructionsElement);
+    mapInstructionsElement.after(detailElement);
+    detailElement.after(liveSummaryElement);
+  }
+  globalThis.dispatchEvent(new Event("resize"));
+}
+
+syncResponsiveDom();
+desktopLayoutMedia.addEventListener("change", syncResponsiveDom);
 
 function joinDepartmentRestrictions(geoJson, restrictions) {
   const restrictionsByCode = new Map(restrictions.map((item) => [item.code, item]));

@@ -1,5 +1,11 @@
 # Journal du projet
 
+## 2026-08-29 21:27:00 +02:00 — Ordre DOM responsive accessible
+
+**Problème de revue :** Le premier correctif utilisait `order` pour déplacer des éléments interactifs. L’ordre visuel mobile différait donc de l’ordre de lecture et de tabulation.
+
+**Solution vérifiée :** Le HTML suit désormais l’ordre mobile réel : titre, canevas, commandes, légende, aide, détail, résumé. Au breakpoint 48 rem, JavaScript déplace les mêmes nœuds — sans duplication — pour obtenir résumé, titre avec commandes, légende, aide, canevas et détail. Edge confirme les deux ordres DOM, un canevas toujours positionné à 664 px sur mobile, les interactions clavier/couches, huit requêtes Hub’Eau toutes bornées par `bbox` et aucune erreur console.
+
 ## 2026-08-29 21:18:00 +02:00 — Carte réellement visible sur mobile
 
 **Solution vérifiée :** À 320 × 900, le canevas MapLibre commence à 664 px et environ 236 px de carte sont visibles dès le premier écran. L’ordre mobile est titre, carte, commandes, légende, aide, détail puis résumé des données ; à partir de 48 rem, le statut et les sources retrouvent leur position avant le titre cartographique et les commandes retrouvent la ligne du titre. Les captures 320 et 1440 px confirment les deux compositions. Le contrôle Edge confirme aussi l’absence de débordement, la bascule de couche, la sélection clavier de la Creuse, six requêtes Hub’Eau toutes munies de `bbox` et aucune erreur console.
