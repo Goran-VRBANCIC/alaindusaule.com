@@ -1,5 +1,11 @@
 # Journal du projet
 
+## 2026-08-29 20:54:52 +02:00 — Carte visible avant les indicateurs
+
+**Problème soumis :** La première composition laissait attendre une carte dans la section d’introduction, mais les indicateurs apparaissaient avant elle.
+
+**Réponse / solution :** La carte MapLibre existante est maintenant placée juste après l’introduction et avant les indicateurs, sur toute la largeur du conteneur. Le panneau de détail reste sous la carte à toutes les largeurs. Sa hauteur vaut `clamp(24rem, 58svh, 32rem)` sur mobile et `clamp(32rem, 65svh, 46rem)` dès 48 rem. Les captures à 320, 768, 1024 et 1440 px confirment la hiérarchie et l’absence de panneau latéral. À 320 px, le choix 2 conserve le statut et les sources avant la carte : son titre apparaît au premier écran et le fond cartographique commence juste après. Le contrôle navigateur confirme l’absence de débordement, la bascule de couche, la sélection clavier du département de la Creuse, six requêtes Hub’Eau toutes bornées par `bbox` après zoom et aucune erreur console. Les 24 tests dashboard, les validateurs du dashboard et du site ainsi que le test du formulaire de contact sont relancés avant intégration.
+
 ## 2026-08-29 19:52:00 +02:00 — Validation de la spécification carte
 
 **Réponse :** L’utilisateur a validé la spécification écrite de la carte pleine largeur placée avant les indicateurs.
