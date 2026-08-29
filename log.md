@@ -1,5 +1,17 @@
 # Journal du projet
 
+## 2026-08-30 00:14:00 +02:00 — Fin de session
+
+**Demande :** Arrêter le serveur local et terminer la session pour ce soir.
+
+**Réponse / solution :** Le serveur principal de test sur le port 4173 est arrêté. La session se termine avec la carte responsive fusionnée localement dans `master`, la branche et le worktree nettoyés, et aucun push distant effectué.
+
+## 2026-08-30 00:13:28 +02:00 — Fusion et nettoyage terminés
+
+**Résultat :** `feature/map-above-fold` a été fusionnée en fast-forward dans `master` jusqu’au commit `1aaf6bc`. Les contrôles sur le résultat fusionné passent : 24 tests dashboard, un test contact, deux validateurs et la syntaxe JavaScript. La branche de fonctionnalité et son worktree ont été supprimés ; le serveur principal de test reste actif sur le port 4173. Aucun push n’a été effectué.
+
+**Règle mémoire :** Si `git worktree remove` désenregistre un worktree sous Windows mais laisse un dossier vide verrouillé, rechercher les serveurs de test restants par leur ligne de commande et leur port. Arrêter uniquement l’arborescence du serveur associé, vérifier avec `git clean -ndx -- <chemin exact>`, puis supprimer ce seul dossier avec `git clean -fdx -- <chemin exact>`.
+
 ## 2026-08-30 00:10:04 +02:00 — Intégration locale de la carte
 
 **Choix :** Option 1, fusionner `feature/map-above-fold` localement dans `master`.
