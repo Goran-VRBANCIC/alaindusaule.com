@@ -6,6 +6,7 @@ import {
   renderDepartmentDetail,
   renderPiezoDetail,
   renderHydroDetail,
+  renderStatus,
   restrictionColor,
 } from "../../assets/js/grid-hydrique/templates.mjs";
 
@@ -58,4 +59,17 @@ test("les détails de station créent un emplacement de graphique", () => {
   assert.match(hydro, /Station H1/);
   assert.match(piezo, /data-chart/);
   assert.match(hydro, /data-chart/);
+});
+
+test("renderStatus décrit chargement, réussite, résultat partiel et erreur avec cache", () => {
+  assert.equal(renderStatus("loading", ""), "Chargement des données officielles…");
+  assert.equal(renderStatus("success", "Actualisé à 14:15"), "Actualisé à 14:15");
+  assert.equal(
+    renderStatus("partial", "Mesures piézométriques indisponibles."),
+    "Certaines données sont indisponibles. Mesures piézométriques indisponibles.",
+  );
+  assert.equal(
+    renderStatus("error", "Réessayez plus tard.", true),
+    "Données temporairement indisponibles. Réessayez plus tard. Dernières données affichées.",
+  );
 });

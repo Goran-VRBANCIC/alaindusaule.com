@@ -38,12 +38,12 @@ export function renderKpis(summary, updatedAt) {
   `).join("");
 }
 
-export function renderStatus(state, message) {
+export function renderStatus(state, message, hasCachedData = false) {
   const labels = {
     loading: "Chargement des données officielles…",
     success: message,
     partial: `Certaines données sont indisponibles. ${message}`,
-    error: `Données temporairement indisponibles. ${message}`,
+    error: `Données temporairement indisponibles. ${message}${hasCachedData ? " Dernières données affichées." : ""}`,
   };
   return escapeHtml(labels[state] || message);
 }

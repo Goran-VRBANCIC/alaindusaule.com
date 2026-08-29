@@ -1,3 +1,9 @@
+.water-map-section,
+.water-kpis,
+.water-hero {
+  color-scheme: light;
+}
+
 .water-hero {
   padding-block: clamp(3rem, 7vw, 6rem);
   background: var(--paper-warm);
@@ -14,6 +20,15 @@
 .water-status {
   margin: 0;
   color: var(--ink-soft);
+}
+
+.water-sources {
+  margin-top: 1rem;
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.62;
 }
 
 .water-kpi-grid {
@@ -133,6 +148,11 @@
 .legend-swatch--alerte { background: #e3a62f; }
 .legend-swatch--vigilance { background: #f2d36b; }
 .legend-swatch--aucune { background: #d8e4e8; }
+
+.deferred-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 700px;
+}
 
 .station-detail {
   min-width: 0;

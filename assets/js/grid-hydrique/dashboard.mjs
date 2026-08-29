@@ -16,16 +16,24 @@ import {
   renderStatus,
 } from "./templates.mjs";
 
+const REFRESH_INTERVAL_MS = 15 * 60 * 1000;
 const api = createWaterApi();
 const statusElement = document.querySelector("[data-water-status]");
 const kpiElement = document.querySelector("[data-kpi-grid]");
 const detailElement = document.querySelector("#station-detail");
 const layerControlsElement = document.querySelector(".water-layer-controls");
+const refreshButton = document.querySelector("[data-refresh-water]");
+
 let waterMap;
 let viewportController;
 let staticPiezoData;
 let staticHydroData;
 let selectionController;
+let departmentsGeoJson;
+let lastRestrictions = null;
+let lastSuccessfulRefresh = 0;
+let refreshTimer;
+let refreshInProgress = false;
 
 function joinDepartmentRestrictions(geoJson, restrictions) {
   const restrictionsByCode = new Map(restrictions.map((item) => [item.code, item]));
@@ -78,46 +86,97 @@ function setupLayerControls() {
   });
 }
 
-async function refreshViewportData() {
-  if (!waterMap || !statusElement) return;
+async function refreshNationalData() {
+  const restrictions = await api.getDepartments();
+  const now = new Date();
+  lastRestrictions = restrictions;
+  waterMap.setDepartments(joinDepartmentRestrictions(departmentsGeoJson, restrictions));
+  kpiElement.innerHTML = renderKpis(buildRestrictionSummary(restrictions), formatUpdateTime(now));
+}
+
+async function refreshViewportData(announce = false) {
+  if (!waterMap || !statusElement) return { partial: false, message: "" };
   viewportController?.abort();
 
   if (waterMap.getZoom() < 6) {
     waterMap.setStations("piezo", staticPiezoData);
     waterMap.setStations("hydro", staticHydroData);
-    statusElement.textContent = "Zoomez pour charger les mesures récentes.";
-    return;
+    if (announce) statusElement.textContent = "Zoomez pour charger les mesures récentes.";
+    return { partial: false, message: "" };
   }
 
   viewportController = new AbortController();
   const signal = viewportController.signal;
   const fromDate = new Date();
   fromDate.setUTCDate(fromDate.getUTCDate() - 2);
-  statusElement.textContent = "Chargement des mesures visibles…";
+  if (announce) statusElement.textContent = "Chargement des mesures visibles…";
 
   const [piezoResult, hydroResult] = await Promise.allSettled([
     api.getPiezoViewport(waterMap.getBounds(), formatIsoDate(fromDate), signal),
     api.getHydroViewport(waterMap.getBounds(), fromDate.toISOString(), signal),
   ]);
+  if (signal.aborted) return { partial: true, message: "Actualisation annulée." };
 
-  if (signal.aborted) return;
-  let partial = false;
+  const unavailable = [];
+  let truncated = false;
   if (piezoResult.status === "fulfilled") {
     waterMap.setStations("piezo", piezoObservationsToGeoJson(piezoResult.value.data));
-    partial ||= Boolean(piezoResult.value.next);
+    truncated ||= Boolean(piezoResult.value.next);
   } else {
-    partial = true;
+    unavailable.push("piézométrie");
   }
   if (hydroResult.status === "fulfilled") {
     waterMap.setStations("hydro", hydroObservationsToGeoJson(hydroResult.value.data));
-    partial ||= Boolean(hydroResult.value.next);
+    truncated ||= Boolean(hydroResult.value.next);
   } else {
-    partial = true;
+    unavailable.push("hydrométrie");
   }
 
-  statusElement.textContent = partial
-    ? "Mesures visibles actualisées — échantillon partiel."
-    : "Mesures visibles actualisées.";
+  const partial = unavailable.length > 0 || truncated;
+  const message = unavailable.length > 0
+    ? `${unavailable.join(" et ")} temporairement indisponible${unavailable.length > 1 ? "s" : ""}.`
+    : truncated ? "Échantillon limité aux 5 000 mesures les plus récentes." : "Mesures visibles actualisées.";
+  if (announce) statusElement.textContent = renderStatus(partial ? "partial" : "success", message);
+  return { partial, message };
+}
+
+async function runRefresh() {
+  if (refreshInProgress || document.hidden || !waterMap) return;
+  refreshInProgress = true;
+  if (refreshButton) refreshButton.disabled = true;
+  if (statusElement) statusElement.textContent = renderStatus("loading", "");
+
+  const [nationalResult, viewportResult] = await Promise.allSettled([
+    refreshNationalData(),
+    refreshViewportData(false),
+  ]);
+  const failures = [];
+  if (nationalResult.status === "rejected") failures.push("restrictions nationales");
+  if (viewportResult.status === "rejected") failures.push("mesures visibles");
+  const viewportPartial = viewportResult.status === "fulfilled" && viewportResult.value.partial;
+
+  if (failures.length === 0 && !viewportPartial) {
+    lastSuccessfulRefresh = Date.now();
+    statusElement.textContent = renderStatus("success", `Données actualisées à ${formatUpdateTime(new Date())}`);
+  } else if (failures.length < 2 || viewportPartial) {
+    if (nationalResult.status === "fulfilled") lastSuccessfulRefresh = Date.now();
+    const details = [
+      ...failures,
+      viewportPartial ? viewportResult.value.message : "",
+    ].filter(Boolean).join(" — ");
+    statusElement.textContent = renderStatus("partial", details);
+  } else {
+    statusElement.textContent = renderStatus("error", "Réessayez dans quelques instants.", Boolean(lastRestrictions));
+  }
+
+  refreshInProgress = false;
+  if (refreshButton) refreshButton.disabled = false;
+  scheduleRefresh();
+}
+
+function scheduleRefresh() {
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(runRefresh, REFRESH_INTERVAL_MS);
 }
 
 async function showSelection(selection) {
@@ -165,10 +224,9 @@ async function showSelection(selection) {
             : observation.niveau_eau_ngf,
         }
       : { date: observation.date_obs, value: observation.resultat_obs / 1000 });
-    const model = buildLineChartModel(values, 600, 240);
     renderLineChart(
       chartContainer,
-      model,
+      buildLineChartModel(values, 600, 240),
       kind === "piezo" ? "Évolution du niveau de la nappe" : "Évolution de la hauteur d’eau",
     );
   } catch (error) {
@@ -180,35 +238,37 @@ async function showSelection(selection) {
 }
 
 async function initializeDashboard() {
-  if (!statusElement || !kpiElement) return;
+  if (!statusElement || !kpiElement || !refreshButton) return;
   statusElement.textContent = renderStatus("loading", "");
 
   try {
-    const [departmentsGeoJson, piezoSample, hydroSample, restrictions] = await Promise.all([
+    const [loadedDepartments, piezoSample, hydroSample] = await Promise.all([
       loadLocalJson("../assets/data/departements-simplifies.geojson"),
       loadLocalJson("../assets/data/piezo-stations.json"),
       loadLocalJson("../assets/data/hydro-stations.json"),
-      api.getDepartments(),
     ]);
-    const now = new Date();
-    const departments = joinDepartmentRestrictions(departmentsGeoJson, restrictions);
-    kpiElement.innerHTML = renderKpis(buildRestrictionSummary(restrictions), formatUpdateTime(now));
+    departmentsGeoJson = loadedDepartments;
     staticPiezoData = stationsToGeoJson(piezoSample.stations);
     staticHydroData = stationsToGeoJson(hydroSample.stations);
     waterMap = createWaterMap({
       container: "carte-hydrique",
-      departments,
+      departments: joinDepartmentRestrictions(departmentsGeoJson, []),
       piezoStations: piezoSample.stations,
       hydroStations: hydroSample.stations,
       onSelect: showSelection,
     });
     await waterMap.ready;
     setupLayerControls();
-    waterMap.onMoveEnd(refreshViewportData);
-    statusElement.textContent = renderStatus("success", `Données actualisées à ${formatUpdateTime(now)}`);
+    waterMap.onMoveEnd(() => refreshViewportData(true));
+    refreshButton.addEventListener("click", runRefresh);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && Date.now() - lastSuccessfulRefresh >= REFRESH_INTERVAL_MS) runRefresh();
+    });
+    await runRefresh();
   } catch (error) {
     console.error(error);
-    statusElement.textContent = renderStatus("error", "Réessayez dans quelques instants.");
+    statusElement.textContent = renderStatus("error", "Les ressources locales sont indisponibles.");
+    refreshButton.disabled = true;
   }
 }
 
