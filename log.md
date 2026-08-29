@@ -1,5 +1,11 @@
 # Journal du projet
 
+## 2026-08-30 00:10:04 +02:00 — Intégration locale de la carte
+
+**Choix :** Option 1, fusionner `feature/map-above-fold` localement dans `master`.
+
+**Réponse / solution :** La branche sera fusionnée sans push. Le résultat fusionné sera vérifié avec les 24 tests dashboard, le test contact, les deux validateurs et le contrôle syntaxique, puis le worktree et la branche de fonctionnalité seront supprimés si tous les contrôles passent.
+
 ## 2026-08-30 00:09:18 +02:00 — Reprise et revue finale de la carte
 
 **Demande :** Reprendre après l’interruption de la dernière revue indépendante.
