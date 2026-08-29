@@ -55,6 +55,23 @@ $sitemapPath = Join-Path $projectRoot 'sitemap.xml'
 Assert-True ($sitemap.urlset.url.Count -eq 5) 'Le sitemap doit contenir cinq URLs'
 Assert-True (@($sitemap.urlset.url.loc) -contains 'https://alaindusaule.fr/grid-hydrique/') 'Le dashboard est absent du sitemap'
 
+$workflowPath = Join-Path $projectRoot '.github/workflows/pages.yml'
+Assert-True (Test-Path -LiteralPath $workflowPath) 'Le workflow GitHub Pages est absent'
+if (Test-Path -LiteralPath $workflowPath) {
+    $workflow = Get-Content -Raw -Encoding UTF8 -LiteralPath $workflowPath
+    Assert-True ($workflow -match 'contents:\s*read') 'La permission contents: read est absente'
+    Assert-True ($workflow -match 'pages:\s*write') 'La permission pages: write est absente'
+    Assert-True ($workflow -match 'id-token:\s*write') 'La permission id-token: write est absente'
+    Assert-True ($workflow -match 'actions/configure-pages@v6') 'configure-pages v6 est absent'
+    Assert-True ($workflow -match 'actions/upload-pages-artifact@v5') 'upload-pages-artifact v5 est absent'
+    Assert-True ($workflow -match 'actions/deploy-pages@v5') 'deploy-pages v5 est absent'
+    Assert-True ($workflow -match 'runs-on:\s*ubuntu-latest') 'Le runner standard Ubuntu est absent'
+    Assert-True ($workflow -notmatch 'runs-on:\s*[^\r\n]*large') 'Un runner payant est configuré'
+    Assert-True ($workflow -match 'node --test tests/grid-hydrique/\*\.test\.mjs') 'Les tests dashboard ne sont pas exécutés en CI'
+}
+
+Assert-True (Test-Path -LiteralPath (Join-Path $projectRoot '.nojekyll')) 'Le fichier .nojekyll est absent'
+
 $dashboardPath = Join-Path $projectRoot 'assets/js/grid-hydrique/dashboard.mjs'
 Assert-True (Test-Path -LiteralPath $dashboardPath) 'Le module principal est absent'
 if (Test-Path -LiteralPath $dashboardPath) {

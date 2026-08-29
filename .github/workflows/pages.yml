@@ -1,0 +1,52 @@
+name: Deploy static site to Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Run JavaScript tests
+        run: node --test tests/grid-hydrique/*.test.mjs && node tests/contact-script.test.js
+      - name: Install PDF validation dependency
+        run: sudo apt-get update && sudo apt-get install --yes poppler-utils
+      - name: Validate all site files
+        shell: pwsh
+        run: ./tests/validate-grid-hydrique.ps1 && ./tests/validate-site.ps1
+      - name: Assemble public artifact
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path '_site'
+          Copy-Item -Recurse -LiteralPath 'assets', 'grid-hydrique', 'livres' -Destination '_site'
+          Copy-Item -LiteralPath '.nojekyll', '404.html', 'CNAME', 'index.html', 'mentions-legales.html', 'presse.html', 'robots.txt', 'sitemap.xml' -Destination '_site'
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
