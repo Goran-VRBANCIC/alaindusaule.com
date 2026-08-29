@@ -1,13 +1,20 @@
 // @ts-check
 
 import { createWaterApi } from "./api.mjs";
+import { buildLineChartModel, renderLineChart } from "./chart.mjs";
 import {
   buildRestrictionSummary,
   hydroObservationsToGeoJson,
   piezoObservationsToGeoJson,
 } from "./domain.mjs";
 import { createWaterMap, stationsToGeoJson } from "./map.mjs";
-import { escapeHtml, renderKpis, renderStatus } from "./templates.mjs";
+import {
+  renderDepartmentDetail,
+  renderHydroDetail,
+  renderKpis,
+  renderPiezoDetail,
+  renderStatus,
+} from "./templates.mjs";
 
 const api = createWaterApi();
 const statusElement = document.querySelector("[data-water-status]");
@@ -18,6 +25,7 @@ let waterMap;
 let viewportController;
 let staticPiezoData;
 let staticHydroData;
+let selectionController;
 
 function joinDepartmentRestrictions(geoJson, restrictions) {
   const restrictionsByCode = new Map(restrictions.map((item) => [item.code, item]));
@@ -112,11 +120,63 @@ async function refreshViewportData() {
     : "Mesures visibles actualisées.";
 }
 
-function showSelection(selection) {
+async function showSelection(selection) {
   if (!detailElement) return;
+  selectionController?.abort();
+  selectionController = new AbortController();
+  const signal = selectionController.signal;
   const properties = selection.feature.properties || {};
-  const title = properties.nom || properties.name || properties.code || "Détail";
-  detailElement.innerHTML = `<h2 id="detail-title">${escapeHtml(title)}</h2><p>Les données détaillées seront chargées depuis la source officielle.</p>`;
+  detailElement.focus({ preventScroll: false });
+
+  if (selection.layerId === "departments-fill") {
+    detailElement.innerHTML = renderDepartmentDetail(properties, []);
+    try {
+      const zones = await api.getLocalRestrictions(selection.coordinates[0], selection.coordinates[1], signal);
+      if (!signal.aborted) detailElement.innerHTML = renderDepartmentDetail(properties, zones);
+    } catch (error) {
+      if (!signal.aborted) {
+        console.error(error);
+        detailElement.insertAdjacentHTML("beforeend", '<p class="data-error">Restrictions locales temporairement indisponibles.</p>');
+      }
+    }
+    return;
+  }
+
+  const kind = selection.layerId === "piezo-points" ? "piezo" : "hydro";
+  detailElement.innerHTML = kind === "piezo"
+    ? renderPiezoDetail(properties)
+    : renderHydroDetail(properties);
+  const stationCode = properties.stationCode || properties.code;
+  const chartContainer = detailElement.querySelector("[data-chart]");
+  if (!stationCode || !chartContainer) return;
+
+  try {
+    const fromDate = new Date();
+    fromDate.setUTCDate(fromDate.getUTCDate() - (kind === "piezo" ? 90 : 7));
+    const response = kind === "piezo"
+      ? await api.getPiezoHistory(stationCode, formatIsoDate(fromDate), signal)
+      : await api.getHydroHistory(stationCode, fromDate.toISOString(), signal);
+    if (signal.aborted) return;
+    const values = response.data.map((observation) => kind === "piezo"
+      ? {
+          date: observation.date_mesure,
+          value: Number.isFinite(observation.profondeur_nappe)
+            ? observation.profondeur_nappe
+            : observation.niveau_eau_ngf,
+        }
+      : { date: observation.date_obs, value: observation.resultat_obs / 1000 });
+    const model = buildLineChartModel(values, 600, 240);
+    renderLineChart(
+      chartContainer,
+      model,
+      kind === "piezo" ? "Évolution du niveau de la nappe" : "Évolution de la hauteur d’eau",
+    );
+  } catch (error) {
+    if (!signal.aborted) {
+      console.error(error);
+      chartContainer.textContent = "Chronique temporairement indisponible.";
+    }
+  }
 }
 
 async function initializeDashboard() {

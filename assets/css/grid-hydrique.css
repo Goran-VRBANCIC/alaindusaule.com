@@ -139,6 +139,95 @@
   padding: clamp(1.25rem, 3vw, 2rem);
 }
 
+.station-detail:focus {
+  outline: none;
+}
+
+.station-facts {
+  display: grid;
+  gap: 0;
+  margin: 0 0 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.station-facts > div {
+  display: grid;
+  gap: 0.25rem;
+  padding-block: 0.65rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.station-facts dt {
+  font-weight: 800;
+}
+
+.station-facts dd {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.detail-level {
+  display: inline-flex;
+  padding: 0.3rem 0.55rem;
+  color: var(--ink);
+  background: var(--water-pale);
+  font-weight: 800;
+}
+
+.detail-level--crise {
+  color: #ffffff;
+  background: #8b1e1e;
+}
+
+.detail-level--alerte_renforcee { background: #d96b27; }
+.detail-level--alerte { background: #e3a62f; }
+.detail-level--vigilance { background: #f2d36b; }
+
+.data-error {
+  padding: 0.75rem;
+  border-left: 4px solid #8b1e1e;
+  background: #f9e9e9;
+}
+
+.water-chart svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  border: 1px solid var(--border);
+  background: var(--paper);
+}
+
+.water-chart__line {
+  fill: none;
+  stroke: var(--water);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.water-chart details {
+  margin-block: 0.75rem 1.5rem;
+}
+
+.water-chart summary {
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.water-chart__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.water-chart__table th,
+.water-chart__table td {
+  padding: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
 @media (min-width: 48rem) {
   .water-kpi-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -148,6 +237,13 @@
 @media (min-width: 64rem) {
   .water-map-layout {
     grid-template-columns: minmax(0, 2fr) minmax(20rem, 0.8fr);
+  }
+
+  .station-detail {
+    position: sticky;
+    top: 6rem;
+    max-height: calc(100vh - 7rem);
+    overflow: auto;
   }
 }
 

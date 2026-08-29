@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import {
   escapeHtml,
   renderKpis,
+  renderDepartmentDetail,
+  renderPiezoDetail,
+  renderHydroDetail,
   restrictionColor,
 } from "../../assets/js/grid-hydrique/templates.mjs";
 
@@ -34,4 +37,25 @@ test("restrictionColor associe les couleurs accessibles", () => {
   assert.equal(restrictionColor("alerte"), "#e3a62f");
   assert.equal(restrictionColor("vigilance"), "#f2d36b");
   assert.equal(restrictionColor(null), "#d8e4e8");
+});
+
+test("renderDepartmentDetail échappe les données et accepte un arrêté HTTPS", () => {
+  const html = renderDepartmentDetail(
+    { nom: '<script>alert("x")</script>', severity: "crise" },
+    [{ nom: "Zone test", niveauGravite: "crise", arrete: { cheminFichier: "https://example.test/arrete.pdf" } }],
+  );
+
+  assert.doesNotMatch(html, /<script>/);
+  assert.match(html, /&lt;script&gt;/);
+  assert.match(html, /https:\/\/example\.test\/arrete\.pdf/);
+});
+
+test("les détails de station créent un emplacement de graphique", () => {
+  const piezo = renderPiezoDetail({ stationCode: "P1", value: 3.2, unit: "m", measuredAt: "2026-08-29T08:00:00Z" });
+  const hydro = renderHydroDetail({ stationCode: "H1", value: 0.8, unit: "m", measuredAt: "2026-08-29T08:00:00Z" });
+
+  assert.match(piezo, /Piézomètre P1/);
+  assert.match(hydro, /Station H1/);
+  assert.match(piezo, /data-chart/);
+  assert.match(hydro, /data-chart/);
 });
