@@ -63,24 +63,45 @@
 }
 
 .water-map-section {
+  display: flex;
+  flex-direction: column;
   padding-block: clamp(1.5rem, 3vw, 3rem) clamp(3rem, 7vw, 6rem);
   background: var(--paper-warm);
 }
 
+.water-live-summary {
+  order: 6;
+  margin-top: clamp(1.5rem, 3vw, 3rem);
+}
+
 .water-map-heading {
-  display: flex;
+  display: contents;
   flex-wrap: wrap;
   align-items: end;
   justify-content: space-between;
   gap: 1rem;
 }
 
+.water-map-heading > div:first-child {
+  width: min(calc(100% - 2rem), 90rem);
+  margin-inline: auto;
+}
+
 .water-map-layout {
   display: grid;
+  order: 1;
   width: min(calc(100% - 2rem), 90rem);
   margin-inline: auto;
   border: 1px solid var(--border);
   background: var(--paper);
+}
+
+.water-map-legend {
+  order: 3;
+}
+
+#map-keyboard-instructions {
+  order: 4;
 }
 
 .water-map {
@@ -98,6 +119,7 @@
 
 .water-layer-controls {
   display: flex;
+  order: 2;
   flex-wrap: wrap;
   gap: 0.75rem;
 }
@@ -187,8 +209,14 @@
 }
 
 .station-detail {
+  order: 5;
+  width: min(calc(100% - 2rem), 90rem);
   min-width: 0;
+  margin-inline: auto;
   padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid var(--border);
+  border-top: 0;
+  background: var(--paper);
 }
 
 .station-detail:focus {
@@ -298,6 +326,32 @@
 }
 
 @media (min-width: 48rem) {
+  .water-map-heading {
+    display: flex;
+  }
+
+  .water-map-heading > div:first-child {
+    width: auto;
+    margin-inline: 0;
+  }
+
+  .water-map-layout {
+    order: 0;
+  }
+
+  .water-layer-controls,
+  .water-map-legend,
+  #map-keyboard-instructions,
+  .station-detail {
+    order: 0;
+  }
+
+  .water-live-summary {
+    order: 0;
+    margin-top: 0;
+    margin-bottom: clamp(1.5rem, 3vw, 3rem);
+  }
+
   .water-kpi-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }

@@ -1,5 +1,33 @@
 # Journal du projet
 
+## 2026-08-29 21:18:00 +02:00 — Carte réellement visible sur mobile
+
+**Solution vérifiée :** À 320 × 900, le canevas MapLibre commence à 664 px et environ 236 px de carte sont visibles dès le premier écran. L’ordre mobile est titre, carte, commandes, légende, aide, détail puis résumé des données ; à partir de 48 rem, le statut et les sources retrouvent leur position avant le titre cartographique et les commandes retrouvent la ligne du titre. Les captures 320 et 1440 px confirment les deux compositions. Le contrôle Edge confirme aussi l’absence de débordement, la bascule de couche, la sélection clavier de la Creuse, six requêtes Hub’Eau toutes munies de `bbox` et aucune erreur console.
+
+## 2026-08-29 21:14:00 +02:00 — Règle mémoire : vérifier la cible après une ancre répétée
+
+**Problème :** Une modification fondée sur la première occurrence générique de `<div class="container">` a ajouté la classe de légende au conteneur des KPI. La capture navigateur a permis de détecter que l’ordre attendu ne s’appliquait pas.
+
+**Solution permanente :** Lorsqu’une balise d’ancrage se répète, inclure dans le correctif l’enfant structurel unique qui la suit, puis relire immédiatement le voisinage HTML modifié avant de poursuivre.
+
+## 2026-08-29 21:08:00 +02:00 — Règle mémoire : propriété CSS sans sous-chaîne
+
+**Problème :** Le premier motif de test cherchait `order:` sans frontière de propriété et a confondu `border: 1px` avec `order: 1`, produisant un faux positif pendant la phase rouge.
+
+**Solution permanente :** Dans les validations CSS textuelles, ancrer le nom de propriété après un début de ligne ou un saut de ligne, afin qu’une propriété telle que `border` ne puisse pas satisfaire une recherche sur `order`.
+
+## 2026-08-29 20:59:43 +02:00 — Confirmation de l’ordre mobile
+
+**Réponse :** L’utilisateur confirme que son choix 2 signifie déplacer le statut, le bouton d’actualisation et les sources sous la carte sur mobile afin que le fond MapLibre soit visible dès le premier écran.
+
+**Solution :** Le plan est précisé avant la correction. L’ordre desktop reste inchangé à partir de 48 rem ; seul l’ordre visuel mobile place le résumé des données après la carte.
+
+## 2026-08-29 21:03:00 +02:00 — Règle mémoire : libeller un choix repris après compaction
+
+**Problème :** La réponse isolée `2` a été interprétée comme l’acceptation des sources avant la carte sur mobile, alors que les libellés du choix n’étaient plus disponibles dans le contexte repris. La revue a montré que cette interprétation contredisait le critère validé exigeant le début du fond cartographique à 320 × 900.
+
+**Solution permanente :** Après une reprise où seul le numéro d’un choix subsiste, reformuler explicitement le libellé associé avant toute modification ou conclusion. Si ce libellé ne peut pas être retrouvé, demander une confirmation concise au lieu de l’inférer.
+
 ## 2026-08-29 20:54:52 +02:00 — Carte visible avant les indicateurs
 
 **Problème soumis :** La première composition laissait attendre une carte dans la section d’introduction, mais les indicateurs apparaissaient avant elle.

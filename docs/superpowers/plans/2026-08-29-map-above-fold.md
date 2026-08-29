@@ -8,6 +8,10 @@
 
 **Tech Stack:** HTML sémantique, CSS natif, PowerShell pour les validations statiques, Node.js test runner, MapLibre GL JS 6.6, Playwright CLI pour les captures.
 
+## Clarification mobile approuvée
+
+À `320 × 900`, le fond MapLibre — et pas seulement le titre de section — doit être visible dans le premier écran. Pour y parvenir sans supprimer d’information, le statut, le bouton d’actualisation et les deux lignes de sources restent avant la carte à partir de `48rem`, mais passent sous la carte sur les écrans plus étroits.
+
 ---
 
 ## File Map

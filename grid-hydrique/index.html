@@ -42,6 +42,10 @@
           <p class="eyebrow">Données publiques · France métropolitaine</p>
           <h1 id="dashboard-title">L’état de l’eau, maintenant</h1>
           <p class="lead">Restrictions en vigueur et mesures récentes issues de VigiEau et Hub’Eau.</p>
+        </div>
+      </section>
+      <section class="water-map-section" aria-labelledby="map-title">
+        <div class="container water-live-summary">
           <div class="water-toolbar">
             <p class="water-status" role="status" aria-live="polite" data-water-status>Chargement des données officielles…</p>
             <button class="button button--secondary" type="button" data-refresh-water>Actualiser maintenant</button>
@@ -49,8 +53,6 @@
           <p class="water-sources fine-print">Sources officielles : <a href="https://vigieau.gouv.fr/" rel="noopener">VigiEau</a> et <a href="https://hubeau.eaufrance.fr/" rel="noopener">Hub’Eau</a>.</p>
           <p class="water-sources fine-print" data-source-updates aria-live="polite">Dates des sources : en attente.</p>
         </div>
-      </section>
-      <section class="water-map-section" aria-labelledby="map-title">
         <div class="container water-map-heading">
           <div>
             <p class="eyebrow">Carte interactive</p>
@@ -58,7 +60,7 @@
           </div>
           <div class="water-layer-controls" role="group" aria-label="Couches de la carte"></div>
         </div>
-        <div class="container">
+        <div class="container water-map-legend">
           <ul class="restriction-legend" aria-label="Niveaux de restriction">
             <li><span class="legend-swatch legend-swatch--crise" aria-hidden="true"></span>Crise</li>
             <li><span class="legend-swatch legend-swatch--renforcee" aria-hidden="true"></span>Alerte renforcée</li>
@@ -70,11 +72,11 @@
         <p id="map-keyboard-instructions" class="container fine-print">Au clavier, déplacez la carte avec les flèches, zoomez avec + ou −, puis appuyez sur Entrée pour sélectionner l’élément au centre.</p>
         <div class="water-map-layout">
           <div id="carte-hydrique" class="water-map" role="region" aria-label="Carte hydrique de la France métropolitaine"></div>
-          <aside id="station-detail" class="station-detail" tabindex="-1" aria-labelledby="detail-title" aria-live="polite">
+        </div>
+        <aside id="station-detail" class="station-detail" tabindex="-1" aria-labelledby="detail-title" aria-live="polite">
             <h2 id="detail-title">Détail</h2>
             <p>Sélectionnez un département ou une station sur la carte.</p>
-          </aside>
-        </div>
+        </aside>
       </section>
       <section id="indicateurs" class="section water-kpis" aria-labelledby="kpi-title">
         <div class="container">
