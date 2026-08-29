@@ -1,5 +1,17 @@
 # Journal du projet
 
+## 2026-08-29 19:48:53 +02:00 — Règle mémoire : espaces finaux Markdown
+
+**Problème :** La vérification `git diff --cached --check` a refusé la spécification à cause de deux espaces finaux utilisés pour forcer un saut de ligne Markdown. Aucun commit incomplet n’a été créé.
+
+**Solution permanente :** Ne pas utiliser de saut de ligne Markdown fondé sur des espaces finaux dans les documents du projet ; préférer un paragraphe distinct ou un saut normal, puis exécuter `git diff --cached --check` avant le commit.
+
+## 2026-08-29 19:47:21 +02:00 — Carte attendue au premier écran
+
+**Problème soumis :** Le premier écran « L’état de l’eau, maintenant » donne l’impression qu’une carte devrait être visible dans cette section, alors que la carte actuelle est placée après les indicateurs.
+
+**Réponse / solution :** La cause est la hiérarchie du plan initial : introduction, indicateurs, puis carte. L’utilisateur a refusé les maquettes dans un compagnon visuel et choisi une vraie carte interactive en pleine largeur directement sous l’introduction, avec une vigilance particulière au mobile. La conception validée place aussi le panneau de détail sous la carte sur toutes les largeurs, conserve une seule instance MapLibre et ne change aucun appel API. La spécification est enregistrée dans `docs/superpowers/specs/2026-08-29-map-above-fold-design.md`.
+
 ## 2026-08-29 19:40:37 +02:00 — Serveur local de test
 
 **Demande :** Lancer un serveur web local pour tester le site.
