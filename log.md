@@ -1,5 +1,11 @@
 # Journal du projet
 
+## 2026-08-29 19:52:00 +02:00 — Validation de la spécification carte
+
+**Réponse :** L’utilisateur a validé la spécification écrite de la carte pleine largeur placée avant les indicateurs.
+
+**Solution :** Un worktree isolé `feature/map-above-fold` a été créé après vérification de son exclusion Git. La base y passe 24 tests dashboard, les deux validateurs PowerShell et le test de contact. Le plan test-first est enregistré dans `docs/superpowers/plans/2026-08-29-map-above-fold.md` avant toute modification HTML ou CSS.
+
 ## 2026-08-29 19:48:53 +02:00 — Règle mémoire : espaces finaux Markdown
 
 **Problème :** La vérification `git diff --cached --check` a refusé la spécification à cause de deux espaces finaux utilisés pour forcer un saut de ligne Markdown. Aucun commit incomplet n’a été créé.
