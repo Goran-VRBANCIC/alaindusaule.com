@@ -5,7 +5,7 @@
 }
 
 .water-hero {
-  padding-block: clamp(3rem, 7vw, 6rem);
+  padding-block: clamp(2rem, 4vw, 4rem);
   background: var(--paper-warm);
 }
 
@@ -63,7 +63,7 @@
 }
 
 .water-map-section {
-  padding-block: clamp(3rem, 7vw, 6rem);
+  padding-block: clamp(1.5rem, 3vw, 3rem) clamp(3rem, 7vw, 6rem);
   background: var(--paper-warm);
 }
 
@@ -84,7 +84,7 @@
 }
 
 .water-map {
-  min-height: 32rem;
+  min-height: clamp(24rem, 58svh, 32rem);
 }
 
 .water-map .maplibregl-canvas {
@@ -305,23 +305,8 @@
   .vision-benefits {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-}
 
-@media (min-width: 64rem) {
-  .water-map-layout {
-    grid-template-columns: minmax(0, 2fr) minmax(20rem, 0.8fr);
-  }
-
-  .station-detail {
-    position: sticky;
-    top: 6rem;
-    max-height: calc(100vh - 7rem);
-    overflow: auto;
-  }
-}
-
-@media (max-width: 47.99rem) {
   .water-map {
-    min-height: 65vh;
+    min-height: clamp(32rem, 65svh, 46rem);
   }
 }

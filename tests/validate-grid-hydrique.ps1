@@ -42,6 +42,11 @@ $cssPath = Join-Path $projectRoot 'assets/css/grid-hydrique.css'
 Assert-True (Test-Path -LiteralPath $cssPath) 'La feuille CSS du dashboard est absente'
 if (Test-Path -LiteralPath $cssPath) {
     $css = Get-Content -Raw -Encoding UTF8 -LiteralPath $cssPath
+    Assert-True ($css -match '\.water-hero\s*\{[^}]*padding-block:\s*clamp\(2rem,\s*4vw,\s*4rem\)') 'Le premier ecran conserve trop espace vertical'
+    Assert-True ($css -match '\.water-map\s*\{[^}]*min-height:\s*clamp\(24rem,\s*58svh,\s*32rem\)') 'La hauteur mobile de la carte est incorrecte'
+    Assert-True ($css -match '@media\s*\(min-width:\s*48rem\)[\s\S]*?\.water-map\s*\{[^}]*min-height:\s*clamp\(32rem,\s*65svh,\s*46rem\)') 'La hauteur desktop de la carte est incorrecte'
+    Assert-True ($css -notmatch '\.water-map-layout\s*\{[^}]*grid-template-columns') 'Le panneau de detail comprime encore la carte'
+    Assert-True ($css -notmatch '\.station-detail\s*\{[^}]*position:\s*sticky') 'Le panneau de detail doit rester sous la carte'
     Assert-True ($css -match '@media\s*\(max-width:\s*35\.99rem\)[\s\S]*?\.nav-list\s*\{[\s\S]*?flex-wrap:\s*wrap') 'La navigation mobile doit revenir a la ligne'
     Assert-True ($css -match 'content-visibility:\s*auto') 'Le contenu narratif différé est absent'
     Assert-True ($css -match 'color-scheme:\s*light') 'Le rendu clair explicite est absent'
