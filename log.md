@@ -1,5 +1,11 @@
 # Journal du projet
 
+## 2026-08-30 00:09:18 +02:00 — Reprise et revue finale de la carte
+
+**Demande :** Reprendre après l’interruption de la dernière revue indépendante.
+
+**Réponse / solution :** Le worktree propre a été repris au commit `64ca06c`. La revue indépendante relancée ne relève aucun point critique, important ou mineur. Elle confirme que le déplacement responsive réutilise les mêmes nœuds, conserve les sélecteurs et écouteurs, aligne l’ordre DOM et l’ordre visuel aux deux breakpoints et notifie MapLibre après réagencement. La suite complète est relancée une dernière fois avant de proposer l’intégration.
+
 ## 2026-08-29 21:27:00 +02:00 — Ordre DOM responsive accessible
 
 **Problème de revue :** Le premier correctif utilisait `order` pour déplacer des éléments interactifs. L’ordre visuel mobile différait donc de l’ordre de lecture et de tabulation.
