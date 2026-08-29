@@ -128,7 +128,7 @@ if (Test-Path -LiteralPath $robotsPath) {
 
 if (Test-Path -LiteralPath $sitemapPath) {
     [xml]$sitemap = Get-Content -LiteralPath $sitemapPath -Raw
-    Assert-True ($sitemap.urlset.url.Count -eq 4) 'sitemap.xml doit contenir 4 URLs indexables'
+    Assert-True ($sitemap.urlset.url.Count -eq 5) 'sitemap.xml doit contenir 5 URLs indexables'
     $sitemapLocations = @($sitemap.urlset.url.loc)
     Assert-True (($sitemapLocations | Where-Object { $_ -notlike 'https://alaindusaule.fr/*' }).Count -eq 0) 'sitemap.xml contient une URL hors du domaine .fr'
     Assert-True (($sitemapLocations -join "`n") -notmatch 'alaindusaule\.com') 'sitemap.xml référence encore le domaine .com'

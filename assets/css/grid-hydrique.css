@@ -154,6 +154,38 @@
   contain-intrinsic-size: 1px 700px;
 }
 
+.vision-benefits {
+  display: grid;
+  gap: 1rem;
+  margin-block: 2.5rem;
+}
+
+.vision-benefits article {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.vision-benefits h3 {
+  color: var(--sun);
+}
+
+.vision-benefits p {
+  margin-bottom: 0;
+}
+
+.vision-store-link {
+  border-color: var(--paper);
+  color: var(--paper);
+  background: transparent;
+}
+
+.vision-store-link:hover {
+  border-color: var(--sun);
+  color: var(--water-deep);
+  background: var(--sun);
+}
+
 .station-detail {
   min-width: 0;
   padding: clamp(1.25rem, 3vw, 2rem);
@@ -251,6 +283,10 @@
 @media (min-width: 48rem) {
   .water-kpi-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .vision-benefits {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

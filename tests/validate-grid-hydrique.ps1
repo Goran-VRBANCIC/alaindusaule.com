@@ -41,6 +41,20 @@ if (Test-Path -LiteralPath $cssPath) {
     Assert-True ($css -match 'color-scheme:\s*light') 'Le rendu clair explicite est absent'
 }
 
+$homePath = Join-Path $projectRoot 'index.html'
+$homeHtml = Get-Content -Raw -Encoding UTF8 -LiteralPath $homePath
+$dashboard = if (Test-Path -LiteralPath $pagePath) { Get-Content -Raw -Encoding UTF8 -LiteralPath $pagePath } else { '' }
+Assert-True ($homeHtml -match 'href="grid-hydrique/"') 'L’accueil ne propose pas le dashboard'
+Assert-True ($dashboard -match '>Anticiper<') 'Le bénéfice Anticiper est absent'
+Assert-True ($dashboard -match '>Relier<') 'Le bénéfice Relier est absent'
+Assert-True ($dashboard -match '>S.curiser<') 'Le bénéfice Securiser est absent'
+Assert-True ($dashboard -match 'https://www\.fnac\.com/a23394930/') 'Le CTA Fnac est absent'
+
+$sitemapPath = Join-Path $projectRoot 'sitemap.xml'
+[xml]$sitemap = Get-Content -Raw -LiteralPath $sitemapPath
+Assert-True ($sitemap.urlset.url.Count -eq 5) 'Le sitemap doit contenir cinq URLs'
+Assert-True (@($sitemap.urlset.url.loc) -contains 'https://alaindusaule.fr/grid-hydrique/') 'Le dashboard est absent du sitemap'
+
 $dashboardPath = Join-Path $projectRoot 'assets/js/grid-hydrique/dashboard.mjs'
 Assert-True (Test-Path -LiteralPath $dashboardPath) 'Le module principal est absent'
 if (Test-Path -LiteralPath $dashboardPath) {
