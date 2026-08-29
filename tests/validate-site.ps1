@@ -6,7 +6,8 @@ $pages = @(
     'livres/leau-ou-le-chaos.html',
     'presse.html',
     'mentions-legales.html',
-    '404.html'
+    '404.html',
+    'grid-hydrique/index.html'
 )
 $failures = [System.Collections.Generic.List[string]]::new()
 

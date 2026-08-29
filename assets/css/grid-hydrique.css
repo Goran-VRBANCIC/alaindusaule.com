@@ -1,0 +1,70 @@
+.water-hero {
+  padding-block: clamp(3rem, 7vw, 6rem);
+  background: var(--paper-warm);
+}
+
+.water-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.water-status {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.water-kpi-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.water-map-section {
+  padding-block: clamp(3rem, 7vw, 6rem);
+  background: var(--paper-warm);
+}
+
+.water-map-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.water-map-layout {
+  display: grid;
+  width: min(calc(100% - 2rem), 90rem);
+  margin-inline: auto;
+  border: 1px solid var(--border);
+  background: var(--paper);
+}
+
+.water-map {
+  min-height: 32rem;
+}
+
+.station-detail {
+  min-width: 0;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+@media (min-width: 48rem) {
+  .water-kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .water-map-layout {
+    grid-template-columns: minmax(0, 2fr) minmax(20rem, 0.8fr);
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .water-map {
+    min-height: 65vh;
+  }
+}
