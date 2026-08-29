@@ -1,5 +1,11 @@
 # Journal du projet
 
+## 2026-08-29 19:40:37 +02:00 — Serveur local de test
+
+**Demande :** Lancer un serveur web local pour tester le site.
+
+**Réponse / solution :** Le site est servi sur `http://127.0.0.1:4173/` avec cache désactivé. Le dashboard répond en HTTP 200 sur `/grid-hydrique/` et son module principal est correctement servi en `application/javascript`.
+
 ## 2026-08-29 19:38:14 +02:00 — Intégration locale
 
 **Choix :** Option 1, fusionner la branche du dashboard dans `master` localement.
