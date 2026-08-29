@@ -1,5 +1,11 @@
 # Journal du projet
 
+## 2026-08-29 19:38:14 +02:00 — Intégration locale
+
+**Choix :** Option 1, fusionner la branche du dashboard dans `master` localement.
+
+**Réponse / solution :** La branche sera fusionnée dans `master`, validée à nouveau sur le résultat final, puis la branche et le worktree seront supprimés. Aucun push ni changement de configuration GitHub Pages distante n’est inclus dans cette option.
+
 ## 2026-08-29 19:20:21 +02:00 — Reprise et validation finale
 
 **Demande :** Reprendre l’exécution interrompue.
