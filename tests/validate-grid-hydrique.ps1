@@ -15,6 +15,11 @@ Assert-True (Test-Path -LiteralPath $pagePath) 'La page grid-hydrique/index.html
 
 if (Test-Path -LiteralPath $pagePath) {
     $html = Get-Content -Raw -Encoding UTF8 -LiteralPath $pagePath
+    $mapSectionPosition = $html.IndexOf('<section class="water-map-section"')
+    $kpiSectionPosition = $html.IndexOf('<section id="indicateurs"')
+    Assert-True ($mapSectionPosition -ge 0) 'La section cartographique est absente'
+    Assert-True ($kpiSectionPosition -ge 0) 'La section des indicateurs est absente'
+    Assert-True ($mapSectionPosition -lt $kpiSectionPosition) 'La carte doit apparaitre avant les indicateurs'
     Assert-True ($html -match 'class="water-layer-controls" role="group" aria-label="Couches de la carte"') 'Les controles de couches ne forment pas un groupe accessible'
     Assert-True ($html -match '<html lang="fr-FR"') 'La langue fr-FR est absente'
     Assert-True ($html -match '<link rel="canonical" href="https://alaindusaule\.fr/grid-hydrique/"') 'La canonical est incorrecte'
