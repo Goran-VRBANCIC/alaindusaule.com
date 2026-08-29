@@ -13,27 +13,34 @@ import {
   renderHydroDetail,
   renderKpis,
   renderPiezoDetail,
+  renderSourceDates,
   renderStatus,
 } from "./templates.mjs";
 
 const REFRESH_INTERVAL_MS = 15 * 60 * 1000;
+const MAPLIBRE_MODULE_URL = "https://unpkg.com/maplibre-gl@6.6.0/dist/maplibre-gl.mjs";
+const MAPLIBRE_CSS_URL = "https://unpkg.com/maplibre-gl@6.6.0/dist/maplibre-gl.css";
 const api = createWaterApi();
 const statusElement = document.querySelector("[data-water-status]");
 const kpiElement = document.querySelector("[data-kpi-grid]");
 const detailElement = document.querySelector("#station-detail");
 const layerControlsElement = document.querySelector(".water-layer-controls");
 const refreshButton = document.querySelector("[data-refresh-water]");
+const sourceUpdatesElement = document.querySelector("[data-source-updates]");
 
 let waterMap;
 let viewportController;
 let staticPiezoData;
 let staticHydroData;
+let piezoMetadata;
+let hydroMetadata;
 let selectionController;
 let departmentsGeoJson;
 let lastRestrictions = null;
 let lastSuccessfulRefresh = 0;
 let refreshTimer;
 let refreshInProgress = false;
+const sourceDates = { vigieau: "en attente", piezo: "en attente", hydro: "en attente" };
 
 function joinDepartmentRestrictions(geoJson, restrictions) {
   const restrictionsByCode = new Map(restrictions.map((item) => [item.code, item]));
@@ -73,6 +80,28 @@ function formatIsoDate(date) {
   return date.toISOString().slice(0, 10);
 }
 
+function latestDate(items, key) {
+  return items.reduce((latest, item) => {
+    const timestamp = Date.parse(item[key]);
+    return Number.isFinite(timestamp) && timestamp > latest ? timestamp : latest;
+  }, 0);
+}
+
+function updateSourceDates() {
+  if (sourceUpdatesElement) sourceUpdatesElement.textContent = renderSourceDates(sourceDates);
+}
+
+function loadMapLibreStyles() {
+  return new Promise((resolve, reject) => {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = MAPLIBRE_CSS_URL;
+    stylesheet.addEventListener("load", resolve, { once: true });
+    stylesheet.addEventListener("error", () => reject(new Error("Styles MapLibre indisponibles")), { once: true });
+    document.head.append(stylesheet);
+  });
+}
+
 function setupLayerControls() {
   if (!layerControlsElement || !waterMap) return;
   layerControlsElement.innerHTML = `
@@ -92,6 +121,8 @@ async function refreshNationalData() {
   lastRestrictions = restrictions;
   waterMap.setDepartments(joinDepartmentRestrictions(departmentsGeoJson, restrictions));
   kpiElement.innerHTML = renderKpis(buildRestrictionSummary(restrictions), formatUpdateTime(now));
+  sourceDates.vigieau = formatUpdateTime(now);
+  updateSourceDates();
 }
 
 async function refreshViewportData(announce = false) {
@@ -120,19 +151,24 @@ async function refreshViewportData(announce = false) {
   const unavailable = [];
   let truncated = false;
   if (piezoResult.status === "fulfilled") {
-    waterMap.setStations("piezo", piezoObservationsToGeoJson(piezoResult.value.data));
+    waterMap.setStations("piezo", piezoObservationsToGeoJson(piezoResult.value.data, new Date(), piezoMetadata));
+    const measuredAt = latestDate(piezoResult.value.data, "date_mesure");
+    sourceDates.piezo = measuredAt ? formatUpdateTime(new Date(measuredAt)) : "aucune mesure récente";
     truncated ||= Boolean(piezoResult.value.next);
   } else {
     unavailable.push("piézométrie");
   }
   if (hydroResult.status === "fulfilled") {
-    waterMap.setStations("hydro", hydroObservationsToGeoJson(hydroResult.value.data));
+    waterMap.setStations("hydro", hydroObservationsToGeoJson(hydroResult.value.data, new Date(), hydroMetadata));
+    const measuredAt = latestDate(hydroResult.value.data, "date_obs");
+    sourceDates.hydro = measuredAt ? formatUpdateTime(new Date(measuredAt)) : "aucune mesure récente";
     truncated ||= Boolean(hydroResult.value.next);
   } else {
     unavailable.push("hydrométrie");
   }
 
   const partial = unavailable.length > 0 || truncated;
+  updateSourceDates();
   const message = unavailable.length > 0
     ? `${unavailable.join(" et ")} temporairement indisponible${unavailable.length > 1 ? "s" : ""}.`
     : truncated ? "Échantillon limité aux 5 000 mesures les plus récentes." : "Mesures visibles actualisées.";
@@ -242,15 +278,24 @@ async function initializeDashboard() {
   statusElement.textContent = renderStatus("loading", "");
 
   try {
-    const [loadedDepartments, piezoSample, hydroSample] = await Promise.all([
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    const [, maplibre, loadedDepartments, piezoSample, hydroSample] = await Promise.all([
+      loadMapLibreStyles(),
+      import(MAPLIBRE_MODULE_URL),
       loadLocalJson("../assets/data/departements-simplifies.geojson"),
       loadLocalJson("../assets/data/piezo-stations.json"),
       loadLocalJson("../assets/data/hydro-stations.json"),
     ]);
     departmentsGeoJson = loadedDepartments;
+    piezoMetadata = new Map(piezoSample.stations.map((station) => [station.code, station]));
+    hydroMetadata = new Map(hydroSample.stations.map((station) => [station.code, station]));
+    sourceDates.piezo = `échantillon du ${formatUpdateTime(new Date(piezoSample.generatedAt))}`;
+    sourceDates.hydro = `échantillon du ${formatUpdateTime(new Date(hydroSample.generatedAt))}`;
+    updateSourceDates();
     staticPiezoData = stationsToGeoJson(piezoSample.stations);
     staticHydroData = stationsToGeoJson(hydroSample.stations);
     waterMap = createWaterMap({
+      maplibre,
       container: "carte-hydrique",
       departments: joinDepartmentRestrictions(departmentsGeoJson, []),
       piezoStations: piezoSample.stations,
@@ -272,4 +317,8 @@ async function initializeDashboard() {
   }
 }
 
-initializeDashboard();
+if ("requestIdleCallback" in globalThis) {
+  globalThis.requestIdleCallback(initializeDashboard, { timeout: 1500 });
+} else {
+  setTimeout(initializeDashboard, 0);
+}

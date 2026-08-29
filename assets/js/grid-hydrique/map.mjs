@@ -15,8 +15,27 @@ export function stationsToGeoJson(stations) {
   };
 }
 
-export function createWaterMap({ container, departments, piezoStations, hydroStations, onSelect }) {
-  const maplibre = globalThis.maplibregl;
+export function selectFeatureAtMapCenter(map, onSelect) {
+  const canvas = map.getCanvas();
+  const features = map.queryRenderedFeatures(
+    [canvas.clientWidth / 2, canvas.clientHeight / 2],
+    { layers: ["hydro-points", "piezo-points", "departments-fill"] },
+  );
+  const feature = features[0];
+  const layerId = feature?.layer?.id;
+  if (!feature || !layerId) return false;
+  const center = map.getCenter();
+  const coordinates = feature.geometry.type === "Point"
+    ? feature.geometry.coordinates
+    : [center.lng, center.lat];
+  if (feature.geometry.type === "Point") {
+    map.getSource("selected-point").setData({ type: "FeatureCollection", features: [feature] });
+  }
+  onSelect({ layerId, feature, coordinates });
+  return true;
+}
+
+export function createWaterMap({ container, departments, piezoStations, hydroStations, onSelect, maplibre = globalThis.maplibregl }) {
   if (!maplibre) throw new Error("MapLibre est indisponible");
 
   const map = new maplibre.Map({
@@ -113,6 +132,12 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
           onSelect({ layerId, feature, coordinates });
         });
       }
+
+      const canvas = map.getCanvas();
+      canvas.setAttribute("aria-describedby", "map-keyboard-instructions");
+      canvas.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && selectFeatureAtMapCenter(map, onSelect)) event.preventDefault();
+      });
 
       resolve();
     });

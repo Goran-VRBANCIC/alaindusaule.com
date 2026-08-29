@@ -51,18 +51,20 @@ export function measurementFreshness(value, now = new Date()) {
   return "stale";
 }
 
-export function piezoObservationsToGeoJson(observations, now = new Date()) {
+export function piezoObservationsToGeoJson(observations, now = new Date(), stationMetadata = new Map()) {
   const latest = latestByStation(observations, "code_bss", "date_mesure");
   const features = [];
 
   for (const observation of latest.values()) {
     if (!Number.isFinite(observation.longitude) || !Number.isFinite(observation.latitude)) continue;
+    const metadata = stationMetadata.get(observation.code_bss) || {};
     const hasDepth = Number.isFinite(observation.profondeur_nappe);
     const value = hasDepth ? observation.profondeur_nappe : observation.niveau_eau_ngf;
     features.push({
       type: "Feature",
       geometry: { type: "Point", coordinates: [observation.longitude, observation.latitude] },
       properties: {
+        ...metadata,
         kind: "piezo",
         stationCode: observation.code_bss,
         measuredAt: observation.date_mesure,
@@ -77,16 +79,18 @@ export function piezoObservationsToGeoJson(observations, now = new Date()) {
   return { type: "FeatureCollection", features };
 }
 
-export function hydroObservationsToGeoJson(observations, now = new Date()) {
+export function hydroObservationsToGeoJson(observations, now = new Date(), stationMetadata = new Map()) {
   const latest = latestByStation(observations, "code_station", "date_obs");
   const features = [];
 
   for (const observation of latest.values()) {
     if (!Number.isFinite(observation.longitude) || !Number.isFinite(observation.latitude)) continue;
+    const metadata = stationMetadata.get(observation.code_station) || {};
     features.push({
       type: "Feature",
       geometry: { type: "Point", coordinates: [observation.longitude, observation.latitude] },
       properties: {
+        ...metadata,
         kind: "hydro",
         stationCode: observation.code_station,
         measuredAt: observation.date_obs,

@@ -32,7 +32,23 @@ export function buildLineChartModel(values, width, height) {
     maximum: rawMaximum,
     startDate: points[0]?.date || null,
     endDate: points.at(-1)?.date || null,
+    xAxisLabels: [points[0]?.date, points.at(-1)?.date].map(formatAxisDate),
+    yAxisLabels: [rawMinimum, rawMaximum].map(formatAxisNumber),
   };
+}
+
+function formatAxisDate(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(value));
+}
+
+function formatAxisNumber(value) {
+  return Number.isFinite(value) ? value.toLocaleString("fr-FR", { maximumFractionDigits: 3 }) : "";
 }
 
 function downsample(values, limit) {
@@ -75,7 +91,21 @@ export function renderLineChart(container, model, title, unit = "m") {
   path.setAttribute("d", model.path);
   path.setAttribute("class", "water-chart__line");
   path.setAttribute("vector-effect", "non-scaling-stroke");
-  svg.append(titleElement, description, path);
+  const axisLabels = [
+    { x: model.padding.left, y: model.height - 8, anchor: "start", value: model.xAxisLabels[0] },
+    { x: model.width - model.padding.right, y: model.height - 8, anchor: "end", value: model.xAxisLabels[1] },
+    { x: model.padding.left - 8, y: model.height - model.padding.bottom, anchor: "end", value: `${model.yAxisLabels[0]} ${unit}` },
+    { x: model.padding.left - 8, y: model.padding.top + 4, anchor: "end", value: `${model.yAxisLabels[1]} ${unit}` },
+  ].map((label) => {
+    const text = document.createElementNS(namespace, "text");
+    text.setAttribute("x", String(label.x));
+    text.setAttribute("y", String(label.y));
+    text.setAttribute("text-anchor", label.anchor);
+    text.setAttribute("class", "water-chart__axis-label");
+    text.textContent = label.value;
+    return text;
+  });
+  svg.append(titleElement, description, path, ...axisLabels);
 
   const details = document.createElement("details");
   const summary = document.createElement("summary");

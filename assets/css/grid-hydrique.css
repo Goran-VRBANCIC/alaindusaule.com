@@ -257,6 +257,12 @@
   stroke-width: 3;
 }
 
+.water-chart__axis-label {
+  fill: var(--ink-muted);
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+}
+
 .water-chart details {
   margin-block: 0.75rem 1.5rem;
 }
@@ -278,6 +284,17 @@
   padding: 0.4rem;
   border-bottom: 1px solid var(--border);
   text-align: left;
+}
+
+@media (max-width: 35.99rem) {
+  .site-nav {
+    overflow-x: visible;
+  }
+
+  .nav-list {
+    flex-wrap: wrap;
+    white-space: normal;
+  }
 }
 
 @media (min-width: 48rem) {

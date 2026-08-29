@@ -48,6 +48,10 @@ export function renderStatus(state, message, hasCachedData = false) {
   return escapeHtml(labels[state] || message);
 }
 
+export function renderSourceDates({ vigieau, piezo, hydro }) {
+  return `VigiEau consulté : ${vigieau} · Hub’Eau nappes : ${piezo} · Hub’Eau cours d’eau : ${hydro}`;
+}
+
 export function renderDepartmentDetail(department, zones = []) {
   const zone = zones[0];
   const level = zone?.niveauGravite || department.severity || "none";
@@ -76,11 +80,19 @@ function renderStationDetail(label, properties) {
   const date = properties.measuredAt
     ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(properties.measuredAt))
     : "Date indisponible";
+  const location = [properties.commune, properties.watercourse].filter(Boolean).join(" — ") || "Non renseigné";
+  const freshness = {
+    fresh: "moins de 24 heures",
+    recent: "moins de 7 jours",
+    stale: "plus de 7 jours",
+  }[properties.freshness] || "non renseignée";
   return `
     <h2 id="detail-title">${label} ${escapeHtml(properties.stationCode || properties.code || "")}</h2>
     <dl class="station-facts">
       <div><dt>Dernière valeur</dt><dd>${escapeHtml(value)}</dd></div>
       <div><dt>Mesurée le</dt><dd>${escapeHtml(date)}</dd></div>
+      <div><dt>Lieu</dt><dd>${escapeHtml(location)}</dd></div>
+      <div><dt>Fraîcheur</dt><dd>${escapeHtml(freshness)}</dd></div>
     </dl>
     <div class="water-chart" data-chart aria-live="polite"><p>Chargement de la chronique…</p></div>
     <p class="fine-print">Source : Hub’Eau</p>

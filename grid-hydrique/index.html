@@ -17,8 +17,8 @@
     <meta name="theme-color" content="#073e52">
     <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">
     <link rel="preload" href="../assets/fonts/eb-garamond-variable.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
     <link rel="stylesheet" href="../assets/css/site.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.6.0/dist/maplibre-gl.css">
     <link rel="stylesheet" href="../assets/css/grid-hydrique.css">
   </head>
   <body>
@@ -47,6 +47,7 @@
             <button class="button button--secondary" type="button" data-refresh-water>Actualiser maintenant</button>
           </div>
           <p class="water-sources fine-print">Sources officielles : <a href="https://vigieau.gouv.fr/" rel="noopener">VigiEau</a> et <a href="https://hubeau.eaufrance.fr/" rel="noopener">Hub’Eau</a>.</p>
+          <p class="water-sources fine-print" data-source-updates aria-live="polite">Dates des sources : en attente.</p>
         </div>
       </section>
       <section id="indicateurs" class="section water-kpis" aria-labelledby="kpi-title">
@@ -61,7 +62,7 @@
             <p class="eyebrow">Carte interactive</p>
             <h2 id="map-title">Restrictions et stations</h2>
           </div>
-          <div class="water-layer-controls" aria-label="Couches de la carte"></div>
+          <div class="water-layer-controls" role="group" aria-label="Couches de la carte"></div>
         </div>
         <div class="container">
           <ul class="restriction-legend" aria-label="Niveaux de restriction">
@@ -72,6 +73,7 @@
             <li><span class="legend-swatch legend-swatch--aucune" aria-hidden="true"></span>Aucune restriction</li>
           </ul>
         </div>
+        <p id="map-keyboard-instructions" class="container fine-print">Au clavier, déplacez la carte avec les flèches, zoomez avec + ou −, puis appuyez sur Entrée pour sélectionner l’élément au centre.</p>
         <div class="water-map-layout">
           <div id="carte-hydrique" class="water-map" role="region" aria-label="Carte hydrique de la France métropolitaine"></div>
           <aside id="station-detail" class="station-detail" tabindex="-1" aria-labelledby="detail-title" aria-live="polite">
@@ -118,7 +120,6 @@
         </ul>
       </div>
     </footer>
-    <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@6.6.0/dist/maplibre-gl.js"></script>
     <script src="../assets/js/contact.js"></script>
     <script type="module" src="../assets/js/grid-hydrique/dashboard.mjs"></script>
   </body>
