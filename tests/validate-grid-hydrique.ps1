@@ -58,10 +58,15 @@ Assert-True (Test-Path -LiteralPath $cssPath) 'La feuille CSS du dashboard est a
 if (Test-Path -LiteralPath $cssPath) {
     $css = Get-Content -Raw -Encoding UTF8 -LiteralPath $cssPath
     Assert-True ($css -match '\.water-hero\s*\{[^}]*padding-block:\s*clamp\(2rem,\s*4vw,\s*4rem\)') 'Le premier ecran conserve trop espace vertical'
-    Assert-True ($css -match '\.water-map\s*\{[^}]*min-height:\s*clamp\(24rem,\s*58svh,\s*32rem\)') 'La hauteur mobile de la carte est incorrecte'
-    Assert-True ($css -match '@media\s*\(min-width:\s*48rem\)[\s\S]*?\.water-map\s*\{[^}]*min-height:\s*clamp\(32rem,\s*65svh,\s*46rem\)') 'La hauteur desktop de la carte est incorrecte'
+    Assert-True ($css -match '\.water-map\s*\{[^}]*min-height:\s*clamp\(30rem,\s*68svh,\s*40rem\)') 'La hauteur mobile de la carte est incorrecte'
+    Assert-True ($css -match '@media\s*\(min-width:\s*48rem\)[\s\S]*?\.water-map\s*\{[^}]*min-height:\s*clamp\(38rem,\s*72svh,\s*52rem\)') 'La hauteur desktop de la carte est incorrecte'
     Assert-True ($css -notmatch '\.water-map-layout\s*\{[^}]*grid-template-columns') 'Le panneau de detail comprime encore la carte'
     Assert-True ($css -notmatch '\.station-detail\s*\{[^}]*position:\s*sticky') 'Le panneau de detail doit rester sous la carte'
+    Assert-True ($css -match '\.water-map-controls,\s*\.water-view-controls,\s*\.water-control-group\s*\{[^}]*display:\s*flex;[^}]*flex-wrap:\s*wrap;[^}]*gap:\s*0\.75rem') 'Les commandes de carte doivent etre flexibles et revenir a la ligne'
+    Assert-True ($css -match '\.water-control-group\s*\{[^}]*border:\s*0') 'Les groupes de commandes ne doivent pas avoir de bordure'
+    Assert-True ($css -match '\.water-control-group\[hidden\]\s*\{[^}]*display:\s*none') 'Les commandes masquées doivent rester absentes du rendu'
+    Assert-True ($css -match '\.zone-detail__item\s*\{') 'Le détail de zone doit disposer d’un style dédié'
+    Assert-True ($css -match '\.water-layer-toggle\s*\{[^}]*min-height:\s*44px') 'Les cibles interactives doivent conserver 44px de hauteur minimale'
     Assert-True ($css -notmatch '\.(?:water-live-summary|water-map-layout|water-layer-controls|station-detail)\s*\{[^}]*(?:^|[\r\n])\s*order:') 'Les elements interactifs ne doivent pas diverger de ordre DOM'
     Assert-True ($css -match '@media\s*\(max-width:\s*35\.99rem\)[\s\S]*?\.nav-list\s*\{[\s\S]*?flex-wrap:\s*wrap') 'La navigation mobile doit revenir a la ligne'
     Assert-True ($css -match 'content-visibility:\s*auto') 'Le contenu narratif différé est absent'

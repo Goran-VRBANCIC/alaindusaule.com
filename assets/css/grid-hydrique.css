@@ -90,7 +90,7 @@
 }
 
 .water-map {
-  min-height: clamp(24rem, 58svh, 32rem);
+  min-height: clamp(30rem, 68svh, 40rem);
 }
 
 .water-map .maplibregl-canvas {
@@ -106,6 +106,36 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
+}
+
+.water-map-controls,
+.water-view-controls,
+.water-control-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.water-map-controls {
+  align-items: end;
+  padding-block: 1rem;
+}
+
+.water-control-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.water-control-group legend {
+  width: 100%;
+  margin-bottom: 0.25rem;
+  font-weight: 800;
+}
+
+.water-control-group[hidden] {
+  display: none;
 }
 
 .water-layer-toggle {
@@ -246,6 +276,11 @@
 .detail-level--alerte { background: #e3a62f; }
 .detail-level--vigilance { background: #f2d36b; }
 
+.zone-detail__item {
+  padding-block: 1rem;
+  border-top: 1px solid var(--border);
+}
+
 .data-error {
   padding: 0.75rem;
   border-left: 4px solid #8b1e1e;
@@ -323,6 +358,6 @@
   }
 
   .water-map {
-    min-height: clamp(32rem, 65svh, 46rem);
+    min-height: clamp(38rem, 72svh, 52rem);
   }
 }
