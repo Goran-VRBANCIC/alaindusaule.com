@@ -112,13 +112,11 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
       type: "vector",
       url: `pmtiles://${ZONE_SOURCE_URL}`,
     });
-    const filter = zoneResourceFilter("ALL");
     map.addLayer({
       id: "zones-fill",
       type: "fill",
       source: "vigieau-zones",
       "source-layer": ZONE_SOURCE_LAYER,
-      filter,
       layout: { visibility: "none", "fill-sort-key": ZONE_FILL_SORT_KEY },
       paint: {
         "fill-color": [
@@ -137,7 +135,6 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
       type: "line",
       source: "vigieau-zones",
       "source-layer": ZONE_SOURCE_LAYER,
-      filter,
       layout: { visibility: "none" },
       paint: { "line-color": "#ffffff", "line-width": 1 },
     }, "piezo-points");

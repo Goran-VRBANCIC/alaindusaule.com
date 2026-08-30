@@ -136,6 +136,8 @@ test("loadZoneLayers prépare les couches officielles une seule fois", async () 
   const line = calls.addLayers.find((layer) => layer.id === "zones-line");
   assert.ok(fill);
   assert.ok(line);
+  assert.equal(Object.hasOwn(fill, "filter"), false);
+  assert.equal(Object.hasOwn(line, "filter"), false);
   assert.equal(calls.layerInsertions.find(({ layer }) => layer.id === "zones-fill").beforeId, "piezo-points");
   assert.equal(calls.layerInsertions.find(({ layer }) => layer.id === "zones-line").beforeId, "piezo-points");
   assert.equal(fill["source-layer"], ZONE_SOURCE_LAYER);
