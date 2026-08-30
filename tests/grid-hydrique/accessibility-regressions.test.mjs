@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { buildLineChartModel } from "../../assets/js/grid-hydrique/chart.mjs";
 import { piezoObservationsToGeoJson } from "../../assets/js/grid-hydrique/domain.mjs";
-import { selectFeatureAtMapCenter } from "../../assets/js/grid-hydrique/map.mjs";
+import { createWaterMap, selectFeatureAtMapCenter } from "../../assets/js/grid-hydrique/map.mjs";
 import { renderHydroDetail, renderPiezoDetail, renderSourceDates } from "../../assets/js/grid-hydrique/templates.mjs";
 
 test("les mesures visibles conservent les métadonnées des stations", () => {
@@ -13,6 +13,34 @@ test("les mesures visibles conservent les métadonnées des stations", () => {
 
   assert.equal(result.features[0].properties.name, "Piézomètre test");
   assert.equal(result.features[0].properties.commune, "Orléans");
+});
+
+test("le calque départemental reste complètement opaque", async () => {
+  class FakeMap {
+    constructor() {
+      this.layers = new Map();
+      this.sources = new Map();
+    }
+
+    addControl() {}
+    addSource(id, source) { this.sources.set(id, source); }
+    addLayer(layer) { this.layers.set(layer.id, layer); }
+    on() {}
+    once(event, callback) { if (event === "load") callback(); }
+    getCanvas() { return { style: {}, setAttribute() {}, addEventListener() {} }; }
+  }
+
+  const waterMap = createWaterMap({
+    container: {},
+    departments: { type: "FeatureCollection", features: [] },
+    piezoStations: [],
+    hydroStations: [],
+    onSelect() {},
+    maplibre: { Map: FakeMap, NavigationControl: class {}, ScaleControl: class {} },
+  });
+
+  await waterMap.ready;
+  assert.equal(waterMap.map.layers.get("departments-fill").paint["fill-opacity"], 1);
 });
 
 test("les détails de station indiquent le lieu et la fraîcheur", () => {

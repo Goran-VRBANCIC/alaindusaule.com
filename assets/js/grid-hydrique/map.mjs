@@ -74,7 +74,7 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
             "vigilance", restrictionColor("vigilance"),
             restrictionColor(null),
           ],
-          "fill-opacity": 0.88,
+          "fill-opacity": 1,
         },
       });
       map.addLayer({

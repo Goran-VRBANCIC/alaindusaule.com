@@ -51,6 +51,16 @@ test("renderDepartmentDetail échappe les données et accepte un arrêté HTTPS"
   assert.match(html, /https:\/\/example\.test\/arrete\.pdf/);
 });
 
+test("renderDepartmentDetail sépare le niveau du département et celui du point", () => {
+  const html = renderDepartmentDetail(
+    { nom: "Charente", severity: "crise" },
+    [{ nom: "Charente-Moyenne", niveauGravite: "alerte_renforcee" }],
+  );
+
+  assert.match(html, /Niveau maximal du département[\s\S]*detail-level--crise[^>]*>Crise/);
+  assert.match(html, /Au point sélectionné[\s\S]*detail-level--alerte_renforcee[^>]*>Alerte renforcée/);
+});
+
 test("les détails de station créent un emplacement de graphique", () => {
   const piezo = renderPiezoDetail({ stationCode: "P1", value: 3.2, unit: "m", measuredAt: "2026-08-29T08:00:00Z" });
   const hydro = renderHydroDetail({ stationCode: "H1", value: 0.8, unit: "m", measuredAt: "2026-08-29T08:00:00Z" });

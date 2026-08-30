@@ -54,12 +54,18 @@ export function renderSourceDates({ vigieau, piezo, hydro }) {
 
 export function renderDepartmentDetail(department, zones = []) {
   const zone = zones[0];
-  const level = zone?.niveauGravite || department.severity || "none";
+  const departmentLevel = department.severity || "none";
+  const localLevel = zone?.niveauGravite || "none";
   const safeUrl = safeHttpsUrl(zone?.arrete?.cheminFichier);
   return `
     <h2 id="detail-title">${escapeHtml(department.nom || "Département")}</h2>
-    <p class="detail-level detail-level--${escapeHtml(level)}">${escapeHtml(severityLabel(level))}</p>
-    ${zone ? `<p>${escapeHtml(zone.nom || "Zone de restriction")}</p>` : "<p>Aucune restriction locale retournée pour ce point.</p>"}
+    <p class="fine-print">Niveau maximal du département — couleur de la carte</p>
+    <p class="detail-level detail-level--${escapeHtml(departmentLevel)}">${escapeHtml(severityLabel(departmentLevel))}</p>
+    ${zone ? `
+      <p class="fine-print">Au point sélectionné</p>
+      <p class="detail-level detail-level--${escapeHtml(localLevel)}">${escapeHtml(severityLabel(localLevel))}</p>
+      <p>${escapeHtml(zone.nom || "Zone de restriction")}</p>
+    ` : "<p>Aucune restriction locale retournée pour ce point.</p>"}
     ${safeUrl ? `<p><a href="${escapeHtml(safeUrl)}" rel="noopener">Consulter l’arrêté officiel</a></p>` : ""}
     <p class="fine-print">Source : VigiEau</p>
   `;
