@@ -269,3 +269,15 @@
 **Problème :** Après la fusion, `git worktree remove` a bien désenregistré le worktree, mais Windows a refusé de supprimer son dossier vide avec `Permission denied`, probablement parce qu’un processus conservait encore ce chemin ouvert.
 
 **Solution permanente :** Après l’arrêt du serveur, vérifier aussi les processus et sessions susceptibles de conserver le dossier comme répertoire courant. Si Git a déjà désenregistré le worktree, ne pas forcer une suppression récursive : confirmer que le dossier résiduel est vide, supprimer la branche fusionnée séparément et laisser le dossier vide jusqu’à la libération du verrou.
+
+## 2026-08-30 19:45:51 +02:00 — Règle mémoire : terminer le brainstorming avant de charger les skills d’implémentation
+
+**Problème :** Pour la demande de borne de dézoom, les instructions de diagnostic et de TDD ont été chargées en même temps que le brainstorming, alors que le brainstorming impose de ne charger aucune skill d’implémentation avant validation du design.
+
+**Solution permanente :** Lorsqu’une modification de comportement déclenche le brainstorming, charger uniquement ses instructions, explorer le contexte et faire valider le design. Ne charger `writing-plans`, le diagnostic, le TDD ou toute autre skill d’implémentation qu’après cette validation et dans l’ordre prescrit.
+
+## 2026-08-30 19:46:56 +02:00 — Limiter le dézoom au cadrage national
+
+**Demande :** Empêcher tout dézoom supplémentaire dès que la carte complète avec la Corse est visible, y compris après un changement de taille ou une rotation mobile.
+
+**Solution validée :** Calculer dynamiquement le zoom minimal depuis l’emprise nationale et les dimensions courantes du conteneur, le recalculer lors des redimensionnements sans recentrer la navigation, et confier tous les tests à GPT-5.6 Luna.
