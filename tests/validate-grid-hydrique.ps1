@@ -103,6 +103,8 @@ if (Test-Path -LiteralPath $workflowPath) {
 }
 
 Assert-True (Test-Path -LiteralPath (Join-Path $projectRoot '.nojekyll')) 'Le fichier .nojekyll est absent'
+Assert-True (Test-Path -LiteralPath (Join-Path $projectRoot 'scripts/build-water-stations.mjs')) 'Le générateur complet des stations est absent'
+Assert-True (-not (Test-Path -LiteralPath (Join-Path $projectRoot 'scripts/build-water-station-samples.mjs'))) 'L’ancien générateur d’échantillons existe encore'
 
 $dashboardPath = Join-Path $projectRoot 'assets/js/grid-hydrique/dashboard.mjs'
 Assert-True (Test-Path -LiteralPath $dashboardPath) 'Le module principal est absent'
