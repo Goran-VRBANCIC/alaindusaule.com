@@ -52,7 +52,7 @@ Aucun nouveau contrôle ni texte d’interface n’est nécessaire.
 
 ## Validation
 
-Tous les tests et contrôles sont écrits ou exécutés exclusivement par un sous-agent GPT-5.6 Luna.
+Tous les tests et contrôles sont écrits ou exécutés exclusivement par un sous-agent GPT-5.4 Mini.
 
 - Test unitaire rouge : le zoom issu du cadrage initial devient `minZoom`.
 - Test unitaire rouge : une nouvelle taille recalcule la limite sans second `fitBounds`.
@@ -73,4 +73,4 @@ Tous les tests et contrôles sont écrits ou exécutés exclusivement par un sou
 - Les instantanés locaux contiennent toutes les stations actives de métropole et de Corse retournées par les filtres officiels retenus.
 - Le nombre et les coordonnées des stations ne changent jamais à cause du zoom, d’un déplacement, d’une réponse tardive ou d’un échec réseau.
 - Les mesures récentes des stations connues continuent d’être actualisées dans la zone visible.
-- Les validations GPT-5.6 Luna sont toutes vertes.
+- Les validations GPT-5.4 Mini sont toutes vertes.

@@ -14,9 +14,9 @@
 
 - Créer une branche et un worktree dédiés depuis `master` avant toute modification applicative.
 - Préserver le fichier utilisateur non suivi `docs/superpowers/plans/2026-08-29 - dashboard_plan.md`.
-- Tous les tests, validateurs et contrôles navigateur sont écrits ou exécutés exclusivement par un sous-agent `gpt-5.6-luna`.
+- Tous les tests, validateurs et contrôles navigateur sont écrits ou exécutés exclusivement par un sous-agent `gpt-5.4-mini`.
 - L’agent principal écrit uniquement le code de production, génère les instantanés de données, inspecte les diffs et crée les commits.
-- Pour chaque comportement : Luna écrit le test, constate l’échec attendu, l’agent principal applique le minimum de production, puis Luna constate le succès.
+- Pour chaque comportement : GPT-5.4 Mini écrit le test, constate l’échec attendu, l’agent principal applique le minimum de production, puis GPT-5.4 Mini constate le succès.
 - Ne jamais ajouter de mention `Co-authored-by`.
 - Indexer chaque commit avec une liste explicite de chemins ; ne jamais utiliser `git add .`.
 
@@ -52,9 +52,9 @@ git worktree add '.worktrees/map-zoom-stable-stations' -b 'feat/map-zoom-stable-
 
 Expected: le nouveau worktree est sur `feat/map-zoom-stable-stations`; le fichier non suivi du checkout principal n’est ni copié ni modifié.
 
-- [ ] **Step 2: Faire exécuter la référence par Luna**
+- [ ] **Step 2: Faire exécuter la référence par GPT-5.4 Mini**
 
-Luna exécute séparément dans le worktree :
+GPT-5.4 Mini exécute séparément dans le worktree :
 
 ```powershell
 node --test tests/grid-hydrique/*.test.mjs
@@ -64,7 +64,7 @@ node --test tests/contact-script.test.js
 git diff --check
 ```
 
-Expected: `43/43` tests cartographiques, les deux validateurs, le test contact et `git diff --check` réussissent. Luna transmet chaque code de sortie.
+Expected: `43/43` tests cartographiques, les deux validateurs, le test contact et `git diff --check` réussissent. GPT-5.4 Mini transmet chaque code de sortie.
 
 ### Task 2: Bloquer le dézoom au cadrage national responsive
 
@@ -72,9 +72,9 @@ Expected: `43/43` tests cartographiques, les deux validateurs, le test contact e
 - Modify: `assets/js/grid-hydrique/map.mjs:51-54,75-88,225-242`
 - Test: `tests/grid-hydrique/map.test.mjs:31-124`
 
-- [ ] **Step 1: Faire écrire les tests rouges par Luna**
+- [ ] **Step 1: Faire écrire les tests rouges par GPT-5.4 Mini**
 
-Luna étend le faux MapLibre avec les contrats suivants :
+GPT-5.4 Mini étend le faux MapLibre avec les contrats suivants :
 
 ```js
 this.zoom = 4.25;
@@ -132,7 +132,7 @@ assert.deepEqual(waterMap.map.getCenter(), centerBefore);
 assert.equal(waterMap.map.calls.minZoom.at(-1), 4.1);
 ```
 
-- [ ] **Step 2: Faire constater l’échec attendu par Luna**
+- [ ] **Step 2: Faire constater l’échec attendu par GPT-5.4 Mini**
 
 ```powershell
 node --test tests/grid-hydrique/map.test.mjs
@@ -205,7 +205,7 @@ if (nationalBounds && map.resize && map.fitBounds && map.getContainer) {
 
 La variable `nationalResizeObserver` reste dans la fermeture de la carte pour conserver l’observateur pendant toute la durée de la page.
 
-- [ ] **Step 4: Faire vérifier le vert par Luna**
+- [ ] **Step 4: Faire vérifier le vert par GPT-5.4 Mini**
 
 ```powershell
 node --test tests/grid-hydrique/map.test.mjs
@@ -233,9 +233,9 @@ git commit -m "fix(map): cap zoom at national extent"
 - Generate: `assets/data/hydro-stations.json`
 - Modify: `tests/validate-grid-hydrique.ps1:107-130`
 
-- [ ] **Step 1: Faire remplacer les tests d’échantillonnage par Luna**
+- [ ] **Step 1: Faire remplacer les tests d’échantillonnage par GPT-5.4 Mini**
 
-Luna remplace `samples.test.mjs` par `stations.test.mjs`. Le nouveau test importe l’API souhaitée avant qu’elle existe :
+GPT-5.4 Mini remplace `samples.test.mjs` par `stations.test.mjs`. Le nouveau test importe l’API souhaitée avant qu’elle existe :
 
 ```js
 import {
@@ -283,14 +283,14 @@ for (const station of [...piezo.stations, ...hydro.stations]) {
 }
 ```
 
-Luna ajoute au validateur PowerShell :
+GPT-5.4 Mini ajoute au validateur PowerShell :
 
 ```powershell
 Assert-True (Test-Path -LiteralPath (Join-Path $projectRoot 'scripts/build-water-stations.mjs')) 'Le générateur complet des stations est absent'
 Assert-True (-not (Test-Path -LiteralPath (Join-Path $projectRoot 'scripts/build-water-station-samples.mjs'))) 'L’ancien générateur d’échantillons existe encore'
 ```
 
-- [ ] **Step 2: Faire constater le rouge par Luna**
+- [ ] **Step 2: Faire constater le rouge par GPT-5.4 Mini**
 
 ```powershell
 node --test tests/grid-hydrique/stations.test.mjs
@@ -440,7 +440,7 @@ node scripts/build-water-stations.mjs
 
 Expected: les deux nombres annoncés sont supérieurs à 350 ; les deux JSON sont réécrits sans erreur réseau.
 
-- [ ] **Step 5: Faire vérifier le vert par Luna**
+- [ ] **Step 5: Faire vérifier le vert par GPT-5.4 Mini**
 
 ```powershell
 node --test tests/grid-hydrique/stations.test.mjs
@@ -466,9 +466,9 @@ git commit -m "feat(map): load all active mainland stations"
 - Test: `tests/grid-hydrique/domain.test.mjs`
 - Test: `tests/grid-hydrique/accessibility-regressions.test.mjs`
 
-- [ ] **Step 1: Faire écrire le test rouge de fusion par Luna**
+- [ ] **Step 1: Faire écrire le test rouge de fusion par GPT-5.4 Mini**
 
-Luna ajoute dans `domain.test.mjs` :
+GPT-5.4 Mini ajoute dans `domain.test.mjs` :
 
 ```js
 test("les mesures enrichissent le référentiel sans modifier ses points", () => {
@@ -498,7 +498,7 @@ test("les mesures enrichissent le référentiel sans modifier ses points", () =>
 
 Elle ajoute un second test appliquant successivement deux viewports et une collection vide ; le nombre, l’ordre et les géométries doivent rester identiques après chaque fusion.
 
-- [ ] **Step 2: Faire constater le rouge par Luna**
+- [ ] **Step 2: Faire constater le rouge par GPT-5.4 Mini**
 
 ```powershell
 node --test tests/grid-hydrique/domain.test.mjs
@@ -534,7 +534,7 @@ export function mergeStationMeasurements(stations, measurements) {
 
 La géométrie canonique n’est jamais lue depuis `measurements`.
 
-- [ ] **Step 4: Faire vérifier le vert unitaire par Luna**
+- [ ] **Step 4: Faire vérifier le vert unitaire par GPT-5.4 Mini**
 
 ```powershell
 node --test tests/grid-hydrique/domain.test.mjs
@@ -542,9 +542,9 @@ node --test tests/grid-hydrique/domain.test.mjs
 
 Expected: PASS pour les codes inconnus, les collections vides et les cycles successifs.
 
-- [ ] **Step 5: Faire écrire le test rouge d’orchestration par Luna**
+- [ ] **Step 5: Faire écrire le test rouge d’orchestration par GPT-5.4 Mini**
 
-Dans `accessibility-regressions.test.mjs`, Luna ajoute un scénario sur deux référentiels canoniques :
+Dans `accessibility-regressions.test.mjs`, GPT-5.4 Mini ajoute un scénario sur deux référentiels canoniques :
 
 ```js
 const piezoAfterA = mergeStationMeasurements(piezoNational, piezoViewportA);
@@ -576,7 +576,7 @@ test("le dashboard conserve les référentiels pendant les changements de zoom",
 });
 ```
 
-- [ ] **Step 6: Faire constater le rouge d’orchestration par Luna**
+- [ ] **Step 6: Faire constater le rouge d’orchestration par GPT-5.4 Mini**
 
 ```powershell
 node --test tests/grid-hydrique/accessibility-regressions.test.mjs
@@ -657,7 +657,7 @@ waterMap = createWaterMap({
 
 Aucune nouvelle source MapLibre n’est créée.
 
-- [ ] **Step 8: Faire vérifier le vert et la non-régression par Luna**
+- [ ] **Step 8: Faire vérifier le vert et la non-régression par GPT-5.4 Mini**
 
 ```powershell
 node --test tests/grid-hydrique/domain.test.mjs tests/grid-hydrique/accessibility-regressions.test.mjs
@@ -679,9 +679,9 @@ git commit -m "fix(map): keep station points stable across zooms"
 **Files:**
 - Modify: `log.md`
 
-- [ ] **Step 1: Faire exécuter toute la validation par Luna**
+- [ ] **Step 1: Faire exécuter toute la validation par GPT-5.4 Mini**
 
-Luna exécute séparément :
+GPT-5.4 Mini exécute séparément :
 
 ```powershell
 node --test tests/grid-hydrique/*.test.mjs
@@ -691,11 +691,11 @@ node --test tests/contact-script.test.js
 git diff --check
 ```
 
-Expected: tous les codes de sortie valent `0`; Luna rapporte le nombre exact de tests et les volumes exacts des deux référentiels.
+Expected: tous les codes de sortie valent `0`; GPT-5.4 Mini rapporte le nombre exact de tests et les volumes exacts des deux référentiels.
 
-- [ ] **Step 2: Faire tester le zoom minimal dans Edge par Luna**
+- [ ] **Step 2: Faire tester le zoom minimal dans Edge par GPT-5.4 Mini**
 
-Luna sert le worktree avec `.mjs` en `text/javascript` et `Cache-Control: no-store`, puis vérifie à 320, 768, 1024 et 1440 px :
+GPT-5.4 Mini sert le worktree avec `.mjs` en `text/javascript` et `Cache-Control: no-store`, puis vérifie à 320, 768, 1024 et 1440 px :
 
 ```text
 1. La France métropolitaine et la Corse sont entièrement visibles au chargement.
@@ -707,9 +707,9 @@ Luna sert le worktree avec `.mjs` en `text/javascript` et `Cache-Control: no-sto
 
 Expected: aucune erreur console ou `pageerror`; aucune marge excessive créée par un dézoom supplémentaire.
 
-- [ ] **Step 3: Faire tester la stabilité des stations dans Edge par Luna**
+- [ ] **Step 3: Faire tester la stabilité des stations dans Edge par GPT-5.4 Mini**
 
-Luna bloque d’abord les deux endpoints de mesures Hub’Eau, capture la carte au même cadrage avant et après trois cycles zoom avant → déplacement → retour au minimum, puis compare les captures et les erreurs. Elle répète avec les endpoints actifs et attend la fin de chaque requête.
+GPT-5.4 Mini bloque d’abord les deux endpoints de mesures Hub’Eau, capture la carte au même cadrage avant et après trois cycles zoom avant → déplacement → retour au minimum, puis compare les captures et les erreurs. Elle répète avec les endpoints actifs et attend la fin de chaque requête.
 
 Expected:
 
@@ -723,7 +723,7 @@ Expected:
 
 - [ ] **Step 4: Corriger uniquement par un nouveau cycle TDD si la recette échoue**
 
-Pour chaque défaut, Luna écrit ou adapte d’abord un test automatisé qui reproduit précisément l’échec et le lance en rouge. L’agent principal applique ensuite une seule correction de production, puis Luna relance le test ciblé et la validation complète. Ne jamais modifier la production directement depuis une observation manuelle non couverte.
+Pour chaque défaut, GPT-5.4 Mini écrit ou adapte d’abord un test automatisé qui reproduit précisément l’échec et le lance en rouge. L’agent principal applique ensuite une seule correction de production, puis GPT-5.4 Mini relance le test ciblé et la validation complète. Ne jamais modifier la production directement depuis une observation manuelle non couverte.
 
 - [ ] **Step 5: Journaliser la livraison**
 
@@ -733,11 +733,11 @@ L’agent principal lit l’heure système avec :
 Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz'
 ```
 
-Puis il ajoute à `log.md` la demande, la cause (`setStations` remplaçait le référentiel par les observations du viewport), les volumes générés, le comportement du zoom minimal et toutes les preuves Luna.
+Puis il ajoute à `log.md` la demande, la cause (`setStations` remplaçait le référentiel par les observations du viewport), les volumes générés, le comportement du zoom minimal et toutes les preuves GPT-5.4 Mini.
 
-- [ ] **Step 6: Faire contrôler le journal par Luna puis commit**
+- [ ] **Step 6: Faire contrôler le journal par GPT-5.4 Mini puis commit**
 
-Luna exécute :
+GPT-5.4 Mini exécute :
 
 ```powershell
 git diff --check -- log.md
@@ -768,7 +768,7 @@ git diff master...HEAD
 
 Il vérifie au minimum : limite de zoom réellement responsive, absence de recentrage, filtres d’activité et de périmètre, déterminisme des instantanés, stabilité des géométries, réponses obsolètes, pannes partielles, performance de plusieurs milliers de points et couverture des tests.
 
-Expected: aucune issue `Critical` ou `Important`. Toute issue de ces niveaux repart dans un cycle rouge → correction → vert avec Luna.
+Expected: aucune issue `Critical` ou `Important`. Toute issue de ces niveaux repart dans un cycle rouge → correction → vert avec GPT-5.4 Mini.
 
 - [ ] **Step 2: Présenter le choix d’intégration**
 

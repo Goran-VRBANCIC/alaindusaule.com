@@ -295,3 +295,9 @@
 **Réponse utilisateur :** `ok`, approuvant la spécification consolidée.
 
 **Solution :** Création d’un plan TDD en incréments pour la limite de zoom responsive, le référentiel complet des stations actives métropolitaines, la fusion stable des mesures et la recette Edge. Le plan maintient l’exigence que GPT-5.6 Luna écrive et exécute tous les tests et validateurs.
+
+## 2026-08-30 20:27:02 +02:00 — Changement du modèle de test
+
+**Décision utilisateur :** Exécuter le plan dans la session courante, mais confier finalement tous les tests à GPT-5.4 Mini afin de réduire la consommation de ressources des sous-agents.
+
+**Solution :** La spécification et le plan actif désignent désormais exclusivement `gpt-5.4-mini` pour l’écriture et l’exécution des tests, validateurs et recettes navigateur. Les mentions GPT-5.6 Luna des entrées historiques restent inchangées car elles décrivent les validations déjà réalisées.
