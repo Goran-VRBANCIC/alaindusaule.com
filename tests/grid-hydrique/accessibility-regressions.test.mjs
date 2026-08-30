@@ -73,6 +73,7 @@ test("Entrée sélectionne au clavier l’élément visible au centre", () => {
   let selected;
   const map = {
     getCanvas: () => ({ clientWidth: 800, clientHeight: 600 }),
+    getLayer: (id) => ["hydro-points", "piezo-points", "departments-fill"].includes(id) ? {} : null,
     queryRenderedFeatures: (point, options) => {
       assert.deepEqual(point, [400, 300]);
       assert.deepEqual(options.layers, ["hydro-points", "piezo-points", "departments-fill"]);

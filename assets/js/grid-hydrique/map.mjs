@@ -1,6 +1,12 @@
 // @ts-check
 
 import { restrictionColor } from "./templates.mjs";
+import {
+  ZONE_FILL_SORT_KEY,
+  ZONE_SOURCE_LAYER,
+  ZONE_SOURCE_URL,
+  zoneResourceFilter,
+} from "./zones.mjs";
 
 const EMPTY_FEATURE_COLLECTION = Object.freeze({ type: "FeatureCollection", features: [] });
 
@@ -15,11 +21,33 @@ export function stationsToGeoJson(stations) {
   };
 }
 
+export function geoJsonBounds(collection) {
+  const bounds = [[Infinity, Infinity], [-Infinity, -Infinity]];
+  const visit = (coordinates) => {
+    if (typeof coordinates?.[0] === "number" && typeof coordinates?.[1] === "number") {
+      bounds[0][0] = Math.min(bounds[0][0], coordinates[0]);
+      bounds[0][1] = Math.min(bounds[0][1], coordinates[1]);
+      bounds[1][0] = Math.max(bounds[1][0], coordinates[0]);
+      bounds[1][1] = Math.max(bounds[1][1], coordinates[1]);
+      return;
+    }
+    coordinates?.forEach(visit);
+  };
+  collection.features.forEach((feature) => visit(feature.geometry?.coordinates));
+  return bounds;
+}
+
+function nationalPadding(width) {
+  return width < 576 ? 20 : 36;
+}
+
 export function selectFeatureAtMapCenter(map, onSelect) {
   const canvas = map.getCanvas();
+  const layerIds = ["hydro-points", "piezo-points", "zones-fill", "departments-fill"]
+    .filter((layerId) => map.getLayer(layerId));
   const features = map.queryRenderedFeatures(
     [canvas.clientWidth / 2, canvas.clientHeight / 2],
-    { layers: ["hydro-points", "piezo-points", "departments-fill"] },
+    { layers: layerIds },
   );
   const feature = features[0];
   const layerId = feature?.layer?.id;
@@ -41,8 +69,7 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
   const map = new maplibre.Map({
     container,
     center: [2.2, 46.4],
-    zoom: 4.6,
-    minZoom: 4,
+    minZoom: 3,
     maxBounds: [[-6, 40.5], [10.5, 52]],
     style: {
       version: 8,
@@ -53,6 +80,69 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
 
   map.addControl(new maplibre.NavigationControl({ showCompass: false }), "top-right");
   map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
+
+  let zoneProtocol;
+
+  function registerSelectableLayer(layerId) {
+    map.on("mouseenter", layerId, () => { map.getCanvas().style.cursor = "pointer"; });
+    map.on("mouseleave", layerId, () => { map.getCanvas().style.cursor = ""; });
+    map.on("click", layerId, (event) => {
+      const feature = event.features?.[0];
+      if (!feature) return;
+      const coordinates = feature.geometry.type === "Point"
+        ? feature.geometry.coordinates
+        : [event.lngLat.lng, event.lngLat.lat];
+      if (feature.geometry.type === "Point") {
+        map.getSource("selected-point").setData({ type: "FeatureCollection", features: [feature] });
+      }
+      onSelect({ layerId, feature, coordinates });
+    });
+  }
+
+  async function loadZoneLayers({ PMTiles, Protocol }) {
+    if (map.getSource("vigieau-zones")) return;
+    const archive = new PMTiles(ZONE_SOURCE_URL);
+    await archive.getHeader();
+    if (!zoneProtocol) {
+      zoneProtocol = new Protocol();
+      zoneProtocol.add(archive);
+      maplibre.addProtocol("pmtiles", zoneProtocol.tile);
+    }
+    map.addSource("vigieau-zones", {
+      type: "vector",
+      url: `pmtiles://${ZONE_SOURCE_URL}`,
+    });
+    const filter = zoneResourceFilter("ALL");
+    map.addLayer({
+      id: "zones-fill",
+      type: "fill",
+      source: "vigieau-zones",
+      "source-layer": ZONE_SOURCE_LAYER,
+      filter,
+      layout: { visibility: "none", "fill-sort-key": ZONE_FILL_SORT_KEY },
+      paint: {
+        "fill-color": [
+          "match", ["get", "niveauGravite"],
+          "crise", restrictionColor("crise"),
+          "alerte_renforcee", restrictionColor("alerte_renforcee"),
+          "alerte", restrictionColor("alerte"),
+          "vigilance", restrictionColor("vigilance"),
+          restrictionColor(null),
+        ],
+        "fill-opacity": 1,
+      },
+    }, "piezo-points");
+    map.addLayer({
+      id: "zones-line",
+      type: "line",
+      source: "vigieau-zones",
+      "source-layer": ZONE_SOURCE_LAYER,
+      filter,
+      layout: { visibility: "none" },
+      paint: { "line-color": "#ffffff", "line-width": 1 },
+    }, "piezo-points");
+    registerSelectableLayer("zones-fill");
+  }
 
   const ready = new Promise((resolve) => {
     map.once("load", () => {
@@ -118,19 +208,7 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
       });
 
       for (const layerId of ["departments-fill", "piezo-points", "hydro-points"]) {
-        map.on("mouseenter", layerId, () => { map.getCanvas().style.cursor = "pointer"; });
-        map.on("mouseleave", layerId, () => { map.getCanvas().style.cursor = ""; });
-        map.on("click", layerId, (event) => {
-          const feature = event.features?.[0];
-          if (!feature) return;
-          const coordinates = feature.geometry.type === "Point"
-            ? feature.geometry.coordinates
-            : [event.lngLat.lng, event.lngLat.lat];
-          if (feature.geometry.type === "Point") {
-            map.getSource("selected-point").setData({ type: "FeatureCollection", features: [feature] });
-          }
-          onSelect({ layerId, feature, coordinates });
-        });
+        registerSelectableLayer(layerId);
       }
 
       const canvas = map.getCanvas();
@@ -139,6 +217,14 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
         if (event.key === "Enter" && selectFeatureAtMapCenter(map, onSelect)) event.preventDefault();
       });
 
+      if (map.resize && map.fitBounds && map.getContainer && departments.features.length > 0) {
+        map.resize();
+        map.fitBounds(geoJsonBounds(departments), {
+          padding: nationalPadding(map.getContainer().clientWidth),
+          duration: 0,
+        });
+      }
+
       resolve();
     });
   });
@@ -146,10 +232,24 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
   return {
     map,
     ready,
+    loadZoneLayers,
     setDepartments(data) { map.getSource("departments")?.setData(data); },
     setStations(kind, data) { map.getSource(`${kind}-stations`)?.setData(data); },
     setLayerVisibility(layerId, visible) {
       if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", visible ? "visible" : "none");
+    },
+    setMapMode(mode) {
+      const zonesVisible = mode === "zones";
+      map.setLayoutProperty("departments-fill", "visibility", zonesVisible ? "none" : "visible");
+      for (const layerId of ["zones-fill", "zones-line"]) {
+        if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", zonesVisible ? "visible" : "none");
+      }
+    },
+    setZoneResource(resource) {
+      const filter = zoneResourceFilter(resource);
+      for (const layerId of ["zones-fill", "zones-line"]) {
+        if (map.getLayer(layerId)) map.setFilter(layerId, filter);
+      }
     },
     onMoveEnd(handler) { map.on("moveend", handler); },
     getBounds() {
