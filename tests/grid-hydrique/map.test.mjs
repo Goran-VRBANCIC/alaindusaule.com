@@ -30,15 +30,47 @@ const departments = {
   ],
 };
 
+const animationFrames = [];
+const requestFrame = (callback) => {
+  animationFrames.push(callback);
+  return animationFrames.length;
+};
+const flushAnimationFrame = async () => {
+  animationFrames.shift()?.();
+  await Promise.resolve();
+};
+
+class FakeResizeObserver {
+  static instance;
+
+  constructor(callback) {
+    this.callback = callback;
+    FakeResizeObserver.instance = this;
+  }
+
+  observe(target) {
+    this.target = target;
+  }
+
+  trigger() {
+    this.callback([{ target: this.target }]);
+  }
+}
+
 function makeFakeMaplibre({ width = 800 } = {}) {
   class FakeMap {
     constructor(options) {
       this.options = options;
+      this.zoom = 4.25;
+      this.center = { lng: 2.2, lat: 46.4 };
+      this.container = { clientWidth: width, clientHeight: 600 };
       this.calls = {
         addLayers: [],
         layerInsertions: [],
         addSources: [],
         fitBounds: [],
+        minZoom: [],
+        cameraForBounds: [],
         resize: 0,
         visibility: {},
         filters: {},
@@ -64,7 +96,14 @@ function makeFakeMaplibre({ width = 800 } = {}) {
     resize() { this.calls.resize += 1; }
     fitBounds(bounds, options) { this.calls.fitBounds.push({ bounds, options }); }
     getCanvas() { return { style: {}, setAttribute() {}, addEventListener() {} }; }
-    getContainer() { return { clientWidth: width }; }
+    getContainer() { return this.container; }
+    getZoom() { return this.zoom; }
+    getCenter() { return { ...this.center }; }
+    setMinZoom(value) { this.calls.minZoom.push(value); }
+    cameraForBounds(bounds, options) {
+      this.calls.cameraForBounds.push({ bounds, options });
+      return { zoom: this.getContainer().clientWidth < 576 ? 4.1 : 4.6 };
+    }
   }
 
   class FakePMTiles {
@@ -99,6 +138,8 @@ function createTestWaterMap(options = {}) {
     hydroStations: [{ longitude: 2, latitude: 47 }],
     onSelect() {},
     maplibre: fake.maplibre,
+    ResizeObserverClass: options.ResizeObserverClass,
+    requestFrame: options.requestFrame,
   });
   return { ...fake, waterMap };
 }
@@ -117,6 +158,42 @@ test("createWaterMap recadre nationalement après resize", async () => {
     bounds: [[-5, 41], [9, 51]],
     options: { padding: 20, duration: 0 },
   });
+});
+
+test("createWaterMap fixe un minZoom national et le resynchronise au resize", async () => {
+  FakeResizeObserver.instance = undefined;
+  const { waterMap } = createTestWaterMap({
+    width: 800,
+    ResizeObserverClass: FakeResizeObserver,
+    requestFrame,
+  });
+  await waterMap.ready;
+
+  assert.deepEqual(waterMap.map.calls.minZoom, [4.25]);
+  assert.ok(FakeResizeObserver.instance);
+  assert.equal(FakeResizeObserver.instance.target, waterMap.map.getContainer());
+
+  const centerBefore = waterMap.map.getCenter();
+  waterMap.map.getContainer().clientWidth = 400;
+  FakeResizeObserver.instance.trigger();
+  await flushAnimationFrame();
+
+  assert.equal(waterMap.map.calls.fitBounds.length, 1);
+  assert.deepEqual(waterMap.map.getCenter(), centerBefore);
+  assert.equal(waterMap.map.calls.minZoom.at(-1), 4.1);
+  assert.equal(waterMap.map.calls.cameraForBounds.length > 0, true);
+});
+
+test("createWaterMap sans ResizeObserver ne plante pas et garde la limite initiale", async () => {
+  const { waterMap } = createTestWaterMap({
+    width: 800,
+    ResizeObserverClass: undefined,
+    requestFrame,
+  });
+  await waterMap.ready;
+
+  assert.equal(waterMap.map.calls.fitBounds.length, 1);
+  assert.deepEqual(waterMap.map.calls.minZoom, [4.25]);
 });
 
 test("loadZoneLayers prépare les couches officielles une seule fois", async () => {

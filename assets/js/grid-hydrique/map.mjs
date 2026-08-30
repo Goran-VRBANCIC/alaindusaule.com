@@ -77,7 +77,16 @@ export function selectFeatureAtMapCenter(map, onSelect) {
   return true;
 }
 
-export function createWaterMap({ container, departments, piezoStations, hydroStations, onSelect, maplibre = globalThis.maplibregl }) {
+export function createWaterMap({
+  container,
+  departments,
+  piezoStations,
+  hydroStations,
+  onSelect,
+  maplibre = globalThis.maplibregl,
+  ResizeObserverClass = globalThis.ResizeObserver,
+  requestFrame = globalThis.requestAnimationFrame,
+}) {
   if (!maplibre) throw new Error("MapLibre est indisponible");
 
   const map = new maplibre.Map({
@@ -94,7 +103,28 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
   map.addControl(new maplibre.NavigationControl({ showCompass: false }), "top-right");
   map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
 
+  const nationalBounds = departments.features.length > 0 ? geoJsonBounds(departments) : null;
+  let resizeFrame;
+  let nationalResizeObserver;
   let zoneProtocol;
+
+  function applyNationalMinZoom() {
+    if (!nationalBounds || !map.cameraForBounds || !map.setMinZoom || !map.getContainer) return;
+    const camera = map.cameraForBounds(nationalBounds, {
+      padding: nationalPadding(map.getContainer().clientWidth),
+    });
+    if (Number.isFinite(camera?.zoom)) map.setMinZoom(camera.zoom);
+  }
+
+  function scheduleNationalMinZoom() {
+    if (resizeFrame !== undefined) return;
+    const schedule = requestFrame || ((callback) => globalThis.setTimeout(callback, 0));
+    resizeFrame = schedule(() => {
+      resizeFrame = undefined;
+      map.resize?.();
+      applyNationalMinZoom();
+    });
+  }
 
   function registerSelectableLayer(layerId) {
     map.on("mouseenter", layerId, () => { map.getCanvas().style.cursor = "pointer"; });
@@ -230,12 +260,20 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
         if (event.key === "Enter" && selectFeatureAtMapCenter(map, onSelect)) event.preventDefault();
       });
 
-      if (map.resize && map.fitBounds && map.getContainer && departments.features.length > 0) {
+      if (nationalBounds && map.resize && map.fitBounds && map.getContainer) {
         map.resize();
-        map.fitBounds(geoJsonBounds(departments), {
+        map.fitBounds(nationalBounds, {
           padding: nationalPadding(map.getContainer().clientWidth),
           duration: 0,
         });
+        if (map.setMinZoom && map.getZoom) map.setMinZoom(map.getZoom());
+
+        if (ResizeObserverClass) {
+          nationalResizeObserver = new ResizeObserverClass(scheduleNationalMinZoom);
+          nationalResizeObserver.observe(map.getContainer());
+        } else {
+          globalThis.addEventListener?.("resize", scheduleNationalMinZoom);
+        }
       }
 
       resolve();
