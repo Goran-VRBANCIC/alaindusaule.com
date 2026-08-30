@@ -33,9 +33,23 @@ export function zoneResourceFilter(resource) {
   return resource === "ALL" ? null : ["==", ["get", "type"], resource];
 }
 
+function normalizeArrete(zone) {
+  if (zone.arrete || typeof zone.arreteRestriction !== "string") return zone.arrete;
+  try {
+    const arreteRestriction = JSON.parse(zone.arreteRestriction);
+    return arreteRestriction?.fichier ? { cheminFichier: arreteRestriction.fichier } : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function normalizeZones(zones = []) {
   return zones
     .filter((zone) => zone && typeof zone === "object")
-    .map((zone) => ({ ...zone, resourceLabel: resourceLabel(zone.type) }))
+    .map((zone) => ({
+      ...zone,
+      arrete: normalizeArrete(zone),
+      resourceLabel: resourceLabel(zone.type),
+    }))
     .sort((left, right) => (SEVERITY_RANK[right.niveauGravite] || 0) - (SEVERITY_RANK[left.niveauGravite] || 0));
 }

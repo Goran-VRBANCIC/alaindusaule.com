@@ -140,8 +140,8 @@ test("loadZoneLayers prépare les couches officielles une seule fois", async () 
   assert.ok(line);
   assert.equal(Object.hasOwn(fill, "filter"), false);
   assert.equal(Object.hasOwn(line, "filter"), false);
-  assert.equal(calls.layerInsertions.find(({ layer }) => layer.id === "zones-fill").beforeId, "piezo-points");
-  assert.equal(calls.layerInsertions.find(({ layer }) => layer.id === "zones-line").beforeId, "piezo-points");
+  assert.equal(calls.layerInsertions.find(({ layer }) => layer.id === "zones-fill").beforeId, "departments-line");
+  assert.equal(calls.layerInsertions.find(({ layer }) => layer.id === "zones-line").beforeId, "departments-line");
   assert.equal(fill["source-layer"], ZONE_SOURCE_LAYER);
   assert.deepEqual(fill.layout["fill-sort-key"], ZONE_FILL_SORT_KEY);
   assert.deepEqual(fill.paint["fill-color"], [

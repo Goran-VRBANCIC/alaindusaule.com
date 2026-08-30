@@ -6,6 +6,7 @@ import {
   resourceLabel,
   zoneResourceFilter,
 } from "../../assets/js/grid-hydrique/zones.mjs";
+import { renderZoneDetail } from "../../assets/js/grid-hydrique/templates.mjs";
 
 test("les ressources VigiEau ont des libellés publics", () => {
   assert.equal(resourceLabel("SUP"), "Cours d’eau");
@@ -46,4 +47,32 @@ test("les zones sont triées par gravité et reçoivent un libellé de ressource
   assert.equal(zones[0].resourceLabel, "Cours d’eau");
   assert.equal(zones[1].resourceLabel, "Nappes");
   assert.equal(zones[4].resourceLabel, "Eau potable");
+});
+
+test("les propriétés PMTiles arreteRestriction sont normalisées pour le lien officiel", () => {
+  const zones = normalizeZones([{
+    type: "SUP",
+    nom: "Charente-Moyenne",
+    niveauGravite: "crise",
+    arreteRestriction: '{"fichier":"https://vigieau.gouv.fr/arretes/charente.pdf"}',
+  }]);
+
+  assert.deepEqual(zones[0].arrete, {
+    cheminFichier: "https://vigieau.gouv.fr/arretes/charente.pdf",
+  });
+  const html = renderZoneDetail(zones);
+  assert.match(html, /href="https:\/\/vigieau\.gouv\.fr\/arretes\/charente\.pdf"/);
+  assert.match(html, /rel="noopener"/);
+});
+
+test("un arreteRestriction JSON invalide ne fait pas planter le fallback", () => {
+  assert.doesNotThrow(() => {
+    const zones = normalizeZones([{
+      type: "SUP",
+      nom: "Charente-Moyenne",
+      niveauGravite: "crise",
+      arreteRestriction: "pas du JSON",
+    }]);
+    renderZoneDetail(zones);
+  });
 });

@@ -145,7 +145,7 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
         ],
         "fill-opacity": 1,
       },
-    }, "piezo-points");
+    }, "departments-line");
     map.addLayer({
       id: "zones-line",
       type: "line",
@@ -153,7 +153,7 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
       "source-layer": ZONE_SOURCE_LAYER,
       layout: { visibility: "none" },
       paint: { "line-color": "#ffffff", "line-width": 1 },
-    }, "piezo-points");
+    }, "departments-line");
     registerSelectableLayer("zones-fill");
   }
 

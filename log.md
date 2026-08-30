@@ -251,3 +251,9 @@
 **Solution :** La branche `feat/vigieau-zone-mode` ajoute le PMTiles officiel chargé à la demande, les vues `Départements` et `Zones`, les filtres `Toutes les ressources`, `Cours d’eau`, `Nappes` et `Eau potable`, le tri des polygones et détails par gravité, les replis réseau, le cadrage national responsive et la conversion des entités MapLibre en GeoJSON sérialisable. Les commits applicatifs sont `c1a89e4`, `7353fc8`, `171853b`, `f35ec1c`, `6a389ea`, `caebd9a`, `006381c` et `6b8d9c0`.
 
 **Validation GPT-5.6 Luna :** `node --test tests/grid-hydrique/*.test.mjs` : 41/41 réussis ; `tests/validate-grid-hydrique.ps1` : code 0 ; `tests/validate-site.ps1` : code 0 et 6 pages contrôlées ; `node --test tests/contact-script.test.js` : 1/1 réussi ; `git diff --check` : code 0. La recette Edge couvre 320, 768, 1024 et 1440 px, le cadrage France + Corse, le chargement PMTiles différé et unique, les quatre filtres, la navigation clavier, le détail multiressource, 20 clics répétés sans erreur worker, ainsi que les replis après échec PMTiles et `/api/zones`.
+
+## 2026-08-30 19:23:03 +02:00 — Corrections après revue du mode Zones
+
+**Problème :** La revue indépendante a détecté que les remplissages zonaux pouvaient masquer les contours départementaux et que le repli après échec de `/api/zones` ne récupérait pas le lien d’arrêté contenu dans la propriété PMTiles `arreteRestriction`.
+
+**Solution :** Les couches zonales sont maintenant insérées sous `departments-line`. La normalisation des zones parse défensivement `arreteRestriction` et convertit son champ `fichier` vers `arrete.cheminFichier`, le rendu continuant à n’accepter que les URL HTTPS. GPT-5.6 Luna a ajouté les tests de régression, constaté leur échec avant correction, puis validé 43/43 tests, les deux validateurs du site, le test du formulaire de contact et `git diff --check`.
