@@ -301,3 +301,9 @@
 **Décision utilisateur :** Exécuter le plan dans la session courante, mais confier finalement tous les tests à GPT-5.4 Mini afin de réduire la consommation de ressources des sous-agents.
 
 **Solution :** La spécification et le plan actif désignent désormais exclusivement `gpt-5.4-mini` pour l’écriture et l’exécution des tests, validateurs et recettes navigateur. Les mentions GPT-5.6 Luna des entrées historiques restent inchangées car elles décrivent les validations déjà réalisées.
+
+## 2026-08-30 20:28:03 +02:00 — Règle mémoire : messages PowerShell strictement ASCII dans les chaînes apostrophées
+
+**Problème :** La commande de création du worktree a été rejetée avant exécution parce qu’un message `throw` délimité par des apostrophes contenait l’apostrophe typographique de « n’est ». Cette erreur répétait une règle déjà consignée.
+
+**Solution permanente :** Dans toute commande PowerShell générée, limiter les chaînes délimitées par apostrophes à des caractères ASCII sans apostrophe interne. Pour les messages français, employer des guillemets doubles ou reformuler le texte en ASCII avant exécution. Après toute erreur d’analyse, contrôler immédiatement les worktrees, branches et fichiers avant de relancer.
