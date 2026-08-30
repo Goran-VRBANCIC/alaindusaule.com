@@ -257,3 +257,9 @@
 **Problème :** La revue indépendante a détecté que les remplissages zonaux pouvaient masquer les contours départementaux et que le repli après échec de `/api/zones` ne récupérait pas le lien d’arrêté contenu dans la propriété PMTiles `arreteRestriction`.
 
 **Solution :** Les couches zonales sont maintenant insérées sous `departments-line`. La normalisation des zones parse défensivement `arreteRestriction` et convertit son champ `fichier` vers `arrete.cheminFichier`, le rendu continuant à n’accepter que les URL HTTPS. GPT-5.6 Luna a ajouté les tests de régression, constaté leur échec avant correction, puis validé 43/43 tests, les deux validateurs du site, le test du formulaire de contact et `git diff --check`.
+
+## 2026-08-30 19:25:48 +02:00 — Choix d’intégration du mode Zones
+
+**Réponse utilisateur :** `1`, pour fusionner localement la branche dans `master`.
+
+**Solution :** Préparer une fusion locale en avance rapide, préserver séparément les modifications déjà présentes dans le checkout principal, puis faire exécuter la validation post-fusion par GPT-5.6 Luna.
