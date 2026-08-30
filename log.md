@@ -289,3 +289,9 @@
 **Décisions utilisateur :** Conserver une liste nationale stable, charger l’intégralité des stations officielles sans l’outre-mer et exclure les stations inactives.
 
 **Solution validée :** Générer localement les référentiels complets des stations actives de métropole et de Corse, conserver leurs codes et géométries pendant toute la session, puis fusionner uniquement les propriétés des mesures récentes reçues pour le viewport. Les échecs, annulations et réponses obsolètes ne pourront plus ajouter, retirer ni déplacer de point.
+
+## 2026-08-30 20:20:19 +02:00 — Plan de correction du zoom et des stations
+
+**Réponse utilisateur :** `ok`, approuvant la spécification consolidée.
+
+**Solution :** Création d’un plan TDD en incréments pour la limite de zoom responsive, le référentiel complet des stations actives métropolitaines, la fusion stable des mesures et la recette Edge. Le plan maintient l’exigence que GPT-5.6 Luna écrive et exécute tous les tests et validateurs.
