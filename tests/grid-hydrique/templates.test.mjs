@@ -6,6 +6,7 @@ import {
   renderDepartmentDetail,
   renderPiezoDetail,
   renderHydroDetail,
+  renderZoneDetail,
   renderStatus,
   restrictionColor,
 } from "../../assets/js/grid-hydrique/templates.mjs";
@@ -59,6 +60,37 @@ test("renderDepartmentDetail sépare le niveau du département et celui du point
 
   assert.match(html, /Niveau maximal du département[\s\S]*detail-level--crise[^>]*>Crise/);
   assert.match(html, /Au point sélectionné[\s\S]*detail-level--alerte_renforcee[^>]*>Alerte renforcée/);
+});
+
+test("renderZoneDetail trie les ressources et souligne le maximum", () => {
+  const html = renderZoneDetail([
+    { type: "AEP", nom: "Réseau <AEP>", niveauGravite: "vigilance" },
+    { type: "SUP", nom: "<b>Charente</b>", niveauGravite: "crise", arrete: { cheminFichier: "https://example.test/crise.pdf" } },
+    { type: "SOU", nom: "Nappe <SOU>", niveauGravite: "alerte_renforcee" },
+  ]);
+
+  assert.match(html, /Niveau maximal à ce point/);
+  assert.ok(html.indexOf("Cours d’eau") < html.indexOf("Nappes"));
+  assert.ok(html.indexOf("Nappes") < html.indexOf("Eau potable"));
+  assert.match(html, /detail-level--crise[^>]*>Crise/);
+  assert.match(html, /detail-level--alerte_renforcee[^>]*>Alerte renforcée/);
+  assert.match(html, /detail-level--vigilance[^>]*>Vigilance/);
+  assert.equal((html.match(/Niveau maximal à ce point/g) || []).length, 1);
+  assert.match(html, /&lt;b&gt;Charente&lt;\/b&gt;/);
+  assert.match(html, /Réseau &lt;AEP&gt;/);
+  assert.match(html, /Nappe &lt;SOU&gt;/);
+  assert.match(html, /href="https:\/\/example\.test\/crise\.pdf" rel="noopener"/);
+});
+
+test("renderZoneDetail échappe les noms et refuse les liens non HTTPS", () => {
+  const html = renderZoneDetail([
+    { type: "SUP", nom: '<img src=x onerror="alert(1)">', niveauGravite: "alerte", arrete: { cheminFichier: "javascript:alert(1)" } },
+    { type: "SOU", nom: "HTTP", niveauGravite: "vigilance", arrete: { cheminFichier: "http://example.test/unsafe.pdf" } },
+  ], { fallback: true });
+
+  assert.doesNotMatch(html, /<img|javascript:|href="http:/);
+  assert.match(html, /&lt;img src=x onerror=&quot;alert\(1\)&quot;&gt;/);
+  assert.match(html, /Détails temporairement indisponibles/);
 });
 
 test("les détails de station créent un emplacement de graphique", () => {

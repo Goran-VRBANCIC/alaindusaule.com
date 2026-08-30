@@ -1,5 +1,7 @@
 // @ts-check
 
+import { normalizeZones } from "./zones.mjs";
+
 const RESTRICTION_COLORS = Object.freeze({
   crise: "#8b1e1e",
   alerte_renforcee: "#d96b27",
@@ -67,6 +69,29 @@ export function renderDepartmentDetail(department, zones = []) {
       <p>${escapeHtml(zone.nom || "Zone de restriction")}</p>
     ` : "<p>Aucune restriction locale retournée pour ce point.</p>"}
     ${safeUrl ? `<p><a href="${escapeHtml(safeUrl)}" rel="noopener">Consulter l’arrêté officiel</a></p>` : ""}
+    <p class="fine-print">Source : VigiEau</p>
+  `;
+}
+
+export function renderZoneDetail(zones, { fallback = false } = {}) {
+  const orderedZones = normalizeZones(zones);
+  const items = orderedZones.map((zone, index) => {
+    const level = zone.niveauGravite || "none";
+    const safeUrl = safeHttpsUrl(zone.arrete?.cheminFichier);
+    return `
+      <article class="zone-detail__item">
+        ${index === 0 ? '<p class="fine-print">Niveau maximal à ce point</p>' : ""}
+        <h3>${escapeHtml(zone.resourceLabel)}</h3>
+        <p class="detail-level detail-level--${escapeHtml(level)}">${escapeHtml(severityLabel(level))}</p>
+        <p>${escapeHtml(zone.nom || "Zone de restriction")}</p>
+        ${safeUrl ? `<p><a href="${escapeHtml(safeUrl)}" rel="noopener">Consulter l’arrêté officiel</a></p>` : ""}
+      </article>
+    `;
+  }).join("");
+  return `
+    <h2 id="detail-title">Restrictions au point sélectionné</h2>
+    ${fallback ? '<p class="data-error">Détails temporairement indisponibles.</p>' : ""}
+    ${items || "<p>Aucune restriction locale retournée pour ce point.</p>"}
     <p class="fine-print">Source : VigiEau</p>
   `;
 }
