@@ -6,6 +6,7 @@ import {
   renderDepartmentDetail,
   renderPiezoDetail,
   renderHydroDetail,
+  renderMapControls,
   renderZoneDetail,
   renderStatus,
   restrictionColor,
@@ -91,6 +92,25 @@ test("renderZoneDetail échappe les noms et refuse les liens non HTTPS", () => {
   assert.doesNotMatch(html, /<img|javascript:|href="http:/);
   assert.match(html, /&lt;img src=x onerror=&quot;alert\(1\)&quot;&gt;/);
   assert.match(html, /Détails temporairement indisponibles/);
+});
+
+test("renderMapControls expose deux groupes radio accessibles", () => {
+  const html = renderMapControls();
+
+  assert.match(html, /<fieldset[^>]*>[\s\S]*<legend>Vue de la carte<\/legend>/);
+  assert.match(html, /<legend>Ressource<\/legend>/);
+  assert.match(html, /name="map-mode" value="departments" checked/);
+  assert.match(html, /name="map-mode" value="zones"/);
+  assert.match(html, /data-zone-resources hidden disabled/);
+  assert.match(html, /name="zone-resource" value="ALL" checked/);
+  assert.match(html, /name="zone-resource" value="SUP"/);
+  assert.match(html, /name="zone-resource" value="SOU"/);
+  assert.match(html, /name="zone-resource" value="AEP"/);
+  assert.match(html, /DÃ©partements|Départements/);
+  assert.match(html, /Zones/);
+  assert.match(html, /Cours dâ€™eau|Cours d’eau/);
+  assert.match(html, /Nappes/);
+  assert.match(html, /Eau potable/);
 });
 
 test("les détails de station créent un emplacement de graphique", () => {

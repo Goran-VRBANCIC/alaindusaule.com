@@ -19,13 +19,23 @@ if (Test-Path -LiteralPath $pagePath) {
     $kpiSectionPosition = $html.IndexOf('<section id="indicateurs"')
     $liveSummaryPosition = $html.IndexOf('<div class="container water-live-summary"')
     $mapLayoutPosition = $html.IndexOf('<div class="water-map-layout"')
-    $layerControlsPosition = $html.IndexOf('<div class="container water-layer-controls"')
+    $mapPosition = $html.IndexOf('id="carte-hydrique"')
+    $mapControlsPosition = $html.IndexOf('class="container water-map-controls"')
+    $viewControlsPosition = $html.IndexOf('class="water-view-controls"')
+    $legendPosition = $html.IndexOf('class="container water-map-legend"')
+    $instructionsPosition = $html.IndexOf('id="map-keyboard-instructions"')
+    $detailPosition = $html.IndexOf('id="station-detail"')
+    $statusPosition = $html.IndexOf('data-water-status')
+    $layerControlsPosition = $html.IndexOf('class="water-layer-controls"')
     Assert-True ($mapSectionPosition -ge 0) 'La section cartographique est absente'
     Assert-True ($kpiSectionPosition -ge 0) 'La section des indicateurs est absente'
     Assert-True ($mapSectionPosition -lt $kpiSectionPosition) 'La carte doit apparaitre avant les indicateurs'
-    Assert-True ($liveSummaryPosition -gt $layerControlsPosition) 'Le resume doit suivre la carte et ses controles dans le DOM mobile'
-    Assert-True ($mapLayoutPosition -lt $layerControlsPosition) 'Le canevas doit preceder les controles dans le DOM mobile'
-    Assert-True ($html -match 'class="[^"]*water-layer-controls" role="group" aria-label="Couches de la carte"') 'Les controles de couches ne forment pas un groupe accessible'
+    Assert-True ($html -match 'class="container water-map-controls"') 'Le conteneur des commandes cartographiques est absent'
+    Assert-True ($html -match 'class="water-view-controls"') 'Le sélecteur de vue est absent'
+    Assert-True ($html -match 'class="water-layer-controls" role="group" aria-label="Stations affich') 'Les contrôles de stations ne forment pas un groupe accessible'
+    Assert-True ($mapPosition -lt $mapControlsPosition -and $mapControlsPosition -lt $legendPosition -and $legendPosition -lt $instructionsPosition -and $instructionsPosition -lt $detailPosition -and $detailPosition -lt $statusPosition) 'L’ordre mobile doit être carte, commandes, légende, instructions, détail puis statut'
+    Assert-True ($liveSummaryPosition -gt $mapControlsPosition) 'Le resume doit suivre la carte et ses controles dans le DOM mobile'
+    Assert-True ($mapLayoutPosition -lt $mapControlsPosition) 'Le canevas doit preceder les commandes dans le DOM mobile'
     Assert-True ($html -match '<html lang="fr-FR"') 'La langue fr-FR est absente'
     Assert-True ($html -match '<link rel="canonical" href="https://alaindusaule\.fr/grid-hydrique/"') 'La canonical est incorrecte'
     Assert-True (([regex]::Matches($html, '<h1(?:\s|>)', 'IgnoreCase')).Count -eq 1) 'La page doit avoir un seul h1'
@@ -101,6 +111,17 @@ if (Test-Path -LiteralPath $dashboardPath) {
     Assert-True ($dashboard -match 'Promise\.allSettled') 'La dégradation indépendante des sources est absente'
     Assert-True ($dashboard -match 'matchMedia\("\(min-width: 48rem\)"\)') 'Le breakpoint DOM responsive est absent'
     Assert-True ($dashboard -match 'desktopLayoutMedia\.addEventListener\("change"') 'Le DOM ne suit pas les changements de largeur'
+    Assert-True ($dashboard -match 'const PMTILES_MODULE_URL = "https://unpkg\.com/pmtiles@3\.2\.0/dist/index\.js"') 'PMTiles doit etre epingle en 3.2.0'
+    Assert-True ($dashboard -match 'zoneLoadPromise\s*\|\|=\s*import\(PMTILES_MODULE_URL\)') 'PMTiles doit etre charge uniquement a la demande'
+    Assert-True ($dashboard -notmatch 'import\s+[^\r\n]*pmtiles') 'PMTiles ne doit pas etre importe statiquement'
+    Assert-True ($dashboard -match 'setupMapControls') 'La configuration des commandes de carte est absente'
+    Assert-True ($dashboard -match 'loadZoneLayers') 'Le chargement des zones est absent'
+    Assert-True ($dashboard -match 'setMapMode') 'Le changement de mode cartographique est absent'
+    Assert-True ($dashboard -match 'setZoneResource') 'Le filtre de ressource zonale est absent'
+    Assert-True ($dashboard -match 'renderZoneDetail') 'Le detail zonal est absent'
+    Assert-True ($dashboard -match 'normalizeZones') 'La normalisation des zones est absente'
+    Assert-True ($dashboard -match 'Vue D.?partements r.?tablie') 'Le texte de repli vers Departements est absent'
+    Assert-True ($dashboard -match 'zoneLoadPromise\s*=\s*undefined') 'La promesse de chargement doit etre reinitialisee apres echec'
 }
 
 if ($failures.Count -gt 0) {

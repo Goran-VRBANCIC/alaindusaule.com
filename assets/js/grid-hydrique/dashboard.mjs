@@ -8,22 +8,28 @@ import {
   piezoObservationsToGeoJson,
 } from "./domain.mjs";
 import { createWaterMap, stationsToGeoJson } from "./map.mjs";
+import { normalizeZones } from "./zones.mjs";
 import {
   renderDepartmentDetail,
   renderHydroDetail,
   renderKpis,
+  renderMapControls,
   renderPiezoDetail,
   renderSourceDates,
   renderStatus,
+  renderZoneDetail,
 } from "./templates.mjs";
 
 const REFRESH_INTERVAL_MS = 15 * 60 * 1000;
 const MAPLIBRE_MODULE_URL = "https://unpkg.com/maplibre-gl@6.6.0/dist/maplibre-gl.mjs";
 const MAPLIBRE_CSS_URL = "https://unpkg.com/maplibre-gl@6.6.0/dist/maplibre-gl.css";
+const PMTILES_MODULE_URL = "https://unpkg.com/pmtiles@3.2.0/dist/index.js";
 const api = createWaterApi();
 const statusElement = document.querySelector("[data-water-status]");
 const kpiElement = document.querySelector("[data-kpi-grid]");
 const detailElement = document.querySelector("#station-detail");
+const mapControlsElement = document.querySelector(".water-map-controls");
+const viewControlsElement = document.querySelector(".water-view-controls");
 const layerControlsElement = document.querySelector(".water-layer-controls");
 const refreshButton = document.querySelector("[data-refresh-water]");
 const sourceUpdatesElement = document.querySelector("[data-source-updates]");
@@ -47,19 +53,20 @@ let lastRestrictions = null;
 let lastSuccessfulRefresh = 0;
 let refreshTimer;
 let refreshInProgress = false;
+let zoneLoadPromise;
 const sourceDates = { vigieau: "en attente", piezo: "en attente", hydro: "en attente" };
 
 function syncResponsiveDom() {
-  if (!mapSectionElement || !mapHeadingElement || !mapLayoutElement || !layerControlsElement || !mapLegendElement || !mapInstructionsElement || !detailElement || !liveSummaryElement) return;
+  if (!mapSectionElement || !mapHeadingElement || !mapLayoutElement || !mapControlsElement || !mapLegendElement || !mapInstructionsElement || !detailElement || !liveSummaryElement) return;
   if (desktopLayoutMedia.matches) {
     mapSectionElement.insertBefore(liveSummaryElement, mapHeadingElement);
-    mapHeadingElement.append(layerControlsElement);
+    mapHeadingElement.append(mapControlsElement);
     mapInstructionsElement.after(mapLayoutElement);
     mapLayoutElement.after(detailElement);
   } else {
     mapHeadingElement.after(mapLayoutElement);
-    mapLayoutElement.after(layerControlsElement);
-    layerControlsElement.after(mapLegendElement);
+    mapLayoutElement.after(mapControlsElement);
+    mapControlsElement.after(mapLegendElement);
     mapLegendElement.after(mapInstructionsElement);
     mapInstructionsElement.after(detailElement);
     detailElement.after(liveSummaryElement);
@@ -139,6 +146,53 @@ function setupLayerControls() {
   layerControlsElement.querySelectorAll("[data-layer-toggle]").forEach((input) => {
     input.addEventListener("change", () => {
       waterMap.setLayerVisibility(input.dataset.layerToggle, input.checked);
+    });
+  });
+}
+
+async function enableZoneMode() {
+  const resources = viewControlsElement?.querySelector("[data-zone-resources]");
+  if (!resources || !statusElement) return;
+  resources.hidden = false;
+  resources.disabled = true;
+  statusElement.textContent = "Chargement des zones officielles…";
+  try {
+    zoneLoadPromise ||= import(PMTILES_MODULE_URL).then((pmtiles) => waterMap.loadZoneLayers(pmtiles));
+    await zoneLoadPromise;
+    if (!viewControlsElement.querySelector('[name="map-mode"][value="zones"]')?.checked) return;
+    waterMap.setMapMode("zones");
+    resources.disabled = false;
+    statusElement.textContent = "Zones officielles affichées.";
+  } catch (error) {
+    console.error(error);
+    zoneLoadPromise = undefined;
+    waterMap.setMapMode("departments");
+    resources.hidden = true;
+    resources.disabled = true;
+    viewControlsElement.querySelector('[name="map-mode"][value="departments"]').checked = true;
+    statusElement.textContent = "Les zones sont temporairement indisponibles. Vue Départements rétablie.";
+  }
+}
+
+function setupMapControls() {
+  if (!viewControlsElement || !waterMap) return;
+  viewControlsElement.innerHTML = renderMapControls();
+  viewControlsElement.querySelectorAll('[name="map-mode"]').forEach((input) => {
+    input.addEventListener("change", async () => {
+      if (!input.checked) return;
+      if (input.value === "zones") {
+        await enableZoneMode();
+        return;
+      }
+      waterMap.setMapMode("departments");
+      const resources = viewControlsElement.querySelector("[data-zone-resources]");
+      resources.hidden = true;
+      resources.disabled = true;
+    });
+  });
+  viewControlsElement.querySelectorAll('[name="zone-resource"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      if (input.checked) waterMap.setZoneResource(input.value);
     });
   });
 }
@@ -251,6 +305,21 @@ async function showSelection(selection) {
   const properties = selection.feature.properties || {};
   detailElement.focus({ preventScroll: false });
 
+  if (selection.layerId === "zones-fill") {
+    const tileZone = normalizeZones([properties]);
+    detailElement.innerHTML = renderZoneDetail(tileZone);
+    try {
+      const zones = await api.getLocalRestrictions(selection.coordinates[0], selection.coordinates[1], signal);
+      if (!signal.aborted) detailElement.innerHTML = renderZoneDetail(normalizeZones(zones));
+    } catch (error) {
+      if (!signal.aborted) {
+        console.error(error);
+        detailElement.innerHTML = renderZoneDetail(tileZone, { fallback: true });
+      }
+    }
+    return;
+  }
+
   if (selection.layerId === "departments-fill") {
     detailElement.innerHTML = renderDepartmentDetail(properties, []);
     try {
@@ -331,6 +400,7 @@ async function initializeDashboard() {
       onSelect: showSelection,
     });
     await waterMap.ready;
+    setupMapControls();
     setupLayerControls();
     waterMap.onMoveEnd(() => refreshViewportData(true));
     refreshButton.addEventListener("click", runRefresh);

@@ -54,6 +54,23 @@ export function renderSourceDates({ vigieau, piezo, hydro }) {
   return `VigiEau consulté : ${vigieau} · Hub’Eau nappes : ${piezo} · Hub’Eau cours d’eau : ${hydro}`;
 }
 
+export function renderMapControls() {
+  return `
+    <fieldset class="water-control-group">
+      <legend>Vue de la carte</legend>
+      <label class="water-layer-toggle"><input type="radio" name="map-mode" value="departments" checked> Départements</label>
+      <label class="water-layer-toggle"><input type="radio" name="map-mode" value="zones"> Zones</label>
+    </fieldset>
+    <fieldset class="water-control-group" data-zone-resources hidden disabled>
+      <legend>Ressource</legend>
+      <label class="water-layer-toggle"><input type="radio" name="zone-resource" value="ALL" checked> Toutes les ressources</label>
+      <label class="water-layer-toggle"><input type="radio" name="zone-resource" value="SUP"> Cours d’eau</label>
+      <label class="water-layer-toggle"><input type="radio" name="zone-resource" value="SOU"> Nappes</label>
+      <label class="water-layer-toggle"><input type="radio" name="zone-resource" value="AEP"> Eau potable</label>
+    </fieldset>
+  `;
+}
+
 export function renderDepartmentDetail(department, zones = []) {
   const zone = zones[0];
   const departmentLevel = department.severity || "none";

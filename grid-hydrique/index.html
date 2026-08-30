@@ -51,6 +51,13 @@
             <h2 id="map-title">Restrictions et stations</h2>
           </div>
         </div>
+        <div class="water-map-layout">
+          <div id="carte-hydrique" class="water-map" role="region" aria-label="Carte hydrique de la France métropolitaine"></div>
+        </div>
+        <div class="container water-map-controls">
+          <div class="water-view-controls"></div>
+          <div class="water-layer-controls" role="group" aria-label="Stations affichées"></div>
+        </div>
         <div class="container water-map-legend">
           <ul class="restriction-legend" aria-label="Niveaux de restriction">
             <li><span class="legend-swatch legend-swatch--crise" aria-hidden="true"></span>Crise</li>
@@ -61,10 +68,6 @@
           </ul>
         </div>
         <p id="map-keyboard-instructions" class="container fine-print">Au clavier, déplacez la carte avec les flèches, zoomez avec + ou −, puis appuyez sur Entrée pour sélectionner l’élément au centre.</p>
-        <div class="water-map-layout">
-          <div id="carte-hydrique" class="water-map" role="region" aria-label="Carte hydrique de la France métropolitaine"></div>
-        </div>
-        <div class="container water-layer-controls" role="group" aria-label="Couches de la carte"></div>
         <aside id="station-detail" class="station-detail" tabindex="-1" aria-labelledby="detail-title" aria-live="polite">
             <h2 id="detail-title">Détail</h2>
             <p>Sélectionnez un département ou une station sur la carte.</p>
