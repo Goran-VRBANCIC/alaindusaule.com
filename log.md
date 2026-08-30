@@ -201,3 +201,53 @@
 **Problème :** Plusieurs validations séparées par des points-virgules ont produit un code final nul parce que les dernières commandes ont réussi, malgré l’échec du premier script.
 
 **Solution permanente :** Ne pas déduire la réussite d’un groupe de commandes PowerShell du seul code final. Exécuter chaque validation séparément ou interrompre explicitement dès que `$LASTEXITCODE` est non nul. Pour les scripts Windows PowerShell sans BOM, éviter aussi les caractères accentués dans les motifs littéraux et employer un motif ASCII équivalent.
+
+## 2026-08-30 18:39:00 +02:00 — Règle mémoire : vérifier les heures annoncées par un message de quota
+
+**Problème :** Le message d’échec d’un sous-agent indiquait une reprise possible à 16 h 17. Cette indication a été répétée alors que l’heure locale était déjà 18 h 39.
+
+**Solution permanente :** Avant de communiquer une heure de reprise fournie par un service, la comparer à l’heure locale du contexte. Si elle est dépassée, signaler que l’indication est périmée et tenter immédiatement une nouvelle exécution.
+
+## 2026-08-30 18:40:00 +02:00 — Règle mémoire : toujours fournir un contexte à `apply_patch`
+
+**Problème :** Une première tentative d’ajout au journal utilisait un hunk vide et a été rejetée sans modifier le fichier.
+
+**Solution permanente :** Lire la fin du fichier puis ancrer tout ajout `apply_patch` sur une ligne existante exacte ; ne jamais envoyer un hunk de mise à jour sans ligne de contexte.
+
+## 2026-08-30 18:48:00 +02:00 — Règle mémoire : ne pas servir les modules `.mjs` avec le serveur Python Windows par défaut
+
+**Problème :** Le serveur `python -m http.server` relancé pour la recette a répondu aux fichiers `.mjs` avec `Content-Type: text/plain`. Edge a donc bloqué `dashboard.mjs` avant l’initialisation de la carte.
+
+**Solution permanente :** Pour ce projet sous Windows, lancer le serveur local avec une association MIME explicite `.mjs` → `text/javascript` et l’en-tête `Cache-Control: no-store`, puis faire contrôler le type de contenu par Luna avant la recette navigateur.
+
+## 2026-08-30 18:55:00 +02:00 — Règle mémoire : ne pas déclarer `filter: null` dans une couche MapLibre
+
+**Problème :** La recette navigateur a montré que MapLibre refuse les définitions `zones-fill` et `zones-line` lorsque leur propriété initiale `filter` vaut `null`, même si `setFilter(layer, null)` est valide pour supprimer ensuite un filtre.
+
+**Solution permanente :** Pour une vue initiale sans filtre, omettre entièrement la propriété `filter` lors de `addLayer`. Réserver `null` à l’appel ultérieur de `setFilter` et couvrir séparément ces deux contrats dans les tests.
+
+## 2026-08-30 19:05:00 +02:00 — Règle mémoire : ne pas combiner `fitBounds` avec des `maxBounds` plus étroites que les ratios cibles
+
+**Problème :** La contrainte `maxBounds` obligeait MapLibre à garder tout le viewport dans un rectangle géographique fixe. Selon le ratio du canvas, elle augmentait le zoom calculé par `fitBounds` et excluait la Corse à 320, 1024 et 1440 px.
+
+**Solution permanente :** Pour un cadrage national responsive qui doit tolérer des marges variables, ne pas fixer de `maxBounds` étroites. Tester les projections des extrêmes territoriaux sur tous les ratios cibles.
+
+## 2026-08-30 19:05:00 +02:00 — Règle mémoire : convertir les entités MapLibre en GeoJSON simple avant `setData`
+
+**Problème :** Un clic sur une station envoyait directement un objet `MapGeoJSONFeature` retourné par MapLibre à la source `selected-point`. Après plusieurs clics, le worker échouait avec `can't serialize object of unregistered class`.
+
+**Solution permanente :** Avant tout `GeoJSONSource.setData`, reconstruire une entité GeoJSON simple contenant uniquement `type`, une géométrie copiée et des propriétés copiées. Ne jamais transmettre les champs ou prototypes internes d’une entité rendue MapLibre.
+
+## 2026-08-30 19:05:05 +02:00 — Règle mémoire : lire l’heure système avant chaque entrée de journal
+
+**Problème :** Une entrée mémoire a été préfixée par `19:06:00` alors que l’heure système était encore `19:05:05`.
+
+**Solution permanente :** Exécuter `Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz'` immédiatement avant chaque ajout au journal et reprendre cette valeur sans arrondi ni estimation.
+
+## 2026-08-30 19:05:05 +02:00 — Livraison du mode Zones VigiEau
+
+**Demande :** Ajouter, en complément de la vue départementale, un mode affichant les zones officielles VigiEau par ressource et garantir que la France métropolitaine avec la Corse apparaît entièrement au chargement. Tous les tests devaient être réalisés par un sous-agent GPT-5.6 Luna.
+
+**Solution :** La branche `feat/vigieau-zone-mode` ajoute le PMTiles officiel chargé à la demande, les vues `Départements` et `Zones`, les filtres `Toutes les ressources`, `Cours d’eau`, `Nappes` et `Eau potable`, le tri des polygones et détails par gravité, les replis réseau, le cadrage national responsive et la conversion des entités MapLibre en GeoJSON sérialisable. Les commits applicatifs sont `c1a89e4`, `7353fc8`, `171853b`, `f35ec1c`, `6a389ea`, `caebd9a`, `006381c` et `6b8d9c0`.
+
+**Validation GPT-5.6 Luna :** `node --test tests/grid-hydrique/*.test.mjs` : 41/41 réussis ; `tests/validate-grid-hydrique.ps1` : code 0 ; `tests/validate-site.ps1` : code 0 et 6 pages contrôlées ; `node --test tests/contact-script.test.js` : 1/1 réussi ; `git diff --check` : code 0. La recette Edge couvre 320, 768, 1024 et 1440 px, le cadrage France + Corse, le chargement PMTiles différé et unique, les quatre filtres, la navigation clavier, le détail multiressource, 20 clics répétés sans erreur worker, ainsi que les replis après échec PMTiles et `/api/zones`.
