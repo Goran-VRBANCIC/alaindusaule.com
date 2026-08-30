@@ -263,3 +263,9 @@
 **Réponse utilisateur :** `1`, pour fusionner localement la branche dans `master`.
 
 **Solution :** Préparer une fusion locale en avance rapide, préserver séparément les modifications déjà présentes dans le checkout principal, puis faire exécuter la validation post-fusion par GPT-5.6 Luna.
+
+## 2026-08-30 19:28:50 +02:00 — Règle mémoire : ne pas supposer que Git peut supprimer immédiatement un worktree Windows
+
+**Problème :** Après la fusion, `git worktree remove` a bien désenregistré le worktree, mais Windows a refusé de supprimer son dossier vide avec `Permission denied`, probablement parce qu’un processus conservait encore ce chemin ouvert.
+
+**Solution permanente :** Après l’arrêt du serveur, vérifier aussi les processus et sessions susceptibles de conserver le dossier comme répertoire courant. Si Git a déjà désenregistré le worktree, ne pas forcer une suppression récursive : confirmer que le dossier résiduel est vide, supprimer la branche fusionnée séparément et laisser le dossier vide jusqu’à la libération du verrou.
