@@ -281,3 +281,11 @@
 **Demande :** Empêcher tout dézoom supplémentaire dès que la carte complète avec la Corse est visible, y compris après un changement de taille ou une rotation mobile.
 
 **Solution validée :** Calculer dynamiquement le zoom minimal depuis l’emprise nationale et les dimensions courantes du conteneur, le recalculer lors des redimensionnements sans recentrer la navigation, et confier tous les tests à GPT-5.6 Luna.
+
+## 2026-08-30 20:16:51 +02:00 — Stabiliser l’intégralité des stations actives
+
+**Problème soumis :** Les points des stations apparaissaient de manière presque aléatoire selon le zoom précédemment appliqué.
+
+**Décisions utilisateur :** Conserver une liste nationale stable, charger l’intégralité des stations officielles sans l’outre-mer et exclure les stations inactives.
+
+**Solution validée :** Générer localement les référentiels complets des stations actives de métropole et de Corse, conserver leurs codes et géométries pendant toute la session, puis fusionner uniquement les propriétés des mesures récentes reçues pour le viewport. Les échecs, annulations et réponses obsolètes ne pourront plus ajouter, retirer ni déplacer de point.
