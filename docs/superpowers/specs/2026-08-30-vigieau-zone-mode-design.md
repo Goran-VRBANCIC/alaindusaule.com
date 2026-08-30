@@ -38,9 +38,13 @@ Lorsque `Zones` est actif, un second groupe radio intitulé `Ressource` apparaî
 
 Les contrôles existants des stations restent disponibles et indépendants. Les groupes reviennent à la ligne sur mobile, conservent des cibles d’au moins 44 px et suivent l’ordre du DOM. Les libellés textuels rendent le sens accessible sans dépendre uniquement de la couleur.
 
+Au chargement, la carte cadre automatiquement toute la France métropolitaine, Corse comprise, avec une marge visible. La hauteur du conteneur s’adapte aux largeurs cibles afin qu’aucune partie du territoire ne soit coupée, y compris lorsque la carte est ramenée à son niveau de zoom minimal.
+
 ## Rendu cartographique
 
 Le mode `Départements` conserve la choroplèthe et les interactions actuelles.
+
+Le cadrage initial est calculé à partir de l’emprise géographique des départements plutôt qu’à partir d’un niveau de zoom fixe. Il est appliqué après que le conteneur a reçu ses dimensions définitives, afin que la carte nationale soit entièrement visible dès son apparition.
 
 Le mode `Zones` :
 
@@ -81,6 +85,7 @@ Module pur contenant :
 Responsable de :
 
 - l’enregistrement unique du protocole PMTiles ;
+- le cadrage initial de la France métropolitaine et de la Corse avec une marge adaptée à la largeur disponible ;
 - l’ajout différé de la source vectorielle officielle ;
 - la création des couches `zones-fill` et `zones-line` ;
 - la sélection des polygones au clic et au clavier ;
@@ -137,6 +142,7 @@ Le sous-agent Luna devra :
 
 Les tests automatisés couvriront au minimum :
 
+- le cadrage initial complet de la France métropolitaine et de la Corse sans dépendre d’un zoom fixe ;
 - le mode initial `Départements` et l’absence de chargement PMTiles au démarrage ;
 - le chargement différé et unique de la source ;
 - la visibilité mutuellement exclusive des remplissages départemental et zonal ;
@@ -151,6 +157,8 @@ Les tests automatisés couvriront au minimum :
 ## Critères d’acceptation
 
 - La page s’ouvre toujours en mode `Départements` sans requête PMTiles.
+- La France métropolitaine et la Corse sont entièrement visibles au chargement, sans déplacement manuel, aux largeurs 320, 768, 1024 et 1440 px.
+- La hauteur de la zone cartographique reste suffisante au niveau de zoom minimal pour ne pas tronquer le territoire.
 - L’activation de `Zones` affiche les contours officiels VigiEau.
 - La vue combinée montre le niveau le plus sévère à chaque point.
 - Chaque filtre de ressource affiche uniquement ses polygones.
