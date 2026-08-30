@@ -4,6 +4,7 @@ import {
   createWaterMap,
   geoJsonBounds,
   selectFeatureAtMapCenter,
+  toSelectedPointFeature,
 } from "../../assets/js/grid-hydrique/map.mjs";
 import {
   ZONE_FILL_SORT_KEY,
@@ -110,6 +111,7 @@ test("createWaterMap recadre nationalement après resize", async () => {
   const { waterMap } = createTestWaterMap({ width: 400 });
   await waterMap.ready;
 
+  assert.equal(Object.hasOwn(waterMap.map.options, "maxBounds"), false);
   assert.equal(waterMap.map.calls.resize, 1);
   assert.deepEqual(waterMap.map.calls.fitBounds[0], {
     bounds: [[-5, 41], [9, 51]],
@@ -214,4 +216,32 @@ test("une couche zonale absente n’est jamais interrogée", () => {
   };
 
   assert.equal(selectFeatureAtMapCenter(map, () => {}), false);
+});
+
+test("toSelectedPointFeature réduit une feature MapLibre à des données sérialisables", () => {
+  class RenderedFeature {
+    constructor() {
+      this.type = "Feature";
+      this.geometry = { type: "Point", coordinates: [2.25, 46.44] };
+      this.properties = { stationCode: "P1", niveauGravite: "crise" };
+      this.layer = { id: "piezo-points" };
+      this.source = "piezo-stations";
+    }
+  }
+
+  const rendered = new RenderedFeature();
+  const selected = toSelectedPointFeature(rendered);
+
+  assert.equal(Object.getPrototypeOf(selected), Object.prototype);
+  assert.deepEqual(selected, {
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [2.25, 46.44] },
+    properties: { stationCode: "P1", niveauGravite: "crise" },
+  });
+  assert.notEqual(selected, rendered);
+  assert.notEqual(selected.geometry, rendered.geometry);
+  assert.notEqual(selected.geometry.coordinates, rendered.geometry.coordinates);
+  assert.notEqual(selected.properties, rendered.properties);
+  assert.equal(Object.hasOwn(selected, "layer"), false);
+  assert.equal(Object.hasOwn(selected, "source"), false);
 });

@@ -21,6 +21,17 @@ export function stationsToGeoJson(stations) {
   };
 }
 
+export function toSelectedPointFeature(feature) {
+  return {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [...feature.geometry.coordinates],
+    },
+    properties: { ...(feature.properties || {}) },
+  };
+}
+
 export function geoJsonBounds(collection) {
   const bounds = [[Infinity, Infinity], [-Infinity, -Infinity]];
   const visit = (coordinates) => {
@@ -57,7 +68,10 @@ export function selectFeatureAtMapCenter(map, onSelect) {
     ? feature.geometry.coordinates
     : [center.lng, center.lat];
   if (feature.geometry.type === "Point") {
-    map.getSource("selected-point").setData({ type: "FeatureCollection", features: [feature] });
+    map.getSource("selected-point").setData({
+      type: "FeatureCollection",
+      features: [toSelectedPointFeature(feature)],
+    });
   }
   onSelect({ layerId, feature, coordinates });
   return true;
@@ -70,7 +84,6 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
     container,
     center: [2.2, 46.4],
     minZoom: 3,
-    maxBounds: [[-6, 40.5], [10.5, 52]],
     style: {
       version: 8,
       sources: {},
@@ -93,7 +106,10 @@ export function createWaterMap({ container, departments, piezoStations, hydroSta
         ? feature.geometry.coordinates
         : [event.lngLat.lng, event.lngLat.lat];
       if (feature.geometry.type === "Point") {
-        map.getSource("selected-point").setData({ type: "FeatureCollection", features: [feature] });
+        map.getSource("selected-point").setData({
+          type: "FeatureCollection",
+          features: [toSelectedPointFeature(feature)],
+        });
       }
       onSelect({ layerId, feature, coordinates });
     });
