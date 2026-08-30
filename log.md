@@ -307,3 +307,9 @@
 **Problème :** La commande de création du worktree a été rejetée avant exécution parce qu’un message `throw` délimité par des apostrophes contenait l’apostrophe typographique de « n’est ». Cette erreur répétait une règle déjà consignée.
 
 **Solution permanente :** Dans toute commande PowerShell générée, limiter les chaînes délimitées par apostrophes à des caractères ASCII sans apostrophe interne. Pour les messages français, employer des guillemets doubles ou reformuler le texte en ASCII avant exécution. Après toute erreur d’analyse, contrôler immédiatement les worktrees, branches et fichiers avant de relancer.
+
+## 2026-08-30 20:28:32 +02:00 — Règle mémoire : placer les options de `git worktree add` avant le chemin
+
+**Problème :** La deuxième tentative de création du worktree a affiché l’aide Git sans rien créer, car la commande plaçait `-b` après le chemin, comme dans le plan initial.
+
+**Solution permanente :** Utiliser et documenter la syntaxe `git worktree add -b <branche> <chemin>` ; vérifier l’aide de la sous-commande avant d’inscrire une nouvelle syntaxe Git dans un plan exécutable.

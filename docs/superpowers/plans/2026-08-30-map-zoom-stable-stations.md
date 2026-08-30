@@ -47,7 +47,7 @@ L’agent principal résout d’abord le chemin absolu du dépôt et vérifie qu
 
 ```powershell
 git check-ignore -q .worktrees
-git worktree add '.worktrees/map-zoom-stable-stations' -b 'feat/map-zoom-stable-stations'
+git worktree add -b 'feat/map-zoom-stable-stations' '.worktrees/map-zoom-stable-stations'
 ```
 
 Expected: le nouveau worktree est sur `feat/map-zoom-stable-stations`; le fichier non suivi du checkout principal n’est ni copié ni modifié.
