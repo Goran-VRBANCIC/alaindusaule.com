@@ -193,6 +193,22 @@ test("createWaterMap recadre nationalement après resize", async () => {
   });
 });
 
+test("createWaterMap prépare le fond vert des zones sans restriction", async () => {
+  const { waterMap } = createTestWaterMap();
+  await waterMap.ready;
+
+  const unrestrictedBackdrop = waterMap.map.layers.get("zones-none-fill");
+  assert.ok(unrestrictedBackdrop);
+  assert.equal(unrestrictedBackdrop.source, "departments");
+  assert.equal(unrestrictedBackdrop.layout.visibility, "none");
+  assert.equal(unrestrictedBackdrop.paint["fill-color"], theme.restrictions.none);
+  assert.equal(unrestrictedBackdrop.paint["fill-opacity"], 1);
+  assert.equal(
+    waterMap.map.calls.layerInsertions.find(({ layer }) => layer.id === "zones-none-fill").beforeId,
+    "departments-line",
+  );
+});
+
 test("createWaterMap fixe un minZoom national et le resynchronise au resize", async () => {
   FakeResizeObserver.instance = undefined;
   const { waterMap, FakePMTiles, FakeProtocol } = createTestWaterMap({
@@ -275,12 +291,14 @@ test("setMapMode alterne les remplissages sans masquer les stations", async () =
 
   waterMap.setMapMode("zones");
   assert.equal(waterMap.map.calls.visibility["departments-fill"], "none");
+  assert.equal(waterMap.map.calls.visibility["zones-none-fill"], "visible");
   assert.equal(waterMap.map.calls.visibility["zones-fill"], "visible");
   assert.equal(waterMap.map.calls.visibility["piezo-points"], undefined);
   assert.equal(waterMap.map.calls.visibility["hydro-points"], undefined);
 
   waterMap.setMapMode("departments");
   assert.equal(waterMap.map.calls.visibility["departments-fill"], "visible");
+  assert.equal(waterMap.map.calls.visibility["zones-none-fill"], "none");
   assert.equal(waterMap.map.calls.visibility["zones-fill"], "none");
 });
 

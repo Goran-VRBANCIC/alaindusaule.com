@@ -218,6 +218,16 @@ export function createWaterMap({
         paint: { "line-color": theme.paper, "line-width": 1 },
       });
       map.addLayer({
+        id: "zones-none-fill",
+        type: "fill",
+        source: "departments",
+        layout: { visibility: "none" },
+        paint: {
+          "fill-color": theme.restrictions.none,
+          "fill-opacity": 1,
+        },
+      }, "departments-line");
+      map.addLayer({
         id: "piezo-points",
         type: "circle",
         source: "piezo-stations",
@@ -294,6 +304,7 @@ export function createWaterMap({
     setMapMode(mode) {
       const zonesVisible = mode === "zones";
       map.setLayoutProperty("departments-fill", "visibility", zonesVisible ? "none" : "visible");
+      map.setLayoutProperty("zones-none-fill", "visibility", zonesVisible ? "visible" : "none");
       for (const layerId of ["zones-fill", "zones-line"]) {
         if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", zonesVisible ? "visible" : "none");
       }
