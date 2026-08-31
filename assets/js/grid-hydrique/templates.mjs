@@ -2,14 +2,6 @@
 
 import { normalizeZones } from "./zones.mjs";
 
-const RESTRICTION_COLORS = Object.freeze({
-  crise: "#8b1e1e",
-  alerte_renforcee: "#d96b27",
-  alerte: "#e3a62f",
-  vigilance: "#f2d36b",
-  none: "#d8e8dc",
-});
-
 export function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -17,10 +9,6 @@ export function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
-}
-
-export function restrictionColor(level) {
-  return RESTRICTION_COLORS[level] || RESTRICTION_COLORS.none;
 }
 
 export function renderKpis(summary, updatedAt) {

@@ -13,7 +13,10 @@ function applicationSources(directory) {
   });
 }
 
-const sourceFiles = applicationSources(path.join(root, "assets/css"));
+const sourceFiles = [
+  ...applicationSources(path.join(root, "assets/css")),
+  ...applicationSources(path.join(root, "assets/js")),
+];
 const colorLiteral = /(?<!&)#[0-9a-f]{3,8}\b/i;
 
 test("les codes couleur applicatifs sont uniques et déclarés dans :root", () => {

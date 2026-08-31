@@ -9,7 +9,6 @@ import {
   renderMapControls,
   renderZoneDetail,
   renderStatus,
-  restrictionColor,
 } from "../../assets/js/grid-hydrique/templates.mjs";
 
 test("renderKpis produit quatre indicateurs officiels", () => {
@@ -32,14 +31,6 @@ test("renderKpis produit quatre indicateurs officiels", () => {
 
 test("escapeHtml neutralise le contenu provenant des API", () => {
   assert.equal(escapeHtml('<img src=x onerror="alert(1)">'), "&lt;img src=x onerror=&quot;alert(1)&quot;&gt;");
-});
-
-test("restrictionColor associe les couleurs accessibles", () => {
-  assert.equal(restrictionColor("crise"), "#8b1e1e");
-  assert.equal(restrictionColor("alerte_renforcee"), "#d96b27");
-  assert.equal(restrictionColor("alerte"), "#e3a62f");
-  assert.equal(restrictionColor("vigilance"), "#f2d36b");
-  assert.equal(restrictionColor(null), "#d8e8dc");
 });
 
 test("renderDepartmentDetail échappe les données et accepte un arrêté HTTPS", () => {

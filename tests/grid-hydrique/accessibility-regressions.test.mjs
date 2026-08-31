@@ -6,6 +6,23 @@ import { piezoObservationsToGeoJson } from "../../assets/js/grid-hydrique/domain
 import { createWaterMap, selectFeatureAtMapCenter } from "../../assets/js/grid-hydrique/map.mjs";
 import { renderHydroDetail, renderPiezoDetail, renderSourceDates } from "../../assets/js/grid-hydrique/templates.mjs";
 
+const theme = {
+  ink: "ink-token",
+  paper: "paper-token",
+  water: "water-token",
+  waterDeep: "water-deep-token",
+  waterPale: "water-pale-token",
+  stationHydro: "station-hydro-token",
+  stationHydroStroke: "station-hydro-stroke-token",
+  restrictions: {
+    crise: "crise-token",
+    alerte_renforcee: "renforcee-token",
+    alerte: "alerte-token",
+    vigilance: "vigilance-token",
+    none: "none-token",
+  },
+};
+
 test("les mesures visibles conservent les métadonnées des stations", () => {
   const metadata = new Map([["P1", { name: "Piézomètre test", commune: "Orléans" }]]);
   const result = piezoObservationsToGeoJson([
@@ -32,6 +49,7 @@ test("le calque départemental reste complètement opaque", async () => {
   }
 
   const waterMap = createWaterMap({
+    theme,
     container: {},
     departments: { type: "FeatureCollection", features: [] },
     piezoStations: [],

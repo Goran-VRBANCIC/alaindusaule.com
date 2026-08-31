@@ -1,6 +1,6 @@
 // @ts-check
 
-import { restrictionColor } from "./templates.mjs";
+import { restrictionColor } from "../theme.mjs";
 import {
   ZONE_FILL_SORT_KEY,
   ZONE_SOURCE_LAYER,
@@ -82,6 +82,7 @@ export function createWaterMap({
   departments,
   piezoStations,
   hydroStations,
+  theme,
   onSelect,
   maplibre = globalThis.maplibregl,
   ResizeObserverClass = globalThis.ResizeObserver,
@@ -96,7 +97,7 @@ export function createWaterMap({
     style: {
       version: 8,
       sources: {},
-      layers: [{ id: "background", type: "background", paint: { "background-color": "#e9f2f5" } }],
+      layers: [{ id: "background", type: "background", paint: { "background-color": theme.waterPale } }],
     },
   });
 
@@ -167,11 +168,11 @@ export function createWaterMap({
       paint: {
         "fill-color": [
           "match", ["get", "niveauGravite"],
-          "crise", restrictionColor("crise"),
-          "alerte_renforcee", restrictionColor("alerte_renforcee"),
-          "alerte", restrictionColor("alerte"),
-          "vigilance", restrictionColor("vigilance"),
-          restrictionColor(null),
+          "crise", restrictionColor("crise", theme),
+          "alerte_renforcee", restrictionColor("alerte_renforcee", theme),
+          "alerte", restrictionColor("alerte", theme),
+          "vigilance", restrictionColor("vigilance", theme),
+          restrictionColor(null, theme),
         ],
         "fill-opacity": 1,
       },
@@ -182,7 +183,7 @@ export function createWaterMap({
       source: "vigieau-zones",
       "source-layer": ZONE_SOURCE_LAYER,
       layout: { visibility: "none" },
-      paint: { "line-color": "#ffffff", "line-width": 1 },
+      paint: { "line-color": theme.paper, "line-width": 1 },
     }, "departments-line");
     registerSelectableLayer("zones-fill");
   }
@@ -201,11 +202,11 @@ export function createWaterMap({
         paint: {
           "fill-color": [
             "match", ["get", "severity"],
-            "crise", restrictionColor("crise"),
-            "alerte_renforcee", restrictionColor("alerte_renforcee"),
-            "alerte", restrictionColor("alerte"),
-            "vigilance", restrictionColor("vigilance"),
-            restrictionColor(null),
+            "crise", restrictionColor("crise", theme),
+            "alerte_renforcee", restrictionColor("alerte_renforcee", theme),
+            "alerte", restrictionColor("alerte", theme),
+            "vigilance", restrictionColor("vigilance", theme),
+            restrictionColor(null, theme),
           ],
           "fill-opacity": 1,
         },
@@ -214,16 +215,16 @@ export function createWaterMap({
         id: "departments-line",
         type: "line",
         source: "departments",
-        paint: { "line-color": "#ffffff", "line-width": 1 },
+        paint: { "line-color": theme.paper, "line-width": 1 },
       });
       map.addLayer({
         id: "piezo-points",
         type: "circle",
         source: "piezo-stations",
         paint: {
-          "circle-color": "#0b5c7a",
+          "circle-color": theme.water,
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3, 8, 6],
-          "circle-stroke-color": "#ffffff",
+          "circle-stroke-color": theme.paper,
           "circle-stroke-width": 1,
         },
       });
@@ -232,9 +233,9 @@ export function createWaterMap({
         type: "circle",
         source: "hydro-stations",
         paint: {
-          "circle-color": "#477328",
+          "circle-color": theme.stationHydro,
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3, 8, 6],
-          "circle-stroke-color": "#17370f",
+          "circle-stroke-color": theme.stationHydroStroke,
           "circle-stroke-width": 2,
         },
       });
@@ -243,9 +244,10 @@ export function createWaterMap({
         type: "circle",
         source: "selected-point",
         paint: {
-          "circle-color": "transparent",
+          "circle-color": theme.paper,
+          "circle-opacity": 0,
           "circle-radius": 10,
-          "circle-stroke-color": "#231f20",
+          "circle-stroke-color": theme.ink,
           "circle-stroke-width": 3,
         },
       });

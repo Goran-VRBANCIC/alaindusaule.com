@@ -12,8 +12,6 @@ import {
   ZONE_SOURCE_URL,
   zoneResourceFilter,
 } from "../../assets/js/grid-hydrique/zones.mjs";
-import { restrictionColor } from "../../assets/js/grid-hydrique/templates.mjs";
-
 const departments = {
   type: "FeatureCollection",
   features: [
@@ -29,6 +27,23 @@ const departments = {
     },
   ],
 };
+
+const theme = Object.freeze({
+  ink: "ink-token",
+  paper: "paper-token",
+  water: "water-token",
+  waterDeep: "water-deep-token",
+  waterPale: "water-pale-token",
+  stationHydro: "station-hydro-token",
+  stationHydroStroke: "station-hydro-stroke-token",
+  restrictions: Object.freeze({
+    crise: "crise-token",
+    alerte_renforcee: "renforcee-token",
+    alerte: "alerte-token",
+    vigilance: "vigilance-token",
+    none: "none-token",
+  }),
+});
 
 const animationFrames = [];
 const requestFrame = (callback) => {
@@ -132,6 +147,7 @@ function makeFakeMaplibre({ width = 800 } = {}) {
 function createTestWaterMap(options = {}) {
   const fake = makeFakeMaplibre(options);
   const waterMap = createWaterMap({
+    theme,
     container: {},
     departments,
     piezoStations: [{ longitude: 1, latitude: 46 }],
@@ -152,6 +168,23 @@ test("createWaterMap recadre nationalement après resize", async () => {
   const { waterMap } = createTestWaterMap({ width: 400 });
   await waterMap.ready;
 
+  assert.equal(waterMap.map.options.style.layers[0].paint["background-color"], "water-pale-token");
+  assert.equal(waterMap.map.layers.get("departments-line").paint["line-color"], "paper-token");
+  assert.equal(waterMap.map.layers.get("piezo-points").paint["circle-color"], "water-token");
+  assert.equal(waterMap.map.layers.get("piezo-points").paint["circle-stroke-color"], "paper-token");
+  assert.equal(waterMap.map.layers.get("hydro-points").paint["circle-color"], "station-hydro-token");
+  assert.equal(waterMap.map.layers.get("hydro-points").paint["circle-stroke-color"], "station-hydro-stroke-token");
+  assert.equal(waterMap.map.layers.get("selected-point-layer").paint["circle-color"], "paper-token");
+  assert.equal(waterMap.map.layers.get("selected-point-layer").paint["circle-opacity"], 0);
+  assert.equal(waterMap.map.layers.get("selected-point-layer").paint["circle-stroke-color"], "ink-token");
+  assert.deepEqual(waterMap.map.layers.get("departments-fill").paint["fill-color"], [
+    "match", ["get", "severity"],
+    "crise", theme.restrictions.crise,
+    "alerte_renforcee", theme.restrictions.alerte_renforcee,
+    "alerte", theme.restrictions.alerte,
+    "vigilance", theme.restrictions.vigilance,
+    theme.restrictions.none,
+  ]);
   assert.equal(Object.hasOwn(waterMap.map.options, "maxBounds"), false);
   assert.equal(waterMap.map.calls.resize, 1);
   assert.deepEqual(waterMap.map.calls.fitBounds[0], {
@@ -162,7 +195,7 @@ test("createWaterMap recadre nationalement après resize", async () => {
 
 test("createWaterMap fixe un minZoom national et le resynchronise au resize", async () => {
   FakeResizeObserver.instance = undefined;
-  const { waterMap } = createTestWaterMap({
+  const { waterMap, FakePMTiles, FakeProtocol } = createTestWaterMap({
     width: 800,
     ResizeObserverClass: FakeResizeObserver,
     requestFrame,
@@ -182,6 +215,9 @@ test("createWaterMap fixe un minZoom national et le resynchronise au resize", as
   assert.deepEqual(waterMap.map.getCenter(), centerBefore);
   assert.equal(waterMap.map.calls.minZoom.at(-1), 4.1);
   assert.equal(waterMap.map.calls.cameraForBounds.length > 0, true);
+
+  await waterMap.loadZoneLayers({ PMTiles: FakePMTiles, Protocol: FakeProtocol });
+  assert.equal(waterMap.map.layers.get("zones-fill").paint["fill-color"].at(-1), "none-token");
 });
 
 test("createWaterMap sans ResizeObserver ne plante pas et garde la limite initiale", async () => {
@@ -223,11 +259,11 @@ test("loadZoneLayers prépare les couches officielles une seule fois", async () 
   assert.deepEqual(fill.layout["fill-sort-key"], ZONE_FILL_SORT_KEY);
   assert.deepEqual(fill.paint["fill-color"], [
     "match", ["get", "niveauGravite"],
-    "crise", restrictionColor("crise"),
-    "alerte_renforcee", restrictionColor("alerte_renforcee"),
-    "alerte", restrictionColor("alerte"),
-    "vigilance", restrictionColor("vigilance"),
-    restrictionColor(null),
+    "crise", theme.restrictions.crise,
+    "alerte_renforcee", theme.restrictions.alerte_renforcee,
+    "alerte", theme.restrictions.alerte,
+    "vigilance", theme.restrictions.vigilance,
+    theme.restrictions.none,
   ]);
   assert.equal(fill.paint["fill-opacity"], 1);
 });

@@ -9,6 +9,7 @@ import {
   piezoObservationsToGeoJson,
 } from "./domain.mjs";
 import { createWaterMap, stationsToGeoJson } from "./map.mjs";
+import { readThemeColors } from "../theme.mjs";
 import { normalizeZones } from "./zones.mjs";
 import {
   renderDepartmentDetail,
@@ -382,6 +383,7 @@ async function initializeDashboard() {
   statusElement.textContent = renderStatus("loading", "");
 
   try {
+    const theme = readThemeColors();
     await new Promise((resolve) => requestAnimationFrame(resolve));
     const [, maplibre, loadedDepartments, piezoReference, hydroReference] = await Promise.all([
       loadMapLibreStyles(),
@@ -399,6 +401,7 @@ async function initializeDashboard() {
     piezoStationData = stationsToGeoJson(piezoReference.stations);
     hydroStationData = stationsToGeoJson(hydroReference.stations);
     waterMap = createWaterMap({
+      theme,
       maplibre,
       container: "carte-hydrique",
       departments: joinDepartmentRestrictions(departmentsGeoJson, []),
