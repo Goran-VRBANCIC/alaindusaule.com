@@ -328,7 +328,7 @@ export function buildStationUrls(now = new Date()) {
   const date = stationReferenceDate(now);
   return {
     piezo: `https://hubeau.eaufrance.fr/api/v1/niveaux_nappes/stations?date_recherche=${date}&size=20000&fields=code_bss,bss_id,libelle_pe,nom_commune,code_departement,nom_departement,altitude_station,nb_mesures_piezo,date_fin_mesure,x,y`,
-    hydro: "https://hubeau.eaufrance.fr/api/v2/hydrometrie/referentiel/stations?en_service=true&size=20000&fields=code_station,libelle_station,libelle_commune,code_departement,libelle_departement,libelle_cours_eau,longitude_station,latitude_station,en_service,date_maj_station",
+    hydro: "https://hubeau.eaufrance.fr/api/v2/hydrometrie/referentiel/stations?en_service=true&size=10000&fields=code_station,libelle_station,libelle_commune,code_departement,libelle_departement,libelle_cours_eau,longitude_station,latitude_station,en_service,date_maj_station",
   };
 }
 ```

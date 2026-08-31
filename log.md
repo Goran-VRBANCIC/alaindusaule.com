@@ -313,3 +313,43 @@
 **Problème :** La deuxième tentative de création du worktree a affiché l’aide Git sans rien créer, car la commande plaçait `-b` après le chemin, comme dans le plan initial.
 
 **Solution permanente :** Utiliser et documenter la syntaxe `git worktree add -b <branche> <chemin>` ; vérifier l’aide de la sous-commande avant d’inscrire une nouvelle syntaxe Git dans un plan exécutable.
+
+## 2026-08-30 20:35:41 +02:00 — Règle mémoire : comparer intégralement les validateurs modifiés par un sous-agent
+
+**Problème :** Lors du premier test rouge du référentiel complet, le sous-agent GPT-5.4 Mini a remplacé presque tout `validate-grid-hydrique.ps1` par deux nouvelles assertions au lieu de les ajouter, supprimant silencieusement la couverture existante.
+
+**Solution permanente :** Après toute modification d’un validateur par un sous-agent, inspecter le diff complet avant le code de production. Refuser toute suppression hors périmètre, restaurer le fichier depuis `HEAD`, puis ajouter uniquement les assertions requises et relancer le rouge.
+
+## 2026-08-30 20:37:37 +02:00 — Règle mémoire : vérifier les tailles maximales propres à chaque endpoint Hub’Eau
+
+**Problème :** Le premier lancement du générateur complet a échoué avant toute écriture avec `HTTP 400` parce que le référentiel hydrométrique limite `size` à 10 000, contrairement à d’autres endpoints Hub’Eau acceptant 20 000. Une première tentative de lecture du corps d’erreur a aussi supposé à tort que la réponse PowerShell exposait une propriété `Content` non nulle.
+
+**Solution permanente :** Avant de fixer une taille de page dans un plan ou un générateur, interroger l’endpoint exact et lire sa réponse `ValidatePageSize`. Pour les erreurs HTTP PowerShell dont la forme varie, utiliser une requête `curl.exe -i` simple avant d’accéder à des propriétés d’exception. Le générateur utilise désormais `size=10000` pour le référentiel hydrométrique et conserve la pagination `next`.
+
+## 2026-08-31 14:25:01 +02:00 — Reprise de la stabilisation des stations
+
+**Demande :** Reprendre le travail interrompu sur le comportement des stations de relevage.
+
+**Solution :** L’état du worktree et le contexte Obsidian ont été contrôlés. La reprise se fait au cycle TDD de fusion des mesures dans le référentiel national stable, avec l’écriture et l’exécution de tous les tests toujours déléguées exclusivement à GPT-5.4 Mini.
+
+## 2026-08-31 14:34:00 +02:00 — Règle mémoire : borner les assertions structurelles au bloc visé
+
+**Problème :** Le premier test structurel de la branche de faible zoom utilisait une expression régulière qui continuait sa recherche après la fin du bloc et aurait interdit les appels `setStations` légitimes situés plus loin dans la fonction.
+
+**Solution permanente :** Lorsqu’un test lit le code source, extraire d’abord le bloc syntaxique ciblé puis appliquer l’assertion à cet extrait. Contrôler le diff du test rouge avant toute modification de production afin de ne pas coder contre un faux contrat.
+
+## 2026-08-31 15:09:30 +02:00 — Stabilisation du dézoom et des stations de relevage
+
+**Problème soumis :** Le dézoom pouvait continuer au-delà du cadrage national et les points des stations variaient presque aléatoirement selon le zoom précédent.
+
+**Cause :** La carte ne recalculait pas une borne minimale responsive à partir de l’emprise France métropolitaine + Corse. De plus, `setStations` remplaçait le référentiel national par les seules observations renvoyées pour le viewport courant, puis réinjectait un ancien jeu de points au faible zoom.
+
+**Solution :** Le zoom minimal est désormais calculé depuis l’emprise nationale, appliqué au chargement et recalculé au redimensionnement sans recentrer la navigation. Deux référentiels locaux complets et déterministes contiennent 2 097 piézomètres et 3 883 stations hydrométriques actives de métropole et de Corse. Les réponses Hub’Eau enrichissent uniquement les propriétés des codes connus ; elles ne changent plus l’ordre, le nombre ni les géométries des points.
+
+**Validation GPT-5.4 Mini :** Les suites carte passent à 50/50, le test contact à 1/1, `validate-grid-hydrique.ps1`, `validate-site.ps1` sur 6 pages et `git diff --check` réussissent. Les codes des deux référentiels sont uniques. Dans Edge, les largeurs 320, 768, 1024 et 1440 px affichent la France métropolitaine et la Corse au chargement ; le dézoom s’arrête exactement au `minZoom`, la limite est recalculée au redimensionnement et le centre choisi reste inchangé. Après trois cycles zoom, déplacement et retour au cadrage initial, les 2 097 et 3 883 points conservent les mêmes séquences code + coordonnées et les captures de la carte ont 0 pixel différent. Les scénarios Hub’Eau indisponible et actif ne vident aucun réseau. Les détails d’un piézomètre et de trois stations hydrométriques ouvrent leur historique. Aucune `pageerror` n’est observée ; le scénario actif ne produit aucune erreur console.
+
+## 2026-08-31 15:12:00 +02:00 — Règle mémoire : répéter le chemin absolu du worktree à chaque délégation
+
+**Problème :** Un contrôle final délégué a été exécuté dans le checkout principal et a annoncé à tort qu’aucun diff de journal n’existait, parce que le message de suivi mentionnait seulement « worktree » sans répéter son chemin absolu.
+
+**Solution permanente :** Chaque tâche et chaque relance d’un sous-agent doivent préciser le chemin absolu du worktree et demander une confirmation du `git rev-parse --show-toplevel` avant toute commande de validation. Refuser un résultat dont le checkout observé ne correspond pas au chemin attendu.
