@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import { buildLineChartModel } from "../../assets/js/grid-hydrique/chart.mjs";
 import { piezoObservationsToGeoJson } from "../../assets/js/grid-hydrique/domain.mjs";
 import { createWaterMap, selectFeatureAtMapCenter } from "../../assets/js/grid-hydrique/map.mjs";
@@ -98,4 +99,37 @@ test("le résumé distingue la date de chaque source", () => {
   assert.match(html, /VigiEau consulté : 29 août 2026 à 15:00/);
   assert.match(html, /Hub’Eau nappes : 29 août 2026 à 14:00/);
   assert.match(html, /Hub’Eau cours d’eau : 29 août 2026 à 14:55/);
+});
+
+test("le dashboard conserve les catalogues nationaux et fusionne les mesures du viewport", () => {
+  const source = fs.readFileSync(
+    new URL("../../assets/js/grid-hydrique/dashboard.mjs", import.meta.url),
+    "utf8",
+  );
+  const lowZoomStart = source.indexOf('if (waterMap.getZoom() < 6) {');
+  assert.notEqual(lowZoomStart, -1);
+  let depth = 0;
+  let lowZoomEnd = -1;
+  for (let index = lowZoomStart; index < source.length; index += 1) {
+    const char = source[index];
+    if (char === "{") depth += 1;
+    else if (char === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        lowZoomEnd = index + 1;
+        break;
+      }
+    }
+  }
+  assert.notEqual(lowZoomEnd, -1);
+  const lowZoomBlock = source.slice(lowZoomStart, lowZoomEnd);
+
+  assert.match(source, /import\s*\{[\s\S]*mergeStationMeasurements[\s\S]*\}\s*from\s*"\.\/domain\.mjs"/);
+  assert.match(source, /piezoStationData\s*=\s*mergeStationMeasurements\(/);
+  assert.match(source, /hydroStationData\s*=\s*mergeStationMeasurements\(/);
+  assert.doesNotMatch(source, /\bstaticPiezoData\b/);
+  assert.doesNotMatch(source, /\bstaticHydroData\b/);
+  assert.doesNotMatch(lowZoomBlock, /setStations\(["'](?:piezo|hydro)["']/);
+  assert.match(source, /piezoStationData\s*=\s*stationsToGeoJson\(piezoReference\.stations\)/);
+  assert.match(source, /hydroStationData\s*=\s*stationsToGeoJson\(hydroReference\.stations\)/);
 });

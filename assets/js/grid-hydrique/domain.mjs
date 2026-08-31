@@ -51,6 +51,25 @@ export function measurementFreshness(value, now = new Date()) {
   return "stale";
 }
 
+export function mergeStationMeasurements(stations, measurements) {
+  const updates = new Map(measurements.features.map((feature) => [
+    feature.properties.stationCode,
+    feature.properties,
+  ]));
+
+  return {
+    ...stations,
+    features: stations.features.map((feature) => {
+      const update = updates.get(feature.properties.code);
+      if (!update) return feature;
+      return {
+        ...feature,
+        properties: { ...feature.properties, ...update, code: feature.properties.code },
+      };
+    }),
+  };
+}
+
 export function piezoObservationsToGeoJson(observations, now = new Date(), stationMetadata = new Map()) {
   const latest = latestByStation(observations, "code_bss", "date_mesure");
   const features = [];

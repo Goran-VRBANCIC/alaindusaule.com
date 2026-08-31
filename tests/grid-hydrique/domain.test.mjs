@@ -4,6 +4,7 @@ import {
   buildRestrictionSummary,
   latestByStation,
   measurementFreshness,
+  mergeStationMeasurements,
   piezoObservationsToGeoJson,
   hydroObservationsToGeoJson,
 } from "../../assets/js/grid-hydrique/domain.mjs";
@@ -73,4 +74,67 @@ test("hydroObservationsToGeoJson convertit les millimètres en mètres", () => {
   assert.equal(result.features[0].properties.stationCode, "H1");
   assert.equal(result.features[0].properties.value, 0.895);
   assert.equal(result.features[0].properties.unit, "m");
+});
+
+test("mergeStationMeasurements conserve le référentiel canonique et fusionne les propriétés connues", () => {
+  const stations = {
+    type: "FeatureCollection",
+    features: [
+      { type: "Feature", geometry: { type: "Point", coordinates: [1, 45] }, properties: { code: "A", name: "Alpha" } },
+      { type: "Feature", geometry: { type: "Point", coordinates: [2, 46] }, properties: { code: "B", name: "Beta" } },
+    ],
+  };
+  const measurements = {
+    type: "FeatureCollection",
+    features: [
+      { type: "Feature", geometry: { type: "Point", coordinates: [9, 49] }, properties: { stationCode: "B", value: 1.2, measuredAt: "2026-08-30T08:00:00Z" } },
+      { type: "Feature", geometry: { type: "Point", coordinates: [3, 47] }, properties: { stationCode: "C", value: 9 } },
+    ],
+  };
+
+  const merged = mergeStationMeasurements(stations, measurements);
+
+  assert.deepEqual(merged.features.map(({ properties }) => properties.code), ["A", "B"]);
+  assert.deepEqual(merged.features.map(({ geometry }) => geometry.coordinates), [[1, 45], [2, 46]]);
+  assert.equal(merged.features[1].properties.value, 1.2);
+  assert.equal(merged.features[1].properties.measuredAt, "2026-08-30T08:00:00Z");
+  assert.equal(merged.features[1].properties.name, "Beta");
+});
+
+test("mergeStationMeasurements préserve l’identité et les géométries à travers plusieurs fusions", () => {
+  const national = {
+    type: "FeatureCollection",
+    features: [
+      { type: "Feature", geometry: { type: "Point", coordinates: [1, 45] }, properties: { code: "A", name: "Alpha" } },
+      { type: "Feature", geometry: { type: "Point", coordinates: [2, 46] }, properties: { code: "B", name: "Beta" } },
+    ],
+  };
+  const viewportA = {
+    type: "FeatureCollection",
+    features: [
+      { type: "Feature", geometry: { type: "Point", coordinates: [8, 48] }, properties: { stationCode: "A", value: 2, measuredAt: "2026-08-30T07:00:00Z" } },
+    ],
+  };
+  const viewportB = {
+    type: "FeatureCollection",
+    features: [
+      { type: "Feature", geometry: { type: "Point", coordinates: [9, 49] }, properties: { stationCode: "B", value: 3, measuredAt: "2026-08-30T09:00:00Z" } },
+    ],
+  };
+  const emptyMeasurements = { type: "FeatureCollection", features: [] };
+
+  const afterA = mergeStationMeasurements(national, viewportA);
+  const afterB = mergeStationMeasurements(afterA, viewportB);
+  const afterEmpty = mergeStationMeasurements(afterB, emptyMeasurements);
+
+  const stationIdentity = (collection) => collection.features.map(({ properties }) => properties.code);
+
+  assert.deepEqual(stationIdentity(afterA), ["A", "B"]);
+  assert.deepEqual(stationIdentity(afterB), ["A", "B"]);
+  assert.deepEqual(stationIdentity(afterEmpty), ["A", "B"]);
+  assert.deepEqual(afterEmpty.features.map(({ geometry }) => geometry.coordinates), [[1, 45], [2, 46]]);
+  assert.equal(afterEmpty.features[0].properties.value, 2);
+  assert.equal(afterEmpty.features[0].properties.measuredAt, "2026-08-30T07:00:00Z");
+  assert.equal(afterEmpty.features[1].properties.value, 3);
+  assert.equal(afterEmpty.features[1].properties.measuredAt, "2026-08-30T09:00:00Z");
 });

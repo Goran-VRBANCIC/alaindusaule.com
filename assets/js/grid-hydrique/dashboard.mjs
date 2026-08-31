@@ -5,6 +5,7 @@ import { buildLineChartModel, renderLineChart } from "./chart.mjs";
 import {
   buildRestrictionSummary,
   hydroObservationsToGeoJson,
+  mergeStationMeasurements,
   piezoObservationsToGeoJson,
 } from "./domain.mjs";
 import { createWaterMap, stationsToGeoJson } from "./map.mjs";
@@ -43,8 +44,8 @@ const desktopLayoutMedia = globalThis.matchMedia("(min-width: 48rem)");
 
 let waterMap;
 let viewportController;
-let staticPiezoData;
-let staticHydroData;
+let piezoStationData;
+let hydroStationData;
 let piezoMetadata;
 let hydroMetadata;
 let selectionController;
@@ -212,8 +213,6 @@ async function refreshViewportData(announce = false) {
   viewportController?.abort();
 
   if (waterMap.getZoom() < 6) {
-    waterMap.setStations("piezo", staticPiezoData);
-    waterMap.setStations("hydro", staticHydroData);
     if (announce) statusElement.textContent = "Zoomez pour charger les mesures récentes.";
     return { partial: false, message: "" };
   }
@@ -233,7 +232,11 @@ async function refreshViewportData(announce = false) {
   const unavailable = [];
   let truncated = false;
   if (piezoResult.status === "fulfilled") {
-    waterMap.setStations("piezo", piezoObservationsToGeoJson(piezoResult.value.data, new Date(), piezoMetadata));
+    piezoStationData = mergeStationMeasurements(
+      piezoStationData,
+      piezoObservationsToGeoJson(piezoResult.value.data, new Date(), piezoMetadata),
+    );
+    waterMap.setStations("piezo", piezoStationData);
     const measuredAt = latestDate(piezoResult.value.data, "date_mesure");
     sourceDates.piezo = measuredAt ? formatUpdateTime(new Date(measuredAt)) : "aucune mesure récente";
     truncated ||= Boolean(piezoResult.value.next);
@@ -241,7 +244,11 @@ async function refreshViewportData(announce = false) {
     unavailable.push("piézométrie");
   }
   if (hydroResult.status === "fulfilled") {
-    waterMap.setStations("hydro", hydroObservationsToGeoJson(hydroResult.value.data, new Date(), hydroMetadata));
+    hydroStationData = mergeStationMeasurements(
+      hydroStationData,
+      hydroObservationsToGeoJson(hydroResult.value.data, new Date(), hydroMetadata),
+    );
+    waterMap.setStations("hydro", hydroStationData);
     const measuredAt = latestDate(hydroResult.value.data, "date_obs");
     sourceDates.hydro = measuredAt ? formatUpdateTime(new Date(measuredAt)) : "aucune mesure récente";
     truncated ||= Boolean(hydroResult.value.next);
@@ -376,7 +383,7 @@ async function initializeDashboard() {
 
   try {
     await new Promise((resolve) => requestAnimationFrame(resolve));
-    const [, maplibre, loadedDepartments, piezoSample, hydroSample] = await Promise.all([
+    const [, maplibre, loadedDepartments, piezoReference, hydroReference] = await Promise.all([
       loadMapLibreStyles(),
       import(MAPLIBRE_MODULE_URL),
       loadLocalJson("../assets/data/departements-simplifies.geojson"),
@@ -384,19 +391,19 @@ async function initializeDashboard() {
       loadLocalJson("../assets/data/hydro-stations.json"),
     ]);
     departmentsGeoJson = loadedDepartments;
-    piezoMetadata = new Map(piezoSample.stations.map((station) => [station.code, station]));
-    hydroMetadata = new Map(hydroSample.stations.map((station) => [station.code, station]));
-    sourceDates.piezo = `échantillon du ${formatUpdateTime(new Date(piezoSample.generatedAt))}`;
-    sourceDates.hydro = `échantillon du ${formatUpdateTime(new Date(hydroSample.generatedAt))}`;
+    piezoMetadata = new Map(piezoReference.stations.map((station) => [station.code, station]));
+    hydroMetadata = new Map(hydroReference.stations.map((station) => [station.code, station]));
+    sourceDates.piezo = `référentiel du ${formatUpdateTime(new Date(piezoReference.generatedAt))}`;
+    sourceDates.hydro = `référentiel du ${formatUpdateTime(new Date(hydroReference.generatedAt))}`;
     updateSourceDates();
-    staticPiezoData = stationsToGeoJson(piezoSample.stations);
-    staticHydroData = stationsToGeoJson(hydroSample.stations);
+    piezoStationData = stationsToGeoJson(piezoReference.stations);
+    hydroStationData = stationsToGeoJson(hydroReference.stations);
     waterMap = createWaterMap({
       maplibre,
       container: "carte-hydrique",
       departments: joinDepartmentRestrictions(departmentsGeoJson, []),
-      piezoStations: piezoSample.stations,
-      hydroStations: hydroSample.stations,
+      piezoStations: piezoReference.stations,
+      hydroStations: hydroReference.stations,
       onSelect: showSelection,
     });
     await waterMap.ready;
