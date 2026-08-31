@@ -367,3 +367,9 @@
 **Décision utilisateur :** Employer un vert ayant le même caractère pastel que le bleu actuel. La proposition `#d8e8dc` a été validée.
 
 **Solution prévue :** Remplacer uniquement la couleur du niveau `none` dans la palette commune de la carte et dans la légende, sans modifier le fond ni les niveaux d’alerte. Les tests seront adaptés et exécutés par GPT-5.4 Mini.
+
+## 2026-08-31 17:00:35 +02:00 — Validation de la spécification verte
+
+**Réponse utilisateur :** La spécification utilisant `#d8e8dc` pour « Aucune restriction » est validée.
+
+**Solution :** Un plan TDD minimal est préparé : GPT-5.4 Mini verrouille d’abord la palette JavaScript et la légende CSS en rouge, l’agent principal remplace les deux valeurs, puis GPT-5.4 Mini exécute la non-régression et la recette Edge.
