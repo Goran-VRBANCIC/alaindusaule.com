@@ -399,3 +399,25 @@
 **Décision utilisateur :** Exclure les ressources graphiques autonomes, notamment `favicon.svg`, de la règle d’unicité des couleurs afin qu’elles restent statiques et disponibles sans JavaScript.
 
 **Solution :** Le contrôle architectural couvrira tous les fichiers applicatifs CSS, JavaScript et HTML. Le plan d’implémentation centralise leurs couleurs dans `site.css`, injecte la palette résolue dans MapLibre et laisse les SVG autonomes inchangés.
+
+## 2026-08-31 19:25:42 +02:00 — Règle mémoire : les validateurs doivent contrôler le contrat, pas une syntaxe historique
+
+**Problème :** Après remplacement d’un `rgba(...)` par un `color-mix(...)` visuellement équivalent, `validate-site.ps1` a signalé à tort une perte de lisibilité parce que son expression régulière imposait l’ancienne écriture littérale.
+
+**Solution permanente :** Lorsqu’une représentation interne change sans modifier le comportement attendu, auditer les validateurs structurels associés. Faire vérifier la propriété sémantique requise — ici une couleur dérivée de `--paper` à 76 % — plutôt qu’une syntaxe devenue obsolète.
+
+## 2026-08-31 19:42:08 +02:00 — Règle mémoire : lancer le serveur de test dans une session dédiée
+
+**Problème :** Une commande PowerShell combinant lancement masqué, attente et inspection du port a été rejetée par la politique d’exécution avant de démarrer le serveur.
+
+**Solution permanente :** Pour un serveur local persistant, lancer directement le script dans une session d’exécution dédiée, conserver son identifiant de session, puis confier la vérification HTTP et navigateur au sous-agent de test.
+
+## 2026-08-31 19:46:42 +02:00 — Livraison de la source unique des couleurs
+
+**Demande utilisateur :** Chaque code couleur doit être déclaré une seule fois comme variable globale, puis être réutilisé avec `var(...)` dans le CSS et via la même source dans le JavaScript. La couleur « Aucune restriction » doit rester le vert pastel `#69f08b`. Tous les tests doivent être écrits et exécutés par GPT-5.4 Mini.
+
+**Solution livrée :** Les 21 valeurs de couleur applicatives sont désormais déclarées uniquement dans le bloc `:root` de `assets/css/site.css`. Le CSS utilise les propriétés personnalisées et `color-mix(...)`; un module partagé résout ces propriétés pour MapLibre; les départements, les zones, les stations, le fond et la sélection reçoivent cette palette injectée. Les six balises `theme-color` sont alimentées depuis `--water-deep`. Le favicon SVG reste volontairement exclu, car il s’agit d’une ressource graphique autonome qui doit fonctionner sans JavaScript.
+
+**Contrôle d’architecture GPT-5.4 Mini :** Le test anti-duplication confirme qu’aucun littéral hexadécimal ou `rgb/rgba` applicatif ne subsiste hors de `:root` dans les CSS, JavaScript et six pages HTML contrôlés.
+
+**Validation GPT-5.4 Mini :** Les tests de thème passent à 5/5, la suite Grid Hydrique à 50/50 et le contact à 1/1. `validate-grid-hydrique.ps1`, `validate-site.ps1` sur 6 pages et `git diff --check` réussissent. La recette Edge sur `http://127.0.0.1:8003/` confirme `theme-color = --water-deep = #073e52` sur les six pages, `--restriction-none = #69f08b`, la même palette pour les départements et les zones, les couleurs résolues attendues pour toutes les couches MapLibre, une carte visible, et aucune erreur console, `pageerror` ou ressource 404.
