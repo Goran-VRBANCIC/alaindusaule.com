@@ -439,3 +439,15 @@
 **Problème :** Le sous-agent de test a annoncé par erreur un ancien HEAD alors que ses modifications se trouvaient bien sur le commit courant du worktree.
 
 **Solution permanente :** Avant toute décision fondée sur un compte rendu délégué, contrôler localement le chemin du worktree, `git rev-parse --short HEAD`, le statut et le diff. Utiliser les preuves du dépôt comme référence, puis faire corriger le compte rendu au passage suivant.
+
+## 2026-08-31 21:41:51 +02:00 — Fond vert des surfaces sans zone VigiEau
+
+**Problème soumis :** En vue `Zones`, les secteurs français absents de `zones_arretes_en_vigueur.pmtiles` révélaient le fond bleu pâle et ne correspondaient donc pas au vert « Aucune restriction » de la légende.
+
+**Cause :** Le mode `Zones` masquait le remplissage départemental et le jeu officiel ne fournit aucune géométrie là où aucun arrêté en vigueur n’est publié. Ces trous laissaient apparaître la couleur de la mer.
+
+**Décision utilisateur :** Interpréter toute surface française sans polygone officiel comme sans restriction active, tout en conservant la mer et l’extérieur en bleu pâle.
+
+**Solution livrée :** Une couche non interactive `zones-none-fill`, alimentée par la source départementale existante et peinte avec `theme.restrictions.none`, est affichée uniquement en vue `Zones`. Elle reste sous les polygones VigiEau et les contours départementaux. Les filtres de ressource, les stations et la vue `Départements` sont inchangés.
+
+**Validation GPT-5.4 Mini :** Le test rouge a produit 2 échecs ciblés, puis `map.test.mjs` passe à 11/11 et la suite Grid Hydrique à 51/51. Les tests de thème passent à 5/5, le contact à 1/1, les deux validateurs PowerShell et `git diff --check` réussissent. Dans Edge, `zones-none-fill` utilise `#69f08b`, reste sous `zones-fill` et `departments-line`, et demeure visible avec les filtres ALL, SUP, SOU et AEP. Un point sans polygone officiel du département 59 mesure exactement `rgb(105, 240, 139)` ; la mer reste `#e9f2f5`. Aucune erreur console, `pageerror` ou ressource 404 n’est observée.
