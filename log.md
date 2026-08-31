@@ -457,3 +457,9 @@
 **Demande utilisateur :** Committer le travail terminé.
 
 **Réponse :** Les changements fonctionnels, les tests, le plan et le journal étaient déjà commités dans `master`. Seule cette confirmation est ajoutée au journal ; le fichier utilisateur non suivi reste exclu du commit.
+
+## 2026-08-31 21:55:38 +02:00 — Arrêt du serveur et fin de session
+
+**Demande utilisateur :** Arrêter le serveur de test et terminer la session.
+
+**Solution :** Le processus Python `15224` servant `127.0.0.1:8002` a été arrêté et le port ne présente plus de listener. La session est clôturée sans toucher au fichier utilisateur non suivi.
