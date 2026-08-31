@@ -393,3 +393,9 @@
 **Décisions utilisateur :** Conserver la modification locale intentionnelle `#69f08b` pour « Aucune restriction » et appliquer la source unique à toute la palette du site, pas seulement à la carte hydrique.
 
 **Architecture validée :** Déclarer les valeurs une seule fois comme propriétés personnalisées dans `site.css`, utiliser `var(...)` dans tous les styles, résoudre ces mêmes propriétés dans un module JavaScript partagé pour MapLibre et synchroniser les balises `theme-color` sans valeur littérale dupliquée. Les transparences seront dérivées des tokens plutôt que redéclarées en `rgba(...)`.
+
+## 2026-08-31 19:06:30 +02:00 — Périmètre des ressources graphiques
+
+**Décision utilisateur :** Exclure les ressources graphiques autonomes, notamment `favicon.svg`, de la règle d’unicité des couleurs afin qu’elles restent statiques et disponibles sans JavaScript.
+
+**Solution :** Le contrôle architectural couvrira tous les fichiers applicatifs CSS, JavaScript et HTML. Le plan d’implémentation centralise leurs couleurs dans `site.css`, injecte la palette résolue dans MapLibre et laisse les SVG autonomes inchangés.
