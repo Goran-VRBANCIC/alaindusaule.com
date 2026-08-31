@@ -385,3 +385,11 @@
 **Réponse utilisateur :** Choix 1, fusionner localement la branche `feat/map-zoom-stable-stations` dans `master`.
 
 **Solution :** Effectuer une fusion locale en avance rapide, faire valider le résultat fusionné par GPT-5.4 Mini, puis nettoyer la branche et son worktree uniquement si la validation reste verte. Le serveur de test sera relancé depuis `master` à la même adresse.
+
+## 2026-08-31 18:44:40 +02:00 — Centralisation globale des couleurs
+
+**Problème soumis :** Les mêmes codes couleur sont dupliqués dans le CSS, le JavaScript et plusieurs pages, au lieu d’être déclarés une fois puis référencés.
+
+**Décisions utilisateur :** Conserver la modification locale intentionnelle `#69f08b` pour « Aucune restriction » et appliquer la source unique à toute la palette du site, pas seulement à la carte hydrique.
+
+**Architecture validée :** Déclarer les valeurs une seule fois comme propriétés personnalisées dans `site.css`, utiliser `var(...)` dans tous les styles, résoudre ces mêmes propriétés dans un module JavaScript partagé pour MapLibre et synchroniser les balises `theme-color` sans valeur littérale dupliquée. Les transparences seront dérivées des tokens plutôt que redéclarées en `rgba(...)`.
