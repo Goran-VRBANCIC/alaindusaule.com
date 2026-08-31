@@ -353,3 +353,17 @@
 **Problème :** Un contrôle final délégué a été exécuté dans le checkout principal et a annoncé à tort qu’aucun diff de journal n’existait, parce que le message de suivi mentionnait seulement « worktree » sans répéter son chemin absolu.
 
 **Solution permanente :** Chaque tâche et chaque relance d’un sous-agent doivent préciser le chemin absolu du worktree et demander une confirmation du `git rev-parse --show-toplevel` avant toute commande de validation. Refuser un résultat dont le checkout observé ne correspond pas au chemin attendu.
+
+## 2026-08-31 15:46:03 +02:00 — Serveur de test utilisateur
+
+**Question :** Un serveur web a-t-il été lancé pour tester la carte, et à quelle adresse ?
+
+**Réponse :** Le serveur de la branche corrigée a été relancé sur `http://127.0.0.1:8002/grid-hydrique/`. La page répond avec le code 200, les modules `.mjs` sont servis en `text/javascript` et le cache est désactivé.
+
+## 2026-08-31 16:55:16 +02:00 — Couleur de l’état sans restriction
+
+**Problème soumis :** La couleur bleu pâle de « Aucune restriction » se confond avec le fond bleu pâle de la carte.
+
+**Décision utilisateur :** Employer un vert ayant le même caractère pastel que le bleu actuel. La proposition `#d8e8dc` a été validée.
+
+**Solution prévue :** Remplacer uniquement la couleur du niveau `none` dans la palette commune de la carte et dans la légende, sans modifier le fond ni les niveaux d’alerte. Les tests seront adaptés et exécutés par GPT-5.4 Mini.
