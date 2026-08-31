@@ -7,7 +7,7 @@ const RESTRICTION_COLORS = Object.freeze({
   alerte_renforcee: "#d96b27",
   alerte: "#e3a62f",
   vigilance: "#f2d36b",
-  none: "#d8e4e8",
+  none: "#d8e8dc",
 });
 
 export function escapeHtml(value) {

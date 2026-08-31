@@ -101,6 +101,16 @@ test("le résumé distingue la date de chaque source", () => {
   assert.match(html, /Hub’Eau cours d’eau : 29 août 2026 à 14:55/);
 });
 
+test("la légende affiche le vert Aucune restriction attendu", () => {
+  const css = fs.readFileSync(
+    new URL("../../assets/css/grid-hydrique.css", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(css, /\.legend-swatch--aucune\s*\{\s*background:\s*#d8e8dc;/);
+  assert.doesNotMatch(css, /\.legend-swatch--aucune\s*\{\s*background:\s*#e9f2f5;/);
+});
+
 test("le dashboard conserve les catalogues nationaux et fusionne les mesures du viewport", () => {
   const source = fs.readFileSync(
     new URL("../../assets/js/grid-hydrique/dashboard.mjs", import.meta.url),

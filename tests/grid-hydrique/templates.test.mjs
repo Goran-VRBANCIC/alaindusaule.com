@@ -39,7 +39,7 @@ test("restrictionColor associe les couleurs accessibles", () => {
   assert.equal(restrictionColor("alerte_renforcee"), "#d96b27");
   assert.equal(restrictionColor("alerte"), "#e3a62f");
   assert.equal(restrictionColor("vigilance"), "#f2d36b");
-  assert.equal(restrictionColor(null), "#d8e4e8");
+  assert.equal(restrictionColor(null), "#d8e8dc");
 });
 
 test("renderDepartmentDetail échappe les données et accepte un arrêté HTTPS", () => {

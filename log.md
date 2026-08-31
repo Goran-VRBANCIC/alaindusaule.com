@@ -373,3 +373,9 @@
 **Réponse utilisateur :** La spécification utilisant `#d8e8dc` pour « Aucune restriction » est validée.
 
 **Solution :** Un plan TDD minimal est préparé : GPT-5.4 Mini verrouille d’abord la palette JavaScript et la légende CSS en rouge, l’agent principal remplace les deux valeurs, puis GPT-5.4 Mini exécute la non-régression et la recette Edge.
+
+## 2026-08-31 17:07:14 +02:00 — Validation du vert « Aucune restriction »
+
+**Solution livrée :** La palette partagée des départements et zones ainsi que la pastille de légende utilisent désormais le vert pastel `#d8e8dc`. Le fond de carte reste `#e9f2f5` et les quatre couleurs de restriction sont inchangées.
+
+**Validation GPT-5.4 Mini :** Le cycle rouge a produit exactement 2 échecs liés à l’ancienne couleur, puis le ciblé passe à 18/18 et la suite carte complète à 51/51. `validate-grid-hydrique.ps1` et `git diff --check` réussissent. Dans Edge, la pastille calcule `rgb(216, 232, 220)`, MapLibre utilise `#d8e8dc` comme couleur par défaut des départements et le même contrat pour les zones, tandis que le fond reste `#e9f2f5`. Les autres pastilles conservent leurs valeurs et aucune erreur console ou `pageerror` n’est observée.
