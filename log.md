@@ -421,3 +421,21 @@
 **Contrôle d’architecture GPT-5.4 Mini :** Le test anti-duplication confirme qu’aucun littéral hexadécimal ou `rgb/rgba` applicatif ne subsiste hors de `:root` dans les CSS, JavaScript et six pages HTML contrôlés.
 
 **Validation GPT-5.4 Mini :** Les tests de thème passent à 5/5, la suite Grid Hydrique à 50/50 et le contact à 1/1. `validate-grid-hydrique.ps1`, `validate-site.ps1` sur 6 pages et `git diff --check` réussissent. La recette Edge sur `http://127.0.0.1:8003/` confirme `theme-color = --water-deep = #073e52` sur les six pages, `--restriction-none = #69f08b`, la même palette pour les départements et les zones, les couleurs résolues attendues pour toutes les couches MapLibre, une carte visible, et aucune erreur console, `pageerror` ou ressource 404.
+
+## 2026-08-31 20:26:45 +02:00 — Diagnostic des surfaces non colorées en vue Zones
+
+**Question utilisateur :** Les zones sans couleur correspondent-elles à une absence de données ou à un bug de coloriage ?
+
+**Réponse :** Les polygones présents dans le PMTiles reçoivent bien une couleur, avec le vert comme repli. Les surfaces bleu pâle ne possèdent aucun polygone dans la couche officielle `zones_arretes_en_vigueur`, qui représente les zones couvertes par des arrêtés en vigueur. Elles signifient donc en principe qu’aucune restriction active n’est publiée dans cette couche, et non qu’un polygone existant a été mal coloré. Le défaut de notre carte est de ne pas dessiner de fond terrestre vert sous ces polygones ; le fond bleu de la carte apparaît alors à tort comme une catégorie non expliquée par la légende. Le PMTiles seul ne permet toutefois pas de distinguer avec certitude une absence de restriction d’une donnée locale non publiée.
+
+## 2026-08-31 20:29:34 +02:00 — Interprétation des zones absentes
+
+**Décision utilisateur :** Une zone locale absente du jeu officiel doit être considérée comme sans restriction, les autorités ayant vocation à publier rapidement tout arrêté applicable.
+
+**Conséquence proposée :** En vue `Zones`, peindre toute l’emprise terrestre française en vert « Aucune restriction », puis superposer les polygones officiels colorés selon leur gravité. La mer et l’extérieur du territoire conservent le fond bleu pâle.
+
+## 2026-08-31 21:40:19 +02:00 — Règle mémoire : vérifier le HEAD rapporté par un sous-agent
+
+**Problème :** Le sous-agent de test a annoncé par erreur un ancien HEAD alors que ses modifications se trouvaient bien sur le commit courant du worktree.
+
+**Solution permanente :** Avant toute décision fondée sur un compte rendu délégué, contrôler localement le chemin du worktree, `git rev-parse --short HEAD`, le statut et le diff. Utiliser les preuves du dépôt comme référence, puis faire corriger le compte rendu au passage suivant.
