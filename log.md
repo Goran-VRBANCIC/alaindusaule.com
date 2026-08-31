@@ -379,3 +379,9 @@
 **Solution livrée :** La palette partagée des départements et zones ainsi que la pastille de légende utilisent désormais le vert pastel `#d8e8dc`. Le fond de carte reste `#e9f2f5` et les quatre couleurs de restriction sont inchangées.
 
 **Validation GPT-5.4 Mini :** Le cycle rouge a produit exactement 2 échecs liés à l’ancienne couleur, puis le ciblé passe à 18/18 et la suite carte complète à 51/51. `validate-grid-hydrique.ps1` et `git diff --check` réussissent. Dans Edge, la pastille calcule `rgb(216, 232, 220)`, MapLibre utilise `#d8e8dc` comme couleur par défaut des départements et le même contrat pour les zones, tandis que le fond reste `#e9f2f5`. Les autres pastilles conservent leurs valeurs et aucune erreur console ou `pageerror` n’est observée.
+
+## 2026-08-31 17:09:47 +02:00 — Intégration de la carte stabilisée
+
+**Réponse utilisateur :** Choix 1, fusionner localement la branche `feat/map-zoom-stable-stations` dans `master`.
+
+**Solution :** Effectuer une fusion locale en avance rapide, faire valider le résultat fusionné par GPT-5.4 Mini, puis nettoyer la branche et son worktree uniquement si la validation reste verte. Le serveur de test sera relancé depuis `master` à la même adresse.
