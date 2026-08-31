@@ -16,6 +16,12 @@ function applicationSources(directory) {
 const sourceFiles = [
   ...applicationSources(path.join(root, "assets/css")),
   ...applicationSources(path.join(root, "assets/js")),
+  path.join(root, "index.html"),
+  path.join(root, "404.html"),
+  path.join(root, "grid-hydrique/index.html"),
+  path.join(root, "presse.html"),
+  path.join(root, "mentions-legales.html"),
+  path.join(root, "livres/leau-ou-le-chaos.html"),
 ];
 const colorLiteral = /(?<!&)#[0-9a-f]{3,8}\b/i;
 
