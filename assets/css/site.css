@@ -18,11 +18,21 @@
   --forest: #283818;
   --sun: #f8d898;
   --border: #d8d2c7;
+  --focus: #d88d13;
+  --restriction-crise: #8b1e1e;
+  --restriction-alerte-renforcee: #d96b27;
+  --restriction-alerte: #e3a62f;
+  --restriction-vigilance: #f2d36b;
+  --restriction-none: #69f08b;
+  --station-hydro: #477328;
+  --station-hydro-stroke: #17370f;
+  --error-pale: #f9e9e9;
+  --black: #000000;
   --serif: "EB Garamond", Georgia, Cambria, "Times New Roman", serif;
   --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --container: 72rem;
   --measure: 68ch;
-  --shadow: 0 1.5rem 4rem rgba(35, 31, 32, 0.18);
+  --shadow: 0 1.5rem 4rem color-mix(in srgb, var(--ink) 18%, transparent);
 }
 
 *,
@@ -72,7 +82,7 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid #d88d13;
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
 
@@ -169,7 +179,7 @@ li {
 }
 
 .lead--light {
-  color: rgba(255, 255, 255, 0.82);
+  color: color-mix(in srgb, var(--paper) 82%, transparent);
 }
 
 .fine-print {
@@ -218,8 +228,8 @@ li {
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid rgba(216, 210, 199, 0.85);
-  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
+  background: color-mix(in srgb, var(--paper) 96%, transparent);
   backdrop-filter: blur(12px);
 }
 
@@ -361,9 +371,11 @@ li {
   z-index: -1;
   width: 32rem;
   height: 32rem;
-  border: 1px solid rgba(11, 92, 122, 0.16);
+  border: 1px solid color-mix(in srgb, var(--water) 16%, transparent);
   border-radius: 50%;
-  box-shadow: 0 0 0 4rem rgba(11, 92, 122, 0.04), 0 0 0 8rem rgba(11, 92, 122, 0.025);
+  box-shadow:
+    0 0 0 4rem color-mix(in srgb, var(--water) 4%, transparent),
+    0 0 0 8rem color-mix(in srgb, var(--water) 2.5%, transparent);
   content: "";
 }
 
@@ -399,7 +411,7 @@ li {
 
 .book-cover {
   width: 100%;
-  border: 1px solid rgba(35, 31, 32, 0.2);
+  border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
   box-shadow: var(--shadow);
 }
 
@@ -511,7 +523,7 @@ li {
   position: absolute;
   right: -1rem;
   bottom: -5rem;
-  color: rgba(11, 92, 122, 0.1);
+  color: color-mix(in srgb, var(--water) 10%, transparent);
   font-family: var(--serif);
   font-size: 16rem;
   line-height: 1;
@@ -708,7 +720,7 @@ li {
 
 .site-footer {
   padding-block: 3rem;
-  color: rgba(255, 255, 255, 0.82);
+  color: color-mix(in srgb, var(--paper) 82%, transparent);
   background: var(--water-deep);
 }
 
@@ -723,7 +735,7 @@ li {
 }
 
 .site-footer .fine-print {
-  color: rgba(255, 255, 255, 0.76);
+  color: color-mix(in srgb, var(--paper) 76%, transparent);
 }
 
 .footer-links {
@@ -868,8 +880,8 @@ li {
   }
 
   body {
-    color: #000;
-    background: #fff;
+    color: var(--black);
+    background: var(--paper);
     font-size: 11pt;
   }
 
@@ -877,10 +889,10 @@ li {
   .hero,
   .page-hero {
     padding-block: 1.5rem;
-    background: #fff;
+    background: var(--paper);
   }
 
   a {
-    color: #000;
+    color: var(--black);
   }
 }

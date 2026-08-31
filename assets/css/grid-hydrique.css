@@ -98,7 +98,7 @@
 }
 
 .water-map .maplibregl-canvas:focus-visible {
-  outline: 3px solid #d88d13;
+  outline: 3px solid var(--focus);
   outline-offset: -4px;
 }
 
@@ -176,14 +176,14 @@
 .legend-swatch {
   width: 1rem;
   height: 1rem;
-  border: 1px solid rgba(35, 31, 32, 0.3);
+  border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
 }
 
-.legend-swatch--crise { background: #8b1e1e; }
-.legend-swatch--renforcee { background: #d96b27; }
-.legend-swatch--alerte { background: #e3a62f; }
-.legend-swatch--vigilance { background: #f2d36b; }
-.legend-swatch--aucune { background: #d8e8dc; }
+.legend-swatch--crise { background: var(--restriction-crise); }
+.legend-swatch--renforcee { background: var(--restriction-alerte-renforcee); }
+.legend-swatch--alerte { background: var(--restriction-alerte); }
+.legend-swatch--vigilance { background: var(--restriction-vigilance); }
+.legend-swatch--aucune { background: var(--restriction-none); }
 
 .deferred-section {
   content-visibility: auto;
@@ -198,8 +198,8 @@
 
 .vision-benefits article {
   padding: clamp(1.25rem, 3vw, 2rem);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid color-mix(in srgb, var(--paper) 28%, transparent);
+  background: color-mix(in srgb, var(--paper) 7%, transparent);
 }
 
 .vision-benefits h3 {
@@ -268,13 +268,13 @@
 }
 
 .detail-level--crise {
-  color: #ffffff;
-  background: #8b1e1e;
+  color: var(--paper);
+  background: var(--restriction-crise);
 }
 
-.detail-level--alerte_renforcee { background: #d96b27; }
-.detail-level--alerte { background: #e3a62f; }
-.detail-level--vigilance { background: #f2d36b; }
+.detail-level--alerte_renforcee { background: var(--restriction-alerte-renforcee); }
+.detail-level--alerte { background: var(--restriction-alerte); }
+.detail-level--vigilance { background: var(--restriction-vigilance); }
 
 .zone-detail__item {
   padding-block: 1rem;
@@ -283,8 +283,8 @@
 
 .data-error {
   padding: 0.75rem;
-  border-left: 4px solid #8b1e1e;
-  background: #f9e9e9;
+  border-left: 4px solid var(--restriction-crise);
+  background: var(--error-pale);
 }
 
 .water-chart svg {
