@@ -451,3 +451,9 @@
 **Solution livrée :** Une couche non interactive `zones-none-fill`, alimentée par la source départementale existante et peinte avec `theme.restrictions.none`, est affichée uniquement en vue `Zones`. Elle reste sous les polygones VigiEau et les contours départementaux. Les filtres de ressource, les stations et la vue `Départements` sont inchangés.
 
 **Validation GPT-5.4 Mini :** Le test rouge a produit 2 échecs ciblés, puis `map.test.mjs` passe à 11/11 et la suite Grid Hydrique à 51/51. Les tests de thème passent à 5/5, le contact à 1/1, les deux validateurs PowerShell et `git diff --check` réussissent. Dans Edge, `zones-none-fill` utilise `#69f08b`, reste sous `zones-fill` et `departments-line`, et demeure visible avec les filtres ALL, SUP, SOU et AEP. Un point sans polygone officiel du département 59 mesure exactement `rgb(105, 240, 139)` ; la mer reste `#e9f2f5`. Aucune erreur console, `pageerror` ou ressource 404 n’est observée.
+
+## 2026-08-31 21:53:31 +02:00 — Demande de commit
+
+**Demande utilisateur :** Committer le travail terminé.
+
+**Réponse :** Les changements fonctionnels, les tests, le plan et le journal étaient déjà commités dans `master`. Seule cette confirmation est ajoutée au journal ; le fichier utilisateur non suivi reste exclu du commit.
