@@ -71,6 +71,7 @@ if (Test-Path -LiteralPath $cssPath) {
     Assert-True ($css -match '\.water-control-group\[hidden\]\s*\{[^}]*display:\s*none') 'Les commandes masquées doivent rester absentes du rendu'
     Assert-True ($css -match '\.simulation-note\[hidden\]\s*\{[^}]*display:\s*none') 'La note de simulation masquée reste visible'
     Assert-True ($css -match '\.grid-network-legend\[hidden\]\s*\{[^}]*display:\s*none') 'La légende simulée masquée reste visible'
+    Assert-True ($css -match '\.water-layer-controls\[hidden\]\s*\{[^}]*display:\s*none') 'Les contrôles de stations masqués restent visibles'
     Assert-True ($css -notmatch '#[0-9a-fA-F]{3,8}|rgba?\(') 'La feuille Grid contient une couleur littérale'
     Assert-True ($css -match '\.zone-detail__item\s*\{') 'Le détail de zone doit disposer d’un style dédié'
     Assert-True ($css -match '\.water-layer-toggle\s*\{[^}]*min-height:\s*44px') 'Les cibles interactives doivent conserver 44px de hauteur minimale'

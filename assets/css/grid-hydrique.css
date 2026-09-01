@@ -108,6 +108,10 @@
   gap: 0.75rem;
 }
 
+.water-layer-controls[hidden] {
+  display: none;
+}
+
 .water-map-controls,
 .water-view-controls,
 .water-control-group {

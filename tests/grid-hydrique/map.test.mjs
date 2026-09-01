@@ -319,6 +319,10 @@ test("la simulation masque les stations et affiche le réseau cumulativement", a
   assert.equal(waterMap.map.calls.visibility["hydro-points"], "none");
   assert.equal(waterMap.map.calls.visibility["selected-point-layer"], "none");
   assert.equal(waterMap.map.calls.visibility["grid-local-lines"], "visible");
+  assert.equal(
+    waterMap.map.calls.layerInsertions.find(({ layer }) => layer.id === "grid-local-lines").beforeId,
+    undefined,
+  );
   assert.equal(waterMap.map.calls.visibility["grid-regional-links"], "none");
   assert.equal(waterMap.map.calls.visibility["grid-national-corridors"], "none");
 

@@ -206,14 +206,14 @@ export function createWaterMap({
       source: "departments",
       layout: { visibility: "none" },
       paint: { "line-color": theme.waterDeep, "line-width": 2, "line-dasharray": [2, 2] },
-    }, "departments-line");
+    });
     map.addLayer({
       id: "grid-regional-links",
       type: "line",
       source: "grid-regional-links-source",
       layout: { visibility: "none" },
       paint: { "line-color": theme.water, "line-width": 3 },
-    }, "departments-line");
+    });
     map.addLayer({
       id: "grid-regional-hubs",
       type: "circle",
@@ -225,14 +225,14 @@ export function createWaterMap({
         "circle-stroke-color": theme.paper,
         "circle-stroke-width": 1,
       },
-    }, "departments-line");
+    });
     map.addLayer({
       id: "grid-national-corridors",
       type: "line",
       source: "grid-national-corridors-source",
       layout: { visibility: "none" },
       paint: { "line-color": theme.ink, "line-width": 5, "line-dasharray": [3, 1] },
-    }, "departments-line");
+    });
   }
 
   const ready = new Promise((resolve) => {

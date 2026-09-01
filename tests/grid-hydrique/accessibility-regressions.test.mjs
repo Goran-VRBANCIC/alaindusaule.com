@@ -181,6 +181,7 @@ test("le scénario simulé reste explicite, accessible et séparé des stations"
   assert.match(html, /Réseau simulé/);
   assert.match(css, /\.simulation-note\[hidden\]/);
   assert.match(css, /\.grid-network-legend\[hidden\]/);
+  assert.match(css, /\.water-layer-controls\[hidden\]\s*\{[^}]*display:\s*none/);
   assert.match(dashboard, /waterMap\.setSimulationPhase\(/);
   assert.match(dashboard, /layerControlsElement\.hidden\s*=\s*simulated/);
   assert.match(dashboard, /renderSimulationDetail/);
