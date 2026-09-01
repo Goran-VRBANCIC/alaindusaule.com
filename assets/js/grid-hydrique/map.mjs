@@ -1,12 +1,17 @@
 // @ts-check
 
-import { restrictionColor } from "../theme.mjs";
 import {
   ZONE_FILL_SORT_KEY,
   ZONE_SOURCE_LAYER,
   ZONE_SOURCE_URL,
   zoneResourceFilter,
 } from "./zones.mjs";
+import {
+  NATIONAL_CORRIDORS,
+  REGIONAL_HUBS,
+  REGIONAL_LINKS,
+  restrictionExpression,
+} from "./simulation.mjs";
 
 const EMPTY_FEATURE_COLLECTION = Object.freeze({ type: "FeatureCollection", features: [] });
 
@@ -52,9 +57,13 @@ function nationalPadding(width) {
   return width < 576 ? 20 : 36;
 }
 
-export function selectFeatureAtMapCenter(map, onSelect) {
+export function selectFeatureAtMapCenter(map, onSelect, includeStations = true) {
   const canvas = map.getCanvas();
-  const layerIds = ["hydro-points", "piezo-points", "zones-fill", "departments-fill"]
+  const layerIds = [
+    ...(includeStations ? ["hydro-points", "piezo-points"] : []),
+    "zones-fill",
+    "departments-fill",
+  ]
     .filter((layerId) => map.getLayer(layerId));
   const features = map.queryRenderedFeatures(
     [canvas.clientWidth / 2, canvas.clientHeight / 2],
@@ -87,6 +96,7 @@ export function createWaterMap({
   maplibre = globalThis.maplibregl,
   ResizeObserverClass = globalThis.ResizeObserver,
   requestFrame = globalThis.requestAnimationFrame,
+  reportError = console.error,
 }) {
   if (!maplibre) throw new Error("MapLibre est indisponible");
 
@@ -108,6 +118,10 @@ export function createWaterMap({
   let resizeFrame;
   let nationalResizeObserver;
   let zoneProtocol;
+  let simulationPhase = null;
+  let simulationAvailable = true;
+  const stationVisibility = { "piezo-points": true, "hydro-points": true };
+  const stationLayerIds = new Set(Object.keys(stationVisibility));
 
   function applyNationalMinZoom() {
     if (!nationalBounds || !map.cameraForBounds || !map.setMinZoom || !map.getContainer) return;
@@ -131,6 +145,7 @@ export function createWaterMap({
     map.on("mouseenter", layerId, () => { map.getCanvas().style.cursor = "pointer"; });
     map.on("mouseleave", layerId, () => { map.getCanvas().style.cursor = ""; });
     map.on("click", layerId, (event) => {
+      if (simulationPhase && stationLayerIds.has(layerId)) return;
       const feature = event.features?.[0];
       if (!feature) return;
       const coordinates = feature.geometry.type === "Point"
@@ -166,17 +181,10 @@ export function createWaterMap({
       "source-layer": ZONE_SOURCE_LAYER,
       layout: { visibility: "none", "fill-sort-key": ZONE_FILL_SORT_KEY },
       paint: {
-        "fill-color": [
-          "match", ["get", "niveauGravite"],
-          "crise", restrictionColor("crise", theme),
-          "alerte_renforcee", restrictionColor("alerte_renforcee", theme),
-          "alerte", restrictionColor("alerte", theme),
-          "vigilance", restrictionColor("vigilance", theme),
-          restrictionColor(null, theme),
-        ],
+        "fill-color": restrictionExpression("niveauGravite", simulationPhase, theme.restrictions),
         "fill-opacity": 1,
       },
-    }, "departments-line");
+    }, map.getLayer("grid-local-lines") ? "grid-local-lines" : "departments-line");
     map.addLayer({
       id: "zones-line",
       type: "line",
@@ -186,6 +194,45 @@ export function createWaterMap({
       paint: { "line-color": theme.paper, "line-width": 1 },
     }, "departments-line");
     registerSelectableLayer("zones-fill");
+  }
+
+  function addSimulationLayers() {
+    map.addSource("grid-regional-links-source", { type: "geojson", data: REGIONAL_LINKS });
+    map.addSource("grid-regional-hubs-source", { type: "geojson", data: REGIONAL_HUBS });
+    map.addSource("grid-national-corridors-source", { type: "geojson", data: NATIONAL_CORRIDORS });
+    map.addLayer({
+      id: "grid-local-lines",
+      type: "line",
+      source: "departments",
+      layout: { visibility: "none" },
+      paint: { "line-color": theme.waterDeep, "line-width": 2, "line-dasharray": [2, 2] },
+    }, "departments-line");
+    map.addLayer({
+      id: "grid-regional-links",
+      type: "line",
+      source: "grid-regional-links-source",
+      layout: { visibility: "none" },
+      paint: { "line-color": theme.water, "line-width": 3 },
+    }, "departments-line");
+    map.addLayer({
+      id: "grid-regional-hubs",
+      type: "circle",
+      source: "grid-regional-hubs-source",
+      layout: { visibility: "none" },
+      paint: {
+        "circle-color": theme.waterDeep,
+        "circle-radius": 4,
+        "circle-stroke-color": theme.paper,
+        "circle-stroke-width": 1,
+      },
+    }, "departments-line");
+    map.addLayer({
+      id: "grid-national-corridors",
+      type: "line",
+      source: "grid-national-corridors-source",
+      layout: { visibility: "none" },
+      paint: { "line-color": theme.ink, "line-width": 5, "line-dasharray": [3, 1] },
+    }, "departments-line");
   }
 
   const ready = new Promise((resolve) => {
@@ -200,14 +247,7 @@ export function createWaterMap({
         type: "fill",
         source: "departments",
         paint: {
-          "fill-color": [
-            "match", ["get", "severity"],
-            "crise", restrictionColor("crise", theme),
-            "alerte_renforcee", restrictionColor("alerte_renforcee", theme),
-            "alerte", restrictionColor("alerte", theme),
-            "vigilance", restrictionColor("vigilance", theme),
-            restrictionColor(null, theme),
-          ],
+          "fill-color": restrictionExpression("severity", null, theme.restrictions),
           "fill-opacity": 1,
         },
       });
@@ -227,6 +267,12 @@ export function createWaterMap({
           "fill-opacity": 1,
         },
       }, "departments-line");
+      try {
+        addSimulationLayers();
+      } catch (error) {
+        reportError(error);
+        simulationAvailable = false;
+      }
       map.addLayer({
         id: "piezo-points",
         type: "circle",
@@ -269,7 +315,7 @@ export function createWaterMap({
       const canvas = map.getCanvas();
       canvas.setAttribute("aria-describedby", "map-keyboard-instructions");
       canvas.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" && selectFeatureAtMapCenter(map, onSelect)) event.preventDefault();
+        if (event.key === "Enter" && selectFeatureAtMapCenter(map, onSelect, !simulationPhase)) event.preventDefault();
       });
 
       if (nationalBounds && map.resize && map.fitBounds && map.getContainer) {
@@ -299,7 +345,46 @@ export function createWaterMap({
     setDepartments(data) { map.getSource("departments")?.setData(data); },
     setStations(kind, data) { map.getSource(`${kind}-stations`)?.setData(data); },
     setLayerVisibility(layerId, visible) {
-      if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", visible ? "visible" : "none");
+      if (stationLayerIds.has(layerId)) stationVisibility[layerId] = visible;
+      const effectiveVisibility = simulationPhase && stationLayerIds.has(layerId) ? false : visible;
+      if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", effectiveVisibility ? "visible" : "none");
+    },
+    isSimulationAvailable() { return simulationAvailable; },
+    setSimulationPhase(phase) {
+      if (phase && !simulationAvailable) return false;
+      simulationPhase = phase;
+      map.setPaintProperty(
+        "departments-fill",
+        "fill-color",
+        restrictionExpression("severity", phase, theme.restrictions),
+      );
+      if (map.getLayer("zones-fill")) {
+        map.setPaintProperty(
+          "zones-fill",
+          "fill-color",
+          restrictionExpression("niveauGravite", phase, theme.restrictions),
+        );
+      }
+      map.getSource("selected-point")?.setData?.(EMPTY_FEATURE_COLLECTION);
+      map.setLayoutProperty("selected-point-layer", "visibility", phase ? "none" : "visible");
+      for (const layerId of stationLayerIds) {
+        map.setLayoutProperty(
+          layerId,
+          "visibility",
+          phase || !stationVisibility[layerId] ? "none" : "visible",
+        );
+      }
+      const phaseNumber = phase ? Number(phase.slice(-1)) : 0;
+      const networkVisibility = {
+        "grid-local-lines": phaseNumber >= 1,
+        "grid-regional-links": phaseNumber >= 2,
+        "grid-regional-hubs": phaseNumber >= 2,
+        "grid-national-corridors": phaseNumber >= 3,
+      };
+      for (const [layerId, visible] of Object.entries(networkVisibility)) {
+        if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", visible ? "visible" : "none");
+      }
+      return true;
     },
     setMapMode(mode) {
       const zonesVisible = mode === "zones";

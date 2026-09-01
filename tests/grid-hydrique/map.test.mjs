@@ -72,7 +72,7 @@ class FakeResizeObserver {
   }
 }
 
-function makeFakeMaplibre({ width = 800 } = {}) {
+function makeFakeMaplibre({ width = 800, failSimulationSources = false } = {}) {
   class FakeMap {
     constructor(options) {
       this.options = options;
@@ -89,6 +89,7 @@ function makeFakeMaplibre({ width = 800 } = {}) {
         resize: 0,
         visibility: {},
         filters: {},
+        paint: {},
       };
       this.layers = new Map();
       this.sources = new Map();
@@ -96,7 +97,11 @@ function makeFakeMaplibre({ width = 800 } = {}) {
     }
 
     addControl() {}
-    addSource(id, source) { this.sources.set(id, source); this.calls.addSources.push({ id, source }); }
+    addSource(id, source) {
+      if (failSimulationSources && id.startsWith("grid-")) throw new Error("Simulation indisponible");
+      this.sources.set(id, source);
+      this.calls.addSources.push({ id, source });
+    }
     getSource(id) { return this.sources.get(id); }
     addLayer(layer, beforeId) {
       this.layers.set(layer.id, layer);
@@ -106,6 +111,7 @@ function makeFakeMaplibre({ width = 800 } = {}) {
     getLayer(id) { return this.layers.get(id); }
     setLayoutProperty(id, property, value) { if (property === "visibility") this.calls.visibility[id] = value; }
     setFilter(id, filter) { this.calls.filters[id] = filter; }
+    setPaintProperty(id, property, value) { this.calls.paint[`${id}:${property}`] = value; }
     on(event, layerId, handler) { this.handlers.set(`${event}:${layerId}`, handler); }
     once(event, handler) { if (event === "load") handler(); }
     resize() { this.calls.resize += 1; }
@@ -156,6 +162,7 @@ function createTestWaterMap(options = {}) {
     maplibre: fake.maplibre,
     ResizeObserverClass: options.ResizeObserverClass,
     requestFrame: options.requestFrame,
+    reportError: options.reportError || (() => {}),
   });
   return { ...fake, waterMap };
 }
@@ -269,7 +276,7 @@ test("loadZoneLayers prépare les couches officielles une seule fois", async () 
   assert.ok(line);
   assert.equal(Object.hasOwn(fill, "filter"), false);
   assert.equal(Object.hasOwn(line, "filter"), false);
-  assert.equal(calls.layerInsertions.find(({ layer }) => layer.id === "zones-fill").beforeId, "departments-line");
+  assert.equal(calls.layerInsertions.find(({ layer }) => layer.id === "zones-fill").beforeId, "grid-local-lines");
   assert.equal(calls.layerInsertions.find(({ layer }) => layer.id === "zones-line").beforeId, "departments-line");
   assert.equal(fill["source-layer"], ZONE_SOURCE_LAYER);
   assert.deepEqual(fill.layout["fill-sort-key"], ZONE_FILL_SORT_KEY);
@@ -300,6 +307,58 @@ test("setMapMode alterne les remplissages sans masquer les stations", async () =
   assert.equal(waterMap.map.calls.visibility["departments-fill"], "visible");
   assert.equal(waterMap.map.calls.visibility["zones-none-fill"], "none");
   assert.equal(waterMap.map.calls.visibility["zones-fill"], "none");
+});
+
+test("la simulation masque les stations et affiche le réseau cumulativement", async () => {
+  const { waterMap } = createTestWaterMap();
+  await waterMap.ready;
+
+  waterMap.setLayerVisibility("piezo-points", false);
+  waterMap.setSimulationPhase("phase1");
+  assert.equal(waterMap.map.calls.visibility["piezo-points"], "none");
+  assert.equal(waterMap.map.calls.visibility["hydro-points"], "none");
+  assert.equal(waterMap.map.calls.visibility["selected-point-layer"], "none");
+  assert.equal(waterMap.map.calls.visibility["grid-local-lines"], "visible");
+  assert.equal(waterMap.map.calls.visibility["grid-regional-links"], "none");
+  assert.equal(waterMap.map.calls.visibility["grid-national-corridors"], "none");
+
+  waterMap.setSimulationPhase("phase2");
+  assert.equal(waterMap.map.calls.visibility["grid-local-lines"], "visible");
+  assert.equal(waterMap.map.calls.visibility["grid-regional-links"], "visible");
+  assert.equal(waterMap.map.calls.visibility["grid-regional-hubs"], "visible");
+  assert.equal(waterMap.map.calls.visibility["grid-national-corridors"], "none");
+
+  waterMap.setSimulationPhase("phase3");
+  assert.equal(waterMap.map.calls.visibility["grid-national-corridors"], "visible");
+
+  waterMap.setSimulationPhase(null);
+  assert.equal(waterMap.map.calls.visibility["piezo-points"], "none");
+  assert.equal(waterMap.map.calls.visibility["hydro-points"], "visible");
+  assert.equal(waterMap.map.calls.visibility["selected-point-layer"], "visible");
+});
+
+test("les phases recolorent départements et zones depuis les mêmes règles", async () => {
+  const { waterMap, FakePMTiles, FakeProtocol } = createTestWaterMap();
+  await waterMap.ready;
+  await waterMap.loadZoneLayers({ PMTiles: FakePMTiles, Protocol: FakeProtocol });
+
+  waterMap.setSimulationPhase("phase1");
+  assert.equal(waterMap.map.calls.paint["departments-fill:fill-color"][3], theme.restrictions.alerte_renforcee);
+  assert.equal(waterMap.map.calls.paint["zones-fill:fill-color"][3], theme.restrictions.alerte_renforcee);
+
+  waterMap.setSimulationPhase("phase3");
+  assert.equal(waterMap.map.calls.paint["departments-fill:fill-color"], theme.restrictions.none);
+  assert.equal(waterMap.map.calls.paint["zones-fill:fill-color"], theme.restrictions.none);
+});
+
+test("une erreur propre au réseau laisse la carte réelle disponible", async () => {
+  const { waterMap } = createTestWaterMap({ failSimulationSources: true });
+  await waterMap.ready;
+
+  assert.equal(waterMap.isSimulationAvailable(), false);
+  assert.equal(waterMap.setSimulationPhase("phase1"), false);
+  assert.ok(waterMap.map.layers.get("departments-fill"));
+  assert.notEqual(waterMap.map.calls.visibility["hydro-points"], "none");
 });
 
 test("setZoneResource applique le filtre aux deux couches", async () => {
@@ -334,6 +393,19 @@ test("zones-fill est sélectionnable au clavier seulement quand elle existe", ()
 
   assert.equal(selectFeatureAtMapCenter(map, (value) => { selected = value; }), true);
   assert.equal(selected.layerId, "zones-fill");
+});
+
+test("les stations sont exclues de la sélection clavier en simulation", () => {
+  const map = {
+    getCanvas: () => ({ clientWidth: 800, clientHeight: 600 }),
+    getLayer: () => ({}),
+    queryRenderedFeatures: (point, options) => {
+      assert.deepEqual(options.layers, ["zones-fill", "departments-fill"]);
+      return [];
+    },
+  };
+
+  assert.equal(selectFeatureAtMapCenter(map, () => {}, false), false);
 });
 
 test("une couche zonale absente n’est jamais interrogée", () => {
