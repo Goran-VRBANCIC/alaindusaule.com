@@ -587,3 +587,21 @@
 **Demande utilisateur :** Arrêter le serveur de test.
 
 **Solution :** Session `http-server` arrêtée proprement avec son signal d’interruption. Vérification effectuée : aucun processus n’écoute plus sur `127.0.0.1:4174`.
+
+## 2026-09-01 18:02:38 +02:00 — Règle mémoire : ne pas réutiliser le mojibake PowerShell dans un patch
+
+**Problème :** Un patch global du vault a repris comme contexte une ligne UTF-8 telle qu’elle était affichée de manière déformée par Windows PowerShell. La ligne attendue n’existait pas sous cette forme dans le fichier et l’ensemble du patch a été rejeté sans modification.
+
+**Solution permanente :** Pour modifier un fichier UTF-8 dont l’affichage PowerShell est déformé, ancrer `apply_patch` sur des lignes ASCII stables ou utiliser des patchs plus petits. Ne jamais recopier le mojibake de la sortie terminal comme texte de contexte.
+
+## 2026-09-01 18:04:00 +02:00 — Règle mémoire renforcée : contrôler chaque ancre avant un patch UTF-8
+
+**Problème :** Le patch suivant contenait encore un titre mojibaké comme ancre et a été rejeté en bloc, malgré la règle précédente. La note nouvelle avait été créée séparément, mais aucun index n’a été modifié.
+
+**Solution permanente :** Avant tout `apply_patch` sur un fichier UTF-8 affiché avec un encodage incertain, relire chaque ligne de contexte du patch et supprimer toute ancre contenant un caractère non ASCII. Modifier un seul fichier par appel afin qu’un échec n’annule pas les autres mises à jour.
+
+## 2026-09-01 18:07:00 +02:00 — Commit local et mise à jour du vault
+
+**Demande utilisateur :** Commit et mise à jour du vault, sans push.
+
+**Solution :** Tous les changements fonctionnels étaient déjà commités sur `master`. Le journal du dépôt a été complété, puis la session « alaindusaule.com — Simulation du Grid hydrique » a été créée dans le vault Obsidian avec mise à jour de `wiki/index.md`, `wiki/projects/_index.md`, `wiki/log.md` et `wiki/hot.md`. Le fichier utilisateur non suivi reste hors commit et aucun push n’est effectué.
