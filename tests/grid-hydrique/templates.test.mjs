@@ -5,6 +5,7 @@ import {
   renderKpis,
   renderDepartmentDetail,
   renderPiezoDetail,
+  renderSimulationDetail,
   renderHydroDetail,
   renderMapControls,
   renderZoneDetail,
@@ -85,9 +86,16 @@ test("renderZoneDetail échappe les noms et refuse les liens non HTTPS", () => {
   assert.match(html, /Détails temporairement indisponibles/);
 });
 
-test("renderMapControls expose deux groupes radio accessibles", () => {
+test("renderMapControls expose les groupes radio accessibles", () => {
   const html = renderMapControls();
 
+  assert.match(html, /<legend>Scénario<\/legend>/);
+  assert.match(html, /name="grid-scenario" value="real" checked/);
+  assert.match(html, /name="grid-scenario" value="simulation"/);
+  assert.match(html, /data-grid-phases hidden disabled/);
+  assert.match(html, /name="grid-phase" value="phase1" checked/);
+  assert.match(html, /name="grid-phase" value="phase2"/);
+  assert.match(html, /name="grid-phase" value="phase3"/);
   assert.match(html, /<fieldset[^>]*>[\s\S]*<legend>Vue de la carte<\/legend>/);
   assert.match(html, /<legend>Ressource<\/legend>/);
   assert.match(html, /name="map-mode" value="departments" checked/);
@@ -102,6 +110,21 @@ test("renderMapControls expose deux groupes radio accessibles", () => {
   assert.match(html, /Cours dâ€™eau|Cours d’eau/);
   assert.match(html, /Nappes/);
   assert.match(html, /Eau potable/);
+});
+
+test("renderSimulationDetail compare le niveau officiel au scénario sans contenu brut", () => {
+  const html = renderSimulationDetail({
+    name: '<script>alert("x")</script>',
+    realLevel: "crise",
+    phase: "phase2",
+  });
+
+  assert.doesNotMatch(html, /<script>/);
+  assert.match(html, /&lt;script&gt;/);
+  assert.match(html, /Niveau officiel de départ[\s\S]*Crise/);
+  assert.match(html, /Phase 2 — Interconnexions régionales/);
+  assert.match(html, /Niveau simulé[\s\S]*Alerte/);
+  assert.match(html, /hypothèse pédagogique/);
 });
 
 test("les détails de station créent un emplacement de graphique", () => {

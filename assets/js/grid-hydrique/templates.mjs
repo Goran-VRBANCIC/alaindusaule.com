@@ -1,6 +1,7 @@
 // @ts-check
 
 import { normalizeZones } from "./zones.mjs";
+import { GRID_PHASES, simulateSeverity } from "./simulation.mjs";
 
 export function escapeHtml(value) {
   return String(value)
@@ -45,6 +46,17 @@ export function renderSourceDates({ vigieau, piezo, hydro }) {
 export function renderMapControls() {
   return `
     <fieldset class="water-control-group">
+      <legend>Scénario</legend>
+      <label class="water-layer-toggle"><input type="radio" name="grid-scenario" value="real" checked> Sans Grid hydrique</label>
+      <label class="water-layer-toggle"><input type="radio" name="grid-scenario" value="simulation"> Avec Grid hydrique</label>
+    </fieldset>
+    <fieldset class="water-control-group" data-grid-phases hidden disabled>
+      <legend>Déploiement du Grid</legend>
+      <label class="water-layer-toggle"><input type="radio" name="grid-phase" value="phase1" checked> Phase 1</label>
+      <label class="water-layer-toggle"><input type="radio" name="grid-phase" value="phase2"> Phase 2</label>
+      <label class="water-layer-toggle"><input type="radio" name="grid-phase" value="phase3"> Phase 3</label>
+    </fieldset>
+    <fieldset class="water-control-group">
       <legend>Vue de la carte</legend>
       <label class="water-layer-toggle"><input type="radio" name="map-mode" value="departments" checked> Départements</label>
       <label class="water-layer-toggle"><input type="radio" name="map-mode" value="zones"> Zones</label>
@@ -56,6 +68,20 @@ export function renderMapControls() {
       <label class="water-layer-toggle"><input type="radio" name="zone-resource" value="SOU"> Nappes</label>
       <label class="water-layer-toggle"><input type="radio" name="zone-resource" value="AEP"> Eau potable</label>
     </fieldset>
+  `;
+}
+
+export function renderSimulationDetail({ name, realLevel, phase }) {
+  const simulatedLevel = simulateSeverity(realLevel, phase);
+  const phaseLabel = GRID_PHASES[phase]?.label || "Phase simulée";
+  return `
+    <h2 id="detail-title">${escapeHtml(name || "Territoire sélectionné")}</h2>
+    <p class="fine-print">Niveau officiel de départ</p>
+    <p class="detail-level detail-level--${escapeHtml(realLevel)}">${escapeHtml(severityLabel(realLevel))}</p>
+    <p class="fine-print">${escapeHtml(phaseLabel)}</p>
+    <p>Niveau simulé</p>
+    <p class="detail-level detail-level--${escapeHtml(simulatedLevel)}">${escapeHtml(severityLabel(simulatedLevel))}</p>
+    <p class="fine-print">Résultat théorique : hypothèse pédagogique, non prévision hydrologique.</p>
   `;
 }
 
