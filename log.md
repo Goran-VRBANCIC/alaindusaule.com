@@ -531,3 +531,29 @@
 **Réponse utilisateur :** Spécification approuvée.
 
 **Suite :** Rédiger un plan TDD détaillé couvrant domaine pur, calques MapLibre, contrôles accessibles, orchestration, recette navigateur et journalisation.
+
+## 2026-09-01 16:51:15 +02:00 — Règle mémoire : rendre les motifs PowerShell indépendants de l’encodage des accents
+
+**Problème :** Deux assertions ajoutées à `validate-grid-hydrique.ps1` utilisaient des littéraux accentués. Windows PowerShell a interprété le script sans le même encodage que le HTML UTF-8 et a produit deux faux négatifs malgré la présence exacte des textes.
+
+**Solution permanente :** Dans les validateurs PowerShell sans BOM, écrire les motifs de contrat avec des segments ASCII stables et des jokers pour les caractères accentués, comme les assertions historiques du projet, puis vérifier séparément le texte exact dans les tests Node UTF-8.
+
+## 2026-09-01 16:52:49 +02:00 — Règle mémoire renforcée : ne pas relancer un navigateur de test avec `Start-Process`
+
+**Problème :** Malgré la règle déjà enregistrée le 31 août, une commande combinée utilisant `Start-Process` pour Edge headless a de nouveau été rejetée par la politique avant tout lancement.
+
+**Solution permanente :** Pour ce dépôt, traiter `Start-Process` comme interdit pour les serveurs et navigateurs de recette. Créer les dossiers préparatoires séparément, puis lancer directement chaque processus persistant dans sa propre session d’exécution et conserver son identifiant de session.
+
+## 2026-09-01 16:55:51 +02:00 — Règle mémoire : servir les modules `.mjs` avec un type MIME JavaScript
+
+**Problème :** Le serveur `python -m http.server` de l’environnement Windows a annoncé les fichiers `.mjs` en `text/plain`. Edge a appliqué le contrôle MIME strict et refusé les modules, laissant le dashboard avant son initialisation.
+
+**Solution permanente :** Avant une recette navigateur de ce projet, contrôler le `Content-Type` d’un fichier `.mjs`. Utiliser un serveur statique qui renvoie `text/javascript; charset=utf-8` pour `.mjs` et `.js`, plutôt que le serveur Python générique de cet environnement.
+
+## 2026-09-01 17:05:13 +02:00 — Livraison du mode de simulation du Grid hydrique
+
+**Demande utilisateur :** Exécuter le plan dans la session courante (choix 2) et ajouter à la carte réelle un mode « Avec Grid hydrique » en trois phases, sans points de stations en simulation, avec un territoire intégralement vert en phase 3.
+
+**Solution :** Ajout d’un scénario accessible « Sans Grid hydrique / Avec Grid hydrique », des phases 1 à 3, d’un réseau schématique cumulatif, du recalcul pédagogique des restrictions et d’un détail comparant niveau officiel et niveau simulé. Les stations et leurs contrôles sont totalement masqués en simulation puis restaurés à l’identique au retour au réel. La phase 3 force tous les départements et toutes les zones au niveau « Aucune restriction ».
+
+**Vérification :** 63 tests Grid et 6 tests transverses réussis ; validateurs `validate-grid-hydrique.ps1` et `validate-site.ps1` réussis ; `git diff --check` sans erreur. Recette Edge réussie à 320, 768, 1024 et 1440 px : aucune erreur navigateur, aucun débordement des contrôles de simulation, stations réellement absentes du rendu simulé, restauration des filtres confirmée, vue Zones fonctionnelle, sélection clavier fonctionnelle et contrôle visuel des boucles de phase 1 ainsi que du territoire vert avec réseau complet en phase 3.
