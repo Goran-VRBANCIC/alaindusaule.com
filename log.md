@@ -463,3 +463,63 @@
 **Demande utilisateur :** Arrêter le serveur de test et terminer la session.
 
 **Solution :** Le processus Python `15224` servant `127.0.0.1:8002` a été arrêté et le port ne présente plus de listener. La session est clôturée sans toucher au fichier utilisateur non suivi.
+
+## 2026-09-01 15:36:13 +02:00 — Règle mémoire : éviter les antislashs invalides dans les regex PowerShell
+
+**Problème :** Un filtre PowerShell `-notmatch` destiné à exclure des sous-dossiers de l’Obsidian utilisait des antislashs non échappés. Le moteur regex a interprété `\p` comme une classe Unicode incomplète et a produit une série d’erreurs.
+
+**Solution permanente :** Pour filtrer des chemins Windows, utiliser une classe de séparateurs explicite (`[\\/]`) ou déléguer le filtrage à `rg -v`, puis vérifier la commande sur un résultat court avant d’élargir la sortie.
+
+## 2026-09-01 15:40:00 +02:00 — Refus du compagnon visuel
+
+**Question posée :** Utiliser un compagnon visuel local pour comparer des maquettes et schémas du mode de simulation.
+
+**Réponse utilisateur :** Non.
+
+**Suite :** Poursuivre le cadrage intégralement en texte.
+
+## 2026-09-01 15:43:00 +02:00 — Contenu du mode de simulation
+
+**Question posée :** Le mode « Avec Grid hydrique » doit-il montrer les restrictions simulées, le réseau théorique, ou les deux ?
+
+**Réponse utilisateur :** Montrer les deux. Dans ce mode, retirer les points des stations de relevage des données, car la vue n’est plus fondée sur le réel.
+
+**Conséquence de conception :** Le mode simulé masque les stations et leurs contrôles, affiche le réseau théorique et recalcule visuellement les niveaux. Le retour au mode réel restaure la visibilité précédente des stations.
+
+## 2026-09-01 15:45:00 +02:00 — Progression de la simulation
+
+**Question posée :** Représenter le Grid entièrement déployé, seulement sa phase 1, ou permettre de sélectionner les phases 1 à 3.
+
+**Réponse utilisateur :** Permettre une progression sélectionnable entre les trois phases.
+
+**Conséquence de conception :** Le mode « Avec Grid hydrique » comportera un sélecteur secondaire Phase 1 / Phase 2 / Phase 3 correspondant aux étapes décrites dans le livre.
+
+## 2026-09-01 15:48:00 +02:00 — Règle d’amélioration simulée
+
+**Question posée :** Choisir entre une amélioration prudente par paliers, une suppression optimiste de toutes les restrictions ou une règle personnalisée par territoire.
+
+**Réponse utilisateur :** Retenir l’amélioration prudente, avec une exception structurante : en phase 3, tout le territoire est théoriquement servi et doit être vert.
+
+**Règle retenue :** La phase 1 réduit la gravité d’un cran, la phase 2 de deux crans, et la phase 3 force le niveau « Aucune restriction » sur tout le territoire. La vue portera explicitement la mention d’une simulation théorique.
+
+## 2026-09-01 15:51:00 +02:00 — Représentation cartographique du réseau
+
+**Question posée :** Choisir entre un réseau schématique, des tracés géographiques précis ou seulement quelques grands flux.
+
+**Réponse utilisateur :** Retenir un réseau schématique.
+
+**Conséquence de conception :** Les boucles, interconnexions et corridors seront des illustrations conceptuelles accompagnées d’une mention explicite ; aucune précision d’implantation réelle ne leur sera attribuée.
+
+## 2026-09-01 15:56:00 +02:00 — Validation du design de simulation
+
+**Proposition soumise :** Étendre la carte actuelle avec un mode réel/simulation, trois phases, transformation prudente des restrictions, phase 3 entièrement verte, réseau schématique cumulatif, masquage des stations et mentions pédagogiques explicites.
+
+**Réponse utilisateur :** Design approuvé.
+
+**Suite :** Formaliser la spécification, la relire, la versionner, puis demander sa validation avant le plan d’implémentation.
+
+## 2026-09-01 16:01:00 +02:00 — Règle mémoire : éviter les sauts Markdown par espaces terminaux
+
+**Problème :** L’en-tête de la nouvelle spécification utilisait deux espaces de fin de ligne pour forcer un retour Markdown. `git diff --check` les a correctement signalés comme espaces terminaux.
+
+**Solution permanente :** Dans les documents du dépôt, utiliser des paragraphes ou lignes simples sans espaces terminaux, puis exécuter `git diff --check` avant tout commit.
