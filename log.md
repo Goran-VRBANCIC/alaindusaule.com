@@ -581,3 +581,9 @@
 **Demande utilisateur :** Lancer le serveur de test du site.
 
 **Solution :** Serveur statique `http-server` lancé en session persistante sur `http://127.0.0.1:4174/`. La page `/grid-hydrique/` répond en `200 OK` et les modules `.mjs` sont correctement servis avec le type `application/javascript`.
+
+## 2026-09-01 18:00:08 +02:00 — Arrêt du serveur de test
+
+**Demande utilisateur :** Arrêter le serveur de test.
+
+**Solution :** Session `http-server` arrêtée proprement avec son signal d’interruption. Vérification effectuée : aucun processus n’écoute plus sur `127.0.0.1:4174`.
