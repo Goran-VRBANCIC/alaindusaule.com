@@ -523,3 +523,11 @@
 **Problème :** L’en-tête de la nouvelle spécification utilisait deux espaces de fin de ligne pour forcer un retour Markdown. `git diff --check` les a correctement signalés comme espaces terminaux.
 
 **Solution permanente :** Dans les documents du dépôt, utiliser des paragraphes ou lignes simples sans espaces terminaux, puis exécuter `git diff --check` avant tout commit.
+
+## 2026-09-01 16:08:00 +02:00 — Validation de la spécification de simulation
+
+**Question posée :** Relire la spécification formalisée et confirmer le passage au plan d’implémentation.
+
+**Réponse utilisateur :** Spécification approuvée.
+
+**Suite :** Rédiger un plan TDD détaillé couvrant domaine pur, calques MapLibre, contrôles accessibles, orchestration, recette navigateur et journalisation.
