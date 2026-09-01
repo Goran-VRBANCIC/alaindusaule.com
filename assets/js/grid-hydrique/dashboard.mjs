@@ -10,6 +10,7 @@ import {
 } from "./domain.mjs";
 import { createWaterMap, stationsToGeoJson } from "./map.mjs";
 import { readThemeColors } from "../theme.mjs";
+import { GRID_PHASES } from "./simulation.mjs";
 import { normalizeZones } from "./zones.mjs";
 import {
   renderDepartmentDetail,
@@ -17,6 +18,7 @@ import {
   renderKpis,
   renderMapControls,
   renderPiezoDetail,
+  renderSimulationDetail,
   renderSourceDates,
   renderStatus,
   renderZoneDetail,
@@ -41,6 +43,8 @@ const mapLayoutElement = document.querySelector(".water-map-layout");
 const mapLegendElement = document.querySelector(".water-map-legend");
 const mapInstructionsElement = document.querySelector("#map-keyboard-instructions");
 const liveSummaryElement = document.querySelector(".water-live-summary");
+const simulationNoteElement = document.querySelector("[data-simulation-note]");
+const gridLegendElement = document.querySelector("[data-grid-legend]");
 const desktopLayoutMedia = globalThis.matchMedia("(min-width: 48rem)");
 
 let waterMap;
@@ -56,6 +60,7 @@ let lastSuccessfulRefresh = 0;
 let refreshTimer;
 let refreshInProgress = false;
 let zoneLoadPromise;
+let simulationPhase = null;
 const sourceDates = { vigieau: "en attente", piezo: "en attente", hydro: "en attente" };
 
 function syncResponsiveDom() {
@@ -179,6 +184,49 @@ async function enableZoneMode() {
 function setupMapControls() {
   if (!viewControlsElement || !waterMap) return;
   viewControlsElement.innerHTML = renderMapControls();
+
+  function applySimulationState(nextPhase) {
+    const applied = waterMap.setSimulationPhase(nextPhase);
+    if (!applied) {
+      simulationPhase = null;
+      viewControlsElement.querySelector('[name="grid-scenario"][value="real"]').checked = true;
+      statusElement.textContent = "La simulation est temporairement indisponible. Données officielles conservées.";
+      return;
+    }
+
+    simulationPhase = nextPhase;
+    const simulated = simulationPhase !== null;
+    const phaseControls = viewControlsElement.querySelector("[data-grid-phases]");
+    phaseControls.hidden = !simulated;
+    phaseControls.disabled = !simulated;
+    if (layerControlsElement) layerControlsElement.hidden = simulated;
+    if (simulationNoteElement) simulationNoteElement.hidden = !simulated;
+    if (gridLegendElement) gridLegendElement.hidden = !simulated;
+    selectionController?.abort();
+    if (detailElement) {
+      detailElement.innerHTML = simulated
+        ? '<h2 id="detail-title">Simulation du Grid</h2><p>Sélectionnez un département ou une zone pour comparer les niveaux.</p>'
+        : '<h2 id="detail-title">Détail</h2><p>Sélectionnez un département ou une station sur la carte.</p>';
+    }
+    if (statusElement) {
+      statusElement.textContent = simulated
+        ? `${GRID_PHASES[simulationPhase].label} affichée — simulation pédagogique.`
+        : "Données officielles affichées.";
+    }
+  }
+
+  viewControlsElement.querySelectorAll('[name="grid-scenario"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      if (!input.checked) return;
+      const selectedPhase = viewControlsElement.querySelector('[name="grid-phase"]:checked')?.value || "phase1";
+      applySimulationState(input.value === "simulation" ? selectedPhase : null);
+    });
+  });
+  viewControlsElement.querySelectorAll('[name="grid-phase"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      if (input.checked && simulationPhase) applySimulationState(input.value);
+    });
+  });
   viewControlsElement.querySelectorAll('[name="map-mode"]').forEach((input) => {
     input.addEventListener("change", async () => {
       if (!input.checked) return;
@@ -311,6 +359,20 @@ async function showSelection(selection) {
   selectionController = new AbortController();
   const signal = selectionController.signal;
   const properties = selection.feature.properties || {};
+
+  if (simulationPhase) {
+    if (selection.layerId === "piezo-points" || selection.layerId === "hydro-points") return;
+    detailElement.innerHTML = renderSimulationDetail({
+      name: properties.nom || properties.name || "Territoire sélectionné",
+      realLevel: selection.layerId === "zones-fill"
+        ? properties.niveauGravite || "none"
+        : properties.severity || "none",
+      phase: simulationPhase,
+    });
+    detailElement.focus({ preventScroll: false });
+    return;
+  }
+
   detailElement.focus({ preventScroll: false });
 
   if (selection.layerId === "zones-fill") {

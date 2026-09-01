@@ -160,3 +160,32 @@ test("le dashboard conserve les catalogues nationaux et fusionne les mesures du 
   assert.match(source, /piezoStationData\s*=\s*stationsToGeoJson\(piezoReference\.stations\)/);
   assert.match(source, /hydroStationData\s*=\s*stationsToGeoJson\(hydroReference\.stations\)/);
 });
+
+test("le scénario simulé reste explicite, accessible et séparé des stations", () => {
+  const html = fs.readFileSync(
+    new URL("../../grid-hydrique/index.html", import.meta.url),
+    "utf8",
+  );
+  const css = fs.readFileSync(
+    new URL("../../assets/css/grid-hydrique.css", import.meta.url),
+    "utf8",
+  );
+  const dashboard = fs.readFileSync(
+    new URL("../../assets/js/grid-hydrique/dashboard.mjs", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(html, /data-simulation-note hidden/);
+  assert.match(html, /Simulation pédagogique fondée sur les hypothèses du livre/);
+  assert.match(html, /data-grid-legend hidden/);
+  assert.match(html, /Réseau simulé/);
+  assert.match(css, /\.simulation-note\[hidden\]/);
+  assert.match(css, /\.grid-network-legend\[hidden\]/);
+  assert.match(dashboard, /waterMap\.setSimulationPhase\(/);
+  assert.match(dashboard, /layerControlsElement\.hidden\s*=\s*simulated/);
+  assert.match(dashboard, /renderSimulationDetail/);
+  assert.ok(
+    dashboard.indexOf("if (simulationPhase)") < dashboard.indexOf("api.getLocalRestrictions"),
+    "Le détail simulé doit court-circuiter les appels réels",
+  );
+});

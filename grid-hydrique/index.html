@@ -59,6 +59,7 @@
           <div class="water-view-controls"></div>
           <div class="water-layer-controls" role="group" aria-label="Stations affichées"></div>
         </div>
+        <p class="container simulation-note" data-simulation-note hidden>Simulation pédagogique fondée sur les hypothèses du livre, non prévision hydrologique. Tracés illustratifs.</p>
         <div class="container water-map-legend">
           <ul class="restriction-legend" aria-label="Niveaux de restriction">
             <li><span class="legend-swatch legend-swatch--crise" aria-hidden="true"></span>Crise</li>
@@ -67,6 +68,14 @@
             <li><span class="legend-swatch legend-swatch--vigilance" aria-hidden="true"></span>Vigilance</li>
             <li><span class="legend-swatch legend-swatch--aucune" aria-hidden="true"></span>Aucune restriction</li>
           </ul>
+          <div class="grid-network-legend" data-grid-legend hidden>
+            <p><strong>Réseau simulé</strong> — implantation illustrative</p>
+            <ul aria-label="Phases visibles du réseau simulé">
+              <li><span class="network-swatch network-swatch--local" aria-hidden="true"></span>Boucles départementales</li>
+              <li><span class="network-swatch network-swatch--regional" aria-hidden="true"></span>Interconnexions régionales</li>
+              <li><span class="network-swatch network-swatch--national" aria-hidden="true"></span>Corridors nationaux</li>
+            </ul>
+          </div>
         </div>
         <p id="map-keyboard-instructions" class="container fine-print">Au clavier, déplacez la carte avec les flèches, zoomez avec + ou −, puis appuyez sur Entrée pour sélectionner l’élément au centre.</p>
         <aside id="station-detail" class="station-detail" tabindex="-1" aria-labelledby="detail-title" aria-live="polite">
