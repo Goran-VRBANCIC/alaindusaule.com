@@ -575,3 +575,9 @@
 **Problème :** Une suppression non récursive portant sur un unique fichier temporaire et un chemin littéral absolu a elle aussi été rejetée avant exécution. Le blocage porte donc sur `Remove-Item` lui-même dans cette session.
 
 **Solution permanente :** Après vérification du chemin et de l’absence de processus utilisateur, ne plus tenter `Remove-Item` dans cet environnement. Pour les artefacts temporaires exacts créés par la recette, employer directement `System.IO.File.Delete` ou `System.IO.Directory.Delete` avec un chemin absolu validé, un appel par cible.
+
+## 2026-09-01 17:23:16 +02:00 — Lancement du serveur de test
+
+**Demande utilisateur :** Lancer le serveur de test du site.
+
+**Solution :** Serveur statique `http-server` lancé en session persistante sur `http://127.0.0.1:4174/`. La page `/grid-hydrique/` répond en `200 OK` et les modules `.mjs` sont correctement servis avec le type `application/javascript`.
