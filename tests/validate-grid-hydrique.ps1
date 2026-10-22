@@ -58,26 +58,26 @@ if (Test-Path -LiteralPath $pagePath) {
 }
 
 $cssPath = Join-Path $projectRoot 'assets/css/grid-hydrique.css'
-Assert-True (Test-Path -LiteralPath $cssPath) "La feuille CSS du dashboard est absente"
+Assert-True (Test-Path -LiteralPath $cssPath) 'La feuille CSS du dashboard est absente'
 if (Test-Path -LiteralPath $cssPath) {
     $css = Get-Content -Raw -Encoding UTF8 -LiteralPath $cssPath
-    $cssBlock = "(?:(?!" + [char]0x7D + ")[\s\S])*?"
-    Assert-True ($css.Contains(".water-hero") -and $css.Contains("padding-block: clamp(2rem, 4vw, 4rem)")) "Le premier ecran conserve trop espace vertical"
-    Assert-True ($css.Contains(".water-map") -and $css.Contains("min-height: clamp(30rem, 68svh, 40rem)")) "La hauteur mobile de la carte est incorrecte"
-    Assert-True ($css.Contains("@media (min-width: 48rem)") -and $css.Contains("min-height: clamp(38rem, 72svh, 52rem)")) "La hauteur desktop de la carte est incorrecte"
-    Assert-True (-not ($css -match ("\.water-map-layout\s*\{" + $cssBlock + "grid-template-columns"))) "Le panneau de detail comprime encore la carte"
-    Assert-True (-not ($css -match ("\.station-detail\s*\{" + $cssBlock + "position:\s*sticky"))) "Le panneau de detail doit rester sous la carte"
-    Assert-True ($css.Contains(".water-map-controls") -and $css.Contains(".water-view-controls") -and $css.Contains("flex-wrap: wrap") -and $css.Contains("gap: 0.75rem")) "Les commandes de carte doivent etre flexibles et revenir a la ligne"
-    Assert-True ($css.Contains(".water-control-group") -and $css.Contains("border: 0")) "Les groupes de commandes ne doivent pas avoir de bordure"
-    Assert-True ($css.Contains(".water-control-group[hidden]") -and $css.Contains(".simulation-note[hidden]") -and $css.Contains(".grid-network-legend[hidden]") -and $css.Contains(".water-layer-controls[hidden]")) "Les controles masques doivent rester absents du rendu"
-    Assert-True ($css -notmatch "#[0-9a-fA-F]{3,8}|rgba?\(") "La feuille Grid contient une couleur litterale"
-    Assert-True ($css.Contains(".zone-detail__item")) "Le detail de zone doit disposer d’un style dedie"
-    Assert-True ($css.Contains(".water-layer-toggle")) "Le controle de couche doit rester present dans la feuille de style"
-    Assert-True ($css.Contains("min-height: 44px")) "Les cibles interactives doivent conserver 44px de hauteur minimale"
-    Assert-True (-not $css.Contains("  order:")) "Les elements interactifs ne doivent pas diverger de ordre DOM"
-    Assert-True ($css.Contains("@media (max-width: 35.99rem)") -and $css.Contains("flex-wrap: wrap")) "La navigation mobile doit revenir a la ligne"
-    Assert-True ($css.Contains("content-visibility: auto")) "Le contenu narratif differe est absent"
-    Assert-True ($css.Contains("color-scheme: light")) "Le rendu clair explicite est absent"
+    $cssBlock = '(?:(?!' + [char]0x7D + ')[\s\S])*?'
+    Assert-True ($css.Contains('.water-hero') -and $css.Contains('padding-block: clamp(2rem, 4vw, 4rem)')) 'Le premier ecran conserve trop espace vertical'
+    Assert-True ($css.Contains('.water-map') -and $css.Contains('min-height: clamp(30rem, 68svh, 40rem)')) 'La hauteur mobile de la carte est incorrecte'
+    Assert-True ($css.Contains('@media (min-width: 48rem)') -and $css.Contains('min-height: clamp(38rem, 72svh, 52rem)')) 'La hauteur desktop de la carte est incorrecte'
+    Assert-True (-not ($css -match ('\.water-map-layout\s*\{' + $cssBlock + 'grid-template-columns'))) 'Le panneau de detail comprime encore la carte'
+    Assert-True (-not ($css -match ('\.station-detail\s*\{' + $cssBlock + 'position:\s*sticky'))) 'Le panneau de detail doit rester sous la carte'
+    Assert-True ($css.Contains('.water-map-controls') -and $css.Contains('.water-view-controls') -and $css.Contains('flex-wrap: wrap') -and $css.Contains('gap: 0.75rem')) 'Les commandes de carte doivent etre flexibles et revenir a la ligne'
+    Assert-True ($css.Contains('.water-control-group') -and $css.Contains('border: 0')) 'Les groupes de commandes ne doivent pas avoir de bordure'
+    Assert-True ($css.Contains('.water-control-group[hidden]') -and $css.Contains('.simulation-note[hidden]') -and $css.Contains('.grid-network-legend[hidden]') -and $css.Contains('.water-layer-controls[hidden]')) 'Les controles masques doivent rester absents du rendu'
+    Assert-True ($css -notmatch '#[0-9a-fA-F]{3,8}|rgba?\(') 'La feuille Grid contient une couleur litterale'
+    Assert-True ($css.Contains('.zone-detail__item')) 'Le detail de zone doit disposer d’un style dedie'
+    Assert-True ($css.Contains('.water-layer-toggle')) 'Le controle de couche doit rester present dans la feuille de style'
+    Assert-True ($css.Contains('min-height: 44px')) 'Les cibles interactives doivent conserver 44px de hauteur minimale'
+    Assert-True (-not $css.Contains('  order:')) 'Les elements interactifs ne doivent pas diverger de ordre DOM'
+    Assert-True ($css.Contains('@media (max-width: 35.99rem)') -and $css.Contains('flex-wrap: wrap')) 'La navigation mobile doit revenir a la ligne'
+    Assert-True ($css.Contains('content-visibility: auto')) 'Le contenu narratif differe est absent'
+    Assert-True ($css.Contains('color-scheme: light')) 'Le rendu clair explicite est absent'
 }
 
 $homePath = Join-Path $projectRoot 'index.html'
