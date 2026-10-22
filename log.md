@@ -1,5 +1,11 @@
 # Journal du projet
 
+## 2026-10-22 12:34:06 +02:00 - Suppression du plan obsolete
+
+**Demande :** L'utilisateur a confirme la suppression du plan initial devenu obsolete.
+
+**Solution :** Suppression du fichier non suivi `docs/superpowers/plans/2026-08-29 - dashboard_plan.md`. Le fichier n'etait pas versionne ; aucun historique Git ni fichier du site n'a ete modifie par cette suppression. La suppression est irreversible sauf restauration manuelle depuis une copie.
+
 ## 2026-10-22 12:32:46 +02:00 - Clarification du plan initial
 
 **Question soumise :** L'utilisateur a demande si le fichier `docs/superpowers/plans/2026-08-29 - dashboard_plan.md` avait ete execute.
