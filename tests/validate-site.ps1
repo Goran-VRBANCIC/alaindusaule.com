@@ -138,8 +138,8 @@ $cssPath = Join-Path $projectRoot 'assets/css/site.css'
 Assert-True (Test-Path -LiteralPath $cssPath) 'site.css est absent'
 if (Test-Path -LiteralPath $cssPath) {
     $css = Get-Content -LiteralPath $cssPath -Raw -Encoding UTF8
-    Assert-True ($css -match '\.section--water\s+\.button--light\s*\{[^\x7D]*color:\s*var\(--water-deep\)') 'Le bouton clair doit conserver un texte sombre sur fond blanc'
-    Assert-True ($css -match '\.site-footer\s+\.fine-print\s*\{[^\x7D]*color:\s*color-mix\(in\s+srgb,\s*var\(--paper\)\s+76%,\s*transparent\)') 'Le texte secondaire du pied de page doit rester lisible sur fond sombre'
+    Assert-True ($css -match '\.section--water\s+\.button--light\s*\{(?:(?!\})[\s\S])*?color:\s*var\(--water-deep\)') 'Le bouton clair doit conserver un texte sombre sur fond blanc'
+    Assert-True ($css -match '\.site-footer\s+\.fine-print\s*\{(?:(?!\})[\s\S])*?color:\s*color-mix\(in\s+srgb,\s*var\(--paper\)\s+76%,\s*transparent\)') 'Le texte secondaire du pied de page doit rester lisible sur fond sombre'
 }
 
 $cover640Avif = Join-Path $projectRoot 'assets/images/cover/leau-ou-le-chaos-640.avif'

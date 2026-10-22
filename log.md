@@ -1,5 +1,13 @@
 # Journal du projet
 
+## 2026-10-22 12:39:26 +02:00 - Second diagnostic de la CI
+
+**Probleme constate :** Le premier correctif pousse (`8c58378`) echouait encore au parsing PowerShell 7 sur l'expression de classe de caracteres utilisee pour exclure l'accolade fermante.
+
+**Solution :** Les tests utilisent maintenant un regard negatif pour parcourir le contenu CSS jusqu'a la prochaine accolade, sans expression de classe de caracteres problematique pour le parseur PowerShell 7.
+
+**Verification locale :** Les validateurs dashboard et site reussissent apres ce second correctif. Le nouveau commit et le run GitHub Actions restent a publier et confirmer.
+
 ## 2026-10-22 12:36:27 +02:00 - Echec de publication GitHub Pages
 
 **Probleme soumis :** La publication GitHub Pages a echoue pendant le job `build`, ce qui a empeche le job `deploy` de demarrer.
