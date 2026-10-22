@@ -129,7 +129,10 @@ if (Test-Path -LiteralPath $dashboardPath) {
     Assert-True ($dashboard -match 'visibilitychange') 'La suspension en arrière-plan est absente'
     Assert-True ($dashboard -match 'Promise\.allSettled') 'La dégradation indépendante des sources est absente'
     $doubleQuote = [char]0x22
-    Assert-True ($dashboard.Contains(('matchMedia(' + $doubleQuote + '(min-width: 48rem)' + $doubleQuote + ')'))) 'Le breakpoint DOM responsive est absent'
+    $openParen = [char]0x28
+    $closeParen = [char]0x29
+    $desktopBreakpoint = 'matchMedia' + $openParen + $doubleQuote + $openParen + 'min-width: 48rem' + $closeParen + $doubleQuote + $closeParen
+    Assert-True ($dashboard.Contains($desktopBreakpoint)) 'Le breakpoint DOM responsive est absent'
     Assert-True ($dashboard.Contains('desktopLayoutMedia.addEventListener')) 'Le DOM ne suit pas les changements de largeur'
     Assert-True ($dashboard.Contains(('const PMTILES_MODULE_URL = ' + $doubleQuote + 'https://unpkg.com/pmtiles@3.2.0/dist/index.js' + $doubleQuote))) 'PMTiles doit etre epingle en 3.2.0'
     Assert-True ($dashboard.Contains('zoneLoadPromise ||= import(PMTILES_MODULE_URL)')) 'PMTiles doit etre charge uniquement a la demande'
