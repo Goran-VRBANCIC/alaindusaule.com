@@ -128,12 +128,15 @@ if (Test-Path -LiteralPath $dashboardPath) {
     Assert-True ($dashboard -match '15\s*\*\s*60\s*\*\s*1000') 'L’intervalle de quinze minutes est absent'
     Assert-True ($dashboard -match 'visibilitychange') 'La suspension en arrière-plan est absente'
     Assert-True ($dashboard -match 'Promise\.allSettled') 'La dégradation indépendante des sources est absente'
-    Assert-True ($dashboard.Contains('matchMedia("(min-width: 48rem)")')) 'Le breakpoint DOM responsive est absent'
+    $doubleQuote = [char]0x22
+    Assert-True ($dashboard.Contains(('matchMedia(' + $doubleQuote + '(min-width: 48rem)' + $doubleQuote + ')'))) 'Le breakpoint DOM responsive est absent'
     Assert-True ($dashboard.Contains('desktopLayoutMedia.addEventListener')) 'Le DOM ne suit pas les changements de largeur'
-    Assert-True ($dashboard.Contains('const PMTILES_MODULE_URL = "https://unpkg.com/pmtiles@3.2.0/dist/index.js"')) 'PMTiles doit etre epingle en 3.2.0'
+    Assert-True ($dashboard.Contains(('const PMTILES_MODULE_URL = ' + $doubleQuote + 'https://unpkg.com/pmtiles@3.2.0/dist/index.js' + $doubleQuote))) 'PMTiles doit etre epingle en 3.2.0'
     Assert-True ($dashboard.Contains('zoneLoadPromise ||= import(PMTILES_MODULE_URL)')) 'PMTiles doit etre charge uniquement a la demande'
     $singleQuote = [char]0x27
-    Assert-True (-not $dashboard.Contains('from "pmtiles"') -and -not $dashboard.Contains(('from ' + $singleQuote + 'pmtiles' + $singleQuote))) 'PMTiles ne doit pas etre importe statiquement'
+    $staticPmtilesImport = 'from ' + $doubleQuote + 'pmtiles' + $doubleQuote
+    $staticPmtilesImportSingle = 'from ' + $singleQuote + 'pmtiles' + $singleQuote
+    Assert-True (-not $dashboard.Contains($staticPmtilesImport) -and -not $dashboard.Contains($staticPmtilesImportSingle)) 'PMTiles ne doit pas etre importe statiquement'
     Assert-True ($dashboard.Contains('setupMapControls')) 'La configuration des commandes de carte est absente'
     Assert-True ($dashboard.Contains('loadZoneLayers')) 'Le chargement des zones est absent'
     Assert-True ($dashboard.Contains('setMapMode')) 'Le changement de mode cartographique est absent'
@@ -152,4 +155,4 @@ if ($failures.Count -gt 0) {
     exit 1
 }
 
-Write-Host 'Validation dashboard réussie.'
+Write-Host 'Validation dashboard reussie.'
