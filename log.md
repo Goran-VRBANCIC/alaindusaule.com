@@ -1,5 +1,15 @@
 # Journal du projet
 
+## 2026-10-22 12:36:27 +02:00 - Echec de publication GitHub Pages
+
+**Probleme soumis :** La publication GitHub Pages a echoue pendant le job `build`, ce qui a empeche le job `deploy` de demarrer.
+
+**Diagnostic :** Le shell PowerShell 7 de GitHub Actions refusait d'analyser les expressions regulieres `[^}]*` des validateurs CSS, alors que Windows PowerShell les executait localement.
+
+**Solution :** Remplacement de `[^}]*` par `[^\x7D]*` dans les deux validateurs PowerShell pour conserver le meme filtrage CSS sans declencher l'erreur d'analyse de PowerShell 7.
+
+**Verification locale :** `tests/validate-grid-hydrique.ps1`, `tests/validate-site.ps1`, `node --test` (69 tests) et `git diff --check` reussissent. La validation GitHub Actions reste a confirmer apres le push.
+
 ## 2026-10-22 12:34:06 +02:00 - Suppression du plan obsolete
 
 **Demande :** L'utilisateur a confirme la suppression du plan initial devenu obsolete.
