@@ -83,7 +83,7 @@ Assert-True ($css.Contains('color-scheme: light')) 'Le rendu clair explicite est
 
 $homePath = Join-Path $projectRoot 'index.html'
 $homeHtml = [System.IO.File]::ReadAllText($homePath)
-$dashboard = [System.IO.File]::ReadAllText($pagePath)
+$dashboard = [string]::Join([Environment]::NewLine, @(Get-Content -Encoding UTF8 -LiteralPath $pagePath))
 Assert-True ($homeHtml.Contains('href="grid-hydrique/"')) 'L’accueil ne propose pas le dashboard'
 Assert-True ($dashboard.Contains('>Anticiper<')) 'Le bénéfice Anticiper est absent'
 Assert-True ($dashboard.Contains('>Relier<')) 'Le bénéfice Relier est absent'
