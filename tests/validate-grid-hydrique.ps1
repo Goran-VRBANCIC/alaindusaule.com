@@ -84,11 +84,12 @@ Assert-True ($css.Contains('color-scheme: light')) 'Le rendu clair explicite est
 $homePath = Join-Path $projectRoot 'index.html'
 $homeHtml = Get-Content -Raw -Encoding UTF8 -LiteralPath $homePath
 $dashboard = if (Test-Path -LiteralPath $pagePath) { Get-Content -Raw -Encoding UTF8 -LiteralPath $pagePath } else { '' }
-Assert-True ($homeHtml -match 'href="grid-hydrique/"') 'L’accueil ne propose pas le dashboard'
-Assert-True ($dashboard -match '>Anticiper<') 'Le bénéfice Anticiper est absent'
-Assert-True ($dashboard -match '>Relier<') 'Le bénéfice Relier est absent'
-Assert-True ($dashboard -match '>S.curiser<') 'Le bénéfice Securiser est absent'
-Assert-True ($dashboard -match 'https://www\.fnac\.com/a23394930/') 'Le CTA Fnac est absent'
+Assert-True ($homeHtml.Contains('href="grid-hydrique/"')) 'L’accueil ne propose pas le dashboard'
+Assert-True ($dashboard.Contains('>Anticiper<')) 'Le bénéfice Anticiper est absent'
+Assert-True ($dashboard.Contains('>Relier<')) 'Le bénéfice Relier est absent'
+$secureBenefit = '>S' + [char]0xE9 + 'curiser<'
+Assert-True ($dashboard.Contains($secureBenefit)) 'Le bénéfice Securiser est absent'
+Assert-True ($dashboard.Contains('https://www.fnac.com/a23394930/')) 'Le CTA Fnac est absent'
 
 $sitemapPath = Join-Path $projectRoot 'sitemap.xml'
 [xml]$sitemap = Get-Content -Raw -LiteralPath $sitemapPath
