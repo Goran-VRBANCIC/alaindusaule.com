@@ -1,5 +1,91 @@
 # Journal du projet
 
+## 2026-10-22 15:12:12 +02:00 - Report de la question de qualite video
+
+**Decision utilisateur :** Laisser pour l'instant la lecture YouTube en qualite automatique.
+
+**Solution :** Aucune modification du site. L'integration YouTube reste en place ; une eventualite d'hebergement HD externe pourra etre reetudiee ulterieurement.
+
+## 2026-10-22 15:10:44 +02:00 - Qualite automatique insuffisante pour les visiteurs
+
+**Question soumise :** Peut-on eviter que les visiteurs abandonnent la video si YouTube la demarre en 360p ?
+
+**Reponse :** Il n'existe pas de parametre YouTube actuel et fiable pour imposer 1080p dans une iframe : les fonctions API de qualite et l'ancien parametre `hd` sont abandonnes ou ignores. Deux options restent possibles : conserver YouTube avec un lien visible « Ouvrir sur YouTube » / « Choisir 1080p », ou servir une version 1080p directement depuis le site ou un hebergeur video dedie. Seule la seconde option maitrise reellement la source HD, au prix d'un fichier et d'une bande passante plus lourds.
+
+## 2026-10-22 15:08:41 +02:00 - Stabilite du 1080p forcee
+
+**Probleme soumis :** Verification de la lecture apres selection manuelle du 1080p.
+
+**Diagnostic :** Apres deux minutes en 1080p force, les statistiques indiquent 1920x1080 actuel et optimal, 24578 Kbps de debit, 34,49 secondes de buffer et 0 image perdue. La video et le poste sont donc parfaitement capables de lire le 1080p ; seule la selection automatique de YouTube reste trop conservative pour cette video. Aucune correction du site ni reupload n'est justifie.
+
+## 2026-10-22 15:05:34 +02:00 - Resolution toujours a 360p apres deux minutes
+
+**Probleme soumis :** Apres deux minutes, la video reste en 360p malgre un debit et un buffer tres eleves.
+
+**Diagnostic :** Les statistiques indiquent 640x360 actuel et optimal, un viewport de 2055x1156, 31550 Kbps de debit, 124,47 secondes de buffer et 0 image perdue. Le lecteur et le reseau ne limitent donc pas la lecture. YouTube maintient volontairement son choix automatique a 360p pour cette video ; le statut non repertorie et le traitement HD ne sont pas en cause. Une comparaison des statistiques avec une video qui demarre en 1080p permettrait d'isoler un eventuel ecart de codec ou de session.
+
+## 2026-10-22 15:03:33 +02:00 - Onglet d'aide YouTube sur la faible qualite
+
+**Probleme soumis :** Un onglet affiche « Faible qualité vidéo après la mise en ligne - Aide YouTube ».
+
+**Solution :** Il s'agit du titre d'un article d'aide ouvert dans le navigateur, pas d'une alerte associee a la video. L'article traite notamment du delai de traitement HD apres un televersement ; les statistiques de la video montrent deja des flux 1920x1080 disponibles, donc ce diagnostic de traitement incomplet ne s'applique pas ici.
+
+## 2026-10-22 15:02:10 +02:00 - Analyse des statistiques de lecture YouTube
+
+**Question soumise :** Les statistiques expliquent-elles pourquoi la video demarre en 360p alors que d'autres videos demarrent en 1080p ?
+
+**Solution :** Les statistiques montrent un lecteur de 2055x1156, un debit mesure de 11970 Kbps, aucun paquet perdu et un buffer de 18,13 secondes. La video est donc lue dans de bonnes conditions ; YouTube a simplement selectionne 640x360 comme resolution actuelle et optimale au moment de la capture. Ce choix automatique n'est pas lie au statut non repertorie ni a l'absence de flux HD. Il faut verifier si la resolution monte apres 30 a 60 secondes ; sinon, il s'agit d'une selection adaptative trop conservative pour cette video.
+
+## 2026-10-22 15:00:37 +02:00 - Visibilite non repertoriee et qualite HD
+
+**Question soumise :** La video pouvait-elle demarrer en 360p parce qu'elle etait auparavant non repertoriee ?
+
+**Reponse :** Non. Le statut non repertorie controle la visibilite et la decouvrabilite, pas les resolutions disponibles. YouTube recommande meme de mettre une nouvelle video en non repertoriee le temps que les qualites HD soient traitees, puis de la rendre publique. La video dispose actuellement de flux 1920x1080 ; la qualite automatique basse ne vient donc pas de ce statut.
+
+## 2026-10-22 14:48:52 +02:00 - Lecture YouTube en 360p sur PC
+
+**Question soumise :** Pourquoi YouTube choisit-il 360p malgré une connexion fibre et comment définir 1080p par défaut ?
+
+**Réponse :** YouTube ne déduit pas la qualité de la seule vitesse de connexion : il tient aussi compte de la taille du lecteur, du navigateur, du format disponible et de mesures adaptatives pendant la lecture. Sur ordinateur, le réglage officiel est fait vidéo par vidéo via `Paramètres > Qualité > 1080p` ; le réglage global « qualité vidéo préférée » est principalement documenté pour les applications mobiles. L’intégration du site ne peut pas imposer 1080p, car les anciennes commandes de qualité de l’API YouTube ne sont plus prises en charge. Le code du site reste inchangé.
+
+## 2026-10-22 14:31:09 +02:00 - Qualité de lecture YouTube
+
+**Question soumise :** La vidéo démarre en 360p ; peut-on forcer la qualité maximale dans l’intégration ?
+
+**Réponse :** Non, pas de façon fiable dans une iframe YouTube. La documentation officielle indique que les fonctions de réglage de qualité de l’IFrame Player API ne sont plus prises en charge et que YouTube adapte automatiquement le flux aux conditions de lecture. Aucune modification trompeuse n’a été ajoutée ; la solution HD garantie nécessiterait de servir directement un fichier vidéo maîtrisé, ou d’ouvrir la vidéo sur YouTube pour permettre le choix manuel de la qualité.
+
+## 2026-10-22 14:27:22 +02:00 - Intégration validée du documentaire
+
+**Décision utilisateur :** Valider l’emplacement après le hero avec la présentation visuelle de la proposition 3.
+
+**Solution :** Ajout d’une section `#documentaire` après le hero, avec affiche CSS locale, lecture YouTube différée au clic via `youtube-nocookie.com`, lien vers la playlist et présentation des trois axes Stocker / Répartir / Piloter. Les contrôles d’accessibilité, de positionnement et de chargement différé sont couverts par le validateur du site et un test ciblé du module vidéo.
+
+**Vérifications :** validation PowerShell du site réussie pour 6 pages, vérification JavaScript et tests Node réussis (5/5), test du clic vidéo réussi, `git diff --check` sans erreur.
+
+## 2026-10-22 14:21:36 +02:00 - Combinaison des propositions 1 et 3
+
+**Decision utilisateur :** Placer la video apres le hero, avec la presentation visuelle de la proposition 3.
+
+**Solution :** Une maquette pleine largeur combine ces choix : le hero reste consacre au livre, puis une section chaude dediee au Grid Hydrique affiche le titre, le lecteur documentaire a gauche, le texte explicatif a droite et les trois axes Stocker / Repartir / Piloter en dessous. Verification HTTP 200 et maquette combinee chargee.
+
+## 2026-10-22 14:18:26 +02:00 - Apercu pleine largeur des propositions
+
+**Demande utilisateur :** Les miniatures etaient trop petites pour juger les trois emplacements de la video.
+
+**Solution :** La maquette a ete remplacee par un apercu pleine largeur avec trois onglets interactifs. Chaque onglet affiche une composition proche de la page d'accueil reelle : video apres le hero, video dans le hero, ou video dans la section Grid Hydrique. Verification HTTP 200 et contenu pleine largeur presentes.
+
+## 2026-10-22 14:16:37 +02:00 - Serveur de maquette inaccessible
+
+**Probleme soumis :** Le lien `http://localhost:59343` affichait « ce site est inaccessible ».
+
+**Solution :** Diagnostic confirme que le processus Node de la maquette avait ete tue a la fin de la commande Windows. Le serveur a ete relance dans un processus persistant ; verification effectuee sur le port `59343` : ecoute active et reponse HTTP 200 avec la maquette chargee.
+
+## 2026-10-22 14:14:12 +02:00 - Proposition d'integration du documentaire
+
+**Demande utilisateur :** Integrer sur la page d'accueil le documentaire YouTube consacre au Grid Hydrique.
+
+**Solution proposee :** Une maquette interactive compare trois emplacements : apres le hero, dans le hero, ou dans la section Grid Hydrique. La variante apres le hero est recommandee, avec chargement de la video au clic afin de conserver de bonnes performances.
+
 ## 2026-10-22 14:08:46 +02:00 - Confirmation de publication
 
 **Question soumise :** L'utilisateur demande confirmation de l'etat de la publication GitHub Pages.

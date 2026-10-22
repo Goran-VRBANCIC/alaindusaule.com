@@ -103,6 +103,18 @@ $index = if (Test-Path -LiteralPath $indexPath) { Get-Content -LiteralPath $inde
 $book = if (Test-Path -LiteralPath $bookPath) { Get-Content -LiteralPath $bookPath -Raw -Encoding UTF8 } else { '' }
 $press = if (Test-Path -LiteralPath $pressPath) { Get-Content -LiteralPath $pressPath -Raw -Encoding UTF8 } else { '' }
 
+$heroPosition = $index.IndexOf('<section class="hero"')
+$heroEndPosition = $index.IndexOf('</section>', $heroPosition)
+$videoSectionPosition = $index.IndexOf('<section id="documentaire"')
+Assert-True ($videoSectionPosition -gt $heroEndPosition) 'Le documentaire doit suivre le hero'
+Assert-True ($index -match 'id="documentaire"') 'La section documentaire est absente'
+Assert-True ($index -match 'data-documentary-video') 'Le déclencheur du documentaire est absent'
+Assert-True ($index -match 'TOtUbkWPqfA') 'L’identifiant YouTube du documentaire est absent'
+Assert-True ($index -notmatch '<iframe[^>]+TOtUbkWPqfA') 'L’iframe YouTube ne doit pas être chargée au départ'
+Assert-True ($index -match 'assets/js/documentary-video\.js') 'Le module du documentaire est absent'
+$repartirAxis = 'R' + [char]0xE9 + 'partir</strong>'
+Assert-True ($index -match 'Stocker</strong>' -and $index -match $repartirAxis -and $index -match 'Piloter</strong>') 'Les trois axes du Grid sont absents de la section documentaire'
+
 Assert-True ($index -match '"@type"\s*:\s*"WebSite"') 'Accueil : schema WebSite absent'
 Assert-True ($index -match '"@type"\s*:\s*"Person"') 'Accueil : schema Person absent'
 Assert-True ($book -match '"@type"\s*:\s*"Book"') 'Livre : schema Book absent'
