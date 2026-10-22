@@ -76,7 +76,8 @@ Assert-True ($css.Contains('.zone-detail__item')) 'Le détail de zone doit dispo
 Assert-True ($css.Contains('.water-layer-toggle')) 'Le contrôle de couche est absent'
 Assert-True ($css.Contains('min-height: 44px')) 'Les cibles interactives doivent conserver 44px de hauteur minimale'
 Assert-True (-not $css.Contains('  order:')) 'Les éléments interactifs ne doivent pas diverger de ordre DOM'
-Assert-True ($css.Contains('@media (max-width: 35.99rem)')) 'La navigation mobile est absente'
+$mobileMedia = '@media ' + [char]0x28 + 'max-width: 35.99rem' + [char]0x29
+Assert-True ($css.Contains($mobileMedia)) 'La navigation mobile est absente'
 Assert-True ($css.Contains('content-visibility: auto')) 'Le contenu narratif différé est absent'
 Assert-True ($css.Contains('color-scheme: light')) 'Le rendu clair explicite est absent'
 
