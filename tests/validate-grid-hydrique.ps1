@@ -42,7 +42,8 @@ if (Test-Path -LiteralPath $pagePath) {
     Assert-True ($mapLayoutPosition -lt $mapControlsPosition) 'Le canevas doit preceder les commandes dans le DOM mobile'
     Assert-True ($html -match '<html lang="fr-FR"') 'La langue fr-FR est absente'
     Assert-True ($html -match '<link rel="canonical" href="https://alaindusaule\.fr/grid-hydrique/"') 'La canonical est incorrecte'
-    Assert-True (([regex]::Matches($html, '<h1(?:\s|>)', 'IgnoreCase')).Count -eq 1) 'La page doit avoir un seul h1'
+    $h1Pattern = [string]::Concat([char]0x3C, 'h1', [char]0x28, [char]0x3F, [char]0x3A, '\s|>', [char]0x29)
+    Assert-True (([regex]::Matches($html, $h1Pattern, 'IgnoreCase')).Count -eq 1) 'La page doit avoir un seul h1'
     Assert-True ($html -match 'class="skip-link"') 'Le lien d’évitement est absent'
     Assert-True ($html -match 'id="indicateurs"') 'La région des indicateurs est absente'
     Assert-True ($html -match 'id="carte-hydrique"') 'Le conteneur de carte est absent'
