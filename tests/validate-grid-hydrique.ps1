@@ -75,9 +75,9 @@ if (Test-Path -LiteralPath $cssPath) {
     Assert-True ($css -match ('\.water-layer-controls\[hidden\]\s*\{' + $cssBlock + 'display:\s*none')) 'Les contrôles de stations masqués restent visibles'
     Assert-True ($css -notmatch '#[0-9a-fA-F]{3,8}|rgba?\(') 'La feuille Grid contient une couleur littérale'
     Assert-True ($css -match '\.zone-detail__item\s*\{') 'Le détail de zone doit disposer d’un style dédié'
-    $waterLayerTogglePattern = '\.water-layer-toggle\s*\{' + $cssBlock + 'min-height:\s*44px'
+    $waterLayerTogglePattern = [string]::Concat('\.water-layer-toggle\s*\{', $cssBlock, 'min-height:\s*44px')
     Assert-True ($css -match $waterLayerTogglePattern) 'Les cibles interactives doivent conserver 44px de hauteur minimale'
-    $interactiveOrderPattern = '\.(?:water-live-summary|water-map-layout|water-layer-controls|station-detail)\s*\{' + $cssBlock + '(?:^|[\r\n])\s*order:'
+    $interactiveOrderPattern = [string]::Concat('\.(?:water-live-summary|water-map-layout|water-layer-controls|station-detail)\s*\{', $cssBlock, '(?:^|[\r\n])\s*order:')
     Assert-True ($css -notmatch $interactiveOrderPattern) 'Les elements interactifs ne doivent pas diverger de ordre DOM'
     Assert-True ($css -match '@media\s*\(max-width:\s*35\.99rem\)[\s\S]*?\.nav-list\s*\{[\s\S]*?flex-wrap:\s*wrap') 'La navigation mobile doit revenir a la ligne'
     Assert-True ($css -match 'content-visibility:\s*auto') 'Le contenu narratif différé est absent'
