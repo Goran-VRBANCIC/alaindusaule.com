@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 
-$projectRoot = Split-Path -Parent $PSScriptRoot
+$projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $pagePath = Join-Path $projectRoot 'grid-hydrique/index.html'
 $failures = [System.Collections.Generic.List[string]]::new()
 
@@ -14,7 +14,7 @@ function Assert-True {
 Assert-True (Test-Path -LiteralPath $pagePath) 'La page grid-hydrique/index.html est absente'
 
 if (Test-Path -LiteralPath $pagePath) {
-    $html = Get-Content -Raw -Encoding UTF8 -LiteralPath $pagePath
+    $html = [System.IO.File]::ReadAllText($pagePath)
     $mapSectionPosition = $html.IndexOf('<section class="water-map-section"')
     $kpiSectionPosition = $html.IndexOf('<section id="indicateurs"')
     $liveSummaryPosition = $html.IndexOf('<div class="container water-live-summary"')
@@ -82,8 +82,8 @@ Assert-True ($css.Contains('content-visibility: auto')) 'Le contenu narratif dif
 Assert-True ($css.Contains('color-scheme: light')) 'Le rendu clair explicite est absent'
 
 $homePath = Join-Path $projectRoot 'index.html'
-$homeHtml = Get-Content -Raw -Encoding UTF8 -LiteralPath $homePath
-$dashboard = Get-Content -Raw -Encoding UTF8 -LiteralPath $pagePath
+$homeHtml = [System.IO.File]::ReadAllText($homePath)
+$dashboard = [System.IO.File]::ReadAllText($pagePath)
 Assert-True ($homeHtml.Contains('href="grid-hydrique/"')) 'L’accueil ne propose pas le dashboard'
 Assert-True ($dashboard.Contains('>Anticiper<')) 'Le bénéfice Anticiper est absent'
 Assert-True ($dashboard.Contains('>Relier<')) 'Le bénéfice Relier est absent'
