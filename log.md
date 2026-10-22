@@ -1,5 +1,11 @@
 # Journal du projet
 
+## 2026-10-22 14:08:46 +02:00 - Confirmation de publication
+
+**Question soumise :** L'utilisateur demande confirmation de l'etat de la publication GitHub Pages.
+
+**Reponse :** Le workflow `39772097081` est termine avec succes sur le commit `f8b0858`. Le dashboard et le sitemap repondent tous deux HTTP 200.
+
 ## 2026-10-22 13:38:02 +02:00 - Publication GitHub Pages retablie
 
 **Probleme soumis :** Le workflow `Deploy static site to Pages` echouait pendant `build`, donc le deploiement etait ignore.
