@@ -1,5 +1,33 @@
 # Journal du projet
 
+## 2026-10-22 12:30:16 +02:00 - Correction des points mineurs de la revue
+
+**Demande :** L'utilisateur a demande la correction des points mineurs identifies pendant la revue locale.
+
+**Solution :** La CI GitHub Pages execute maintenant les tests racine et les tests du dashboard. Le validateur du dashboard controle ces deux groupes de tests. Les espaces finaux de la specification des zones et la ligne vide finale de `tests/color-tokens.test.mjs` ont ete retires.
+
+**Verification :** 68 tests Node executes avec la commande CI, puis le test de contact ; validation du dashboard et validation des 6 pages reussies ; `git diff --check` propre. Aucun commit ni push effectue.
+
+## 2026-10-22 12:28:39 +02:00 - Revue locale avant publication
+
+**Question soumise :** L'utilisateur a confirme la revue locale du projet avant toute publication.
+
+**Revue / resultat :** Aucun defaut bloquant releve. Le projet local contient le dashboard `/grid-hydrique/`, ses donnees et son sitemap a 5 URL. Les donnees contiennent 3 883 stations hydrometriques et 2 097 stations piezometriques, sans doublon de code. Les exclusions Google Search Console restent normales (redirection et canonique correcte). Aucun fichier applicatif n'a ete modifie et aucun push n'a ete effectue.
+
+**Verification :** `node --test` : 69 tests passes ; `tests/validate-site.ps1` : 6 pages validees ; `tests/validate-grid-hydrique.ps1` : validation reussie. `git diff --check` signale seulement deux espaces finaux dans une specification et une ligne vide finale dans `tests/color-tokens.test.mjs`. La CI GitHub Pages ne lance pas les tests racine `tests/color-tokens.test.mjs` et `tests/theme.test.mjs`.
+
+## 2026-10-22 12:23:29 +02:00 - Reprise de contexte du projet
+
+**Question soumise :** L'utilisateur ne se souvenait plus ou le projet s'etait arrete apres la carte interactive.
+
+**Reponse / etat retrouve :** La carte interactive a ete largement completee localement : donnees VigiEau et Hub'Eau, vues Departements et Zones, stations stables, zoom national responsive, accessibilite, couleurs partagees et mode pedagogique Grid Hydrique en trois phases. Les controles et validateurs passent. Le dernier etat local est `master` a `fb68514`, mais `origin/master` reste a `b02f79a` ; aucun push n'a ete effectue. Le site publie n'inclut donc pas encore le dashboard `/grid-hydrique/`. Prochaine decision : revoir le contenu local puis confirmer ou non la publication.
+
+## 2026-10-22 12:20:45 +02:00 - Audit Google Search Console
+
+**Probleme soumis :** Google Search Console signale une page avec redirection et une autre page avec balise canonique correcte.
+
+**Diagnostic / solution :** Les deux exclusions sont normales : `http://alaindusaule.fr/` redirige en `301` vers HTTPS et `/index.html` repond en `200` avec la canonique `https://alaindusaule.fr/`. Aucun correctif de balise ou de redirection n'est requis. Le site publie est toutefois en retard sur la branche locale : `/grid-hydrique/` repond `404` et le sitemap publie contient 4 URL, tandis que la branche locale contient la page et un sitemap a 5 URL. Une publication de la branche locale necessiterait une confirmation explicite.
+
 ## 2026-08-30 00:14:00 +02:00 — Fin de session
 
 **Demande :** Arrêter le serveur local et terminer la session pour ce soir.
@@ -605,3 +633,26 @@
 **Demande utilisateur :** Commit et mise à jour du vault, sans push.
 
 **Solution :** Tous les changements fonctionnels étaient déjà commités sur `master`. Le journal du dépôt a été complété, puis la session « alaindusaule.com — Simulation du Grid hydrique » a été créée dans le vault Obsidian avec mise à jour de `wiki/index.md`, `wiki/projects/_index.md`, `wiki/log.md` et `wiki/hot.md`. Le fichier utilisateur non suivi reste hors commit et aucun push n’est effectué.
+## 2026-09-08 10:21:13 +02:00 — Règle mémoire : ne pas supposer `http-server` installé globalement
+
+**Problème :** Le lancement direct avec `http-server` a échoué, car la commande globale n’est pas disponible dans cette session.
+
+**Solution permanente :** Pour lancer le serveur de test de ce dépôt, vérifier la résolution de la commande puis utiliser `npx --yes http-server` lorsque l’installation globale est absente.
+
+## 2026-09-08 10:22:45 +02:00 — Lancement du serveur de test
+
+**Demande utilisateur :** Lancer le serveur de test du site.
+
+**Solution :** Serveur statique `http-server` lancé en session persistante sur `http://127.0.0.1:4174/`. La page `/grid-hydrique/` répond en `200 OK` et les modules `.mjs` sont servis avec le type `application/javascript; charset=UTF-8`.
+
+## 2026-09-27 21:01:12 +02:00 — Lancement du serveur de test
+
+**Demande utilisateur :** Lancer le serveur de test du site.
+
+**Solution :** Serveur statique `http-server` lancé en session persistante sur `http://127.0.0.1:4174/`. La page `/grid-hydrique/` et le module `simulation.mjs` répondent en `200 OK`; le module est servi avec le type `application/javascript; charset=UTF-8`.
+
+## 2026-09-27 23:07:45 +02:00 — Arrêt du serveur de test
+
+**Demande utilisateur :** Arrêter le serveur de test.
+
+**Solution :** Session `http-server` arrêtée proprement avec son signal d’interruption. Vérification effectuée : aucun processus n’écoute plus sur le port `4174`.

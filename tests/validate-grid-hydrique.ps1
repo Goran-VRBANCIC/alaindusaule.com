@@ -107,7 +107,8 @@ if (Test-Path -LiteralPath $workflowPath) {
     Assert-True ($workflow -match 'actions/deploy-pages@v5') 'deploy-pages v5 est absent'
     Assert-True ($workflow -match 'runs-on:\s*ubuntu-latest') 'Le runner standard Ubuntu est absent'
     Assert-True ($workflow -notmatch 'runs-on:\s*[^\r\n]*large') 'Un runner payant est configuré'
-    Assert-True ($workflow -match 'node --test tests/grid-hydrique/\*\.test\.mjs') 'Les tests dashboard ne sont pas exécutés en CI'
+    Assert-True ($workflow -match 'node --test tests/\*\.test\.mjs') 'Les tests racine ne sont pas exécutés en CI'
+    Assert-True ($workflow -match 'node --test [^\r\n]*tests/grid-hydrique/\*\.test\.mjs') 'Les tests dashboard ne sont pas exécutés en CI'
 }
 
 Assert-True (Test-Path -LiteralPath (Join-Path $projectRoot '.nojekyll')) 'Le fichier .nojekyll est absent'

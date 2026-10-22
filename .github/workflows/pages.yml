@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 22
       - name: Run JavaScript tests
-        run: node --test tests/grid-hydrique/*.test.mjs && node tests/contact-script.test.js
+        run: node --test tests/*.test.mjs tests/grid-hydrique/*.test.mjs && node tests/contact-script.test.js
       - name: Install PDF validation dependency
         run: sudo apt-get update && sudo apt-get install --yes poppler-utils
       - name: Validate all site files

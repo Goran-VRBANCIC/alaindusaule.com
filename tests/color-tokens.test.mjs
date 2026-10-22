@@ -44,4 +44,3 @@ test("les codes couleur applicatifs sont uniques et déclarés dans :root", () =
     assert.doesNotMatch(inspected, /\brgba?\(/i, path.relative(root, absolutePath));
   }
 });
-

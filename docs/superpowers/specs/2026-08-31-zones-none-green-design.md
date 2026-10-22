@@ -1,7 +1,7 @@
 # Fond vert des zones sans restriction
 
-**Date :** 2026-08-31  
-**Statut :** conception validée  
+**Date :** 2026-08-31
+**Statut :** conception validée
 **Portée :** vue `Zones` de `/grid-hydrique/`
 
 ## Problème
