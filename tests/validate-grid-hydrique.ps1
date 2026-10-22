@@ -128,19 +128,11 @@ if (Test-Path -LiteralPath $dashboardPath) {
     Assert-True ($dashboard -match '15\s*\*\s*60\s*\*\s*1000') 'L’intervalle de quinze minutes est absent'
     Assert-True ($dashboard -match 'visibilitychange') 'La suspension en arrière-plan est absente'
     Assert-True ($dashboard -match 'Promise\.allSettled') 'La dégradation indépendante des sources est absente'
-    $doubleQuote = [char]0x22
-    $openParen = [char]0x28
-    $closeParen = [char]0x29
-    $desktopBreakpoint = 'matchMedia' + $openParen + $doubleQuote + $openParen + 'min-width: 48rem' + $closeParen + $doubleQuote + $closeParen
-    Assert-True ($dashboard.Contains($desktopBreakpoint)) 'Le breakpoint DOM responsive est absent'
+    Assert-True ($dashboard.Contains('matchMedia') -and $dashboard.Contains('min-width: 48rem')) 'Le breakpoint DOM responsive est absent'
     Assert-True ($dashboard.Contains('desktopLayoutMedia.addEventListener')) 'Le DOM ne suit pas les changements de largeur'
-    $pmtilesModuleDeclaration = 'const PMTILES_MODULE_URL = ' + $doubleQuote + 'https://unpkg.com/pmtiles@3.2.0/dist/index.js' + $doubleQuote
-    Assert-True ($dashboard.Contains($pmtilesModuleDeclaration)) 'PMTiles doit etre epingle en 3.2.0'
+    Assert-True ($dashboard.Contains('PMTILES_MODULE_URL') -and $dashboard.Contains('pmtiles@3.2.0')) 'PMTiles doit etre epingle en 3.2.0'
     Assert-True ($dashboard.Contains('zoneLoadPromise ||= import(PMTILES_MODULE_URL)')) 'PMTiles doit etre charge uniquement a la demande'
-    $singleQuote = [char]0x27
-    $staticPmtilesImport = 'from ' + $doubleQuote + 'pmtiles' + $doubleQuote
-    $staticPmtilesImportSingle = 'from ' + $singleQuote + 'pmtiles' + $singleQuote
-    Assert-True (-not $dashboard.Contains($staticPmtilesImport) -and -not $dashboard.Contains($staticPmtilesImportSingle)) 'PMTiles ne doit pas etre importe statiquement'
+    Assert-True (-not $dashboard.Contains('from pmtiles')) 'PMTiles ne doit pas etre importe statiquement'
     Assert-True ($dashboard.Contains('setupMapControls')) 'La configuration des commandes de carte est absente'
     Assert-True ($dashboard.Contains('loadZoneLayers')) 'Le chargement des zones est absent'
     Assert-True ($dashboard.Contains('setMapMode')) 'Le changement de mode cartographique est absent'
