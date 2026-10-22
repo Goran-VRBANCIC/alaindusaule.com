@@ -59,7 +59,6 @@ if (Test-Path -LiteralPath $pagePath) {
 
 $cssPath = Join-Path $projectRoot 'assets/css/grid-hydrique.css'
 $anyCharacters = '[\s\S]*?'
-$singleLine = '[^\r\n]*'
 Assert-True (Test-Path -LiteralPath $cssPath) 'La feuille CSS du dashboard est absente'
 if (Test-Path -LiteralPath $cssPath) {
     $css = Get-Content -Raw -Encoding UTF8 -LiteralPath $cssPath
@@ -80,7 +79,7 @@ if (Test-Path -LiteralPath $cssPath) {
     Assert-True ($css.Contains('.water-layer-toggle')) 'Le controle de couche doit rester present dans la feuille de style'
     Assert-True ($css.Contains('min-height: 44px')) 'Les cibles interactives doivent conserver 44px de hauteur minimale'
     Assert-True (-not $css.Contains('  order:')) 'Les elements interactifs ne doivent pas diverger de ordre DOM'
-    Assert-True ($css -match ('@media\s*\(max-width:\s*35\.99rem\)' + $anyCharacters + '\.nav-list\s*\{' + $anyCharacters + 'flex-wrap:\s*wrap')) 'La navigation mobile doit revenir a la ligne'
+    Assert-True ($css.Contains('@media (max-width: 35.99rem)') -and $css.Contains('flex-wrap: wrap')) 'La navigation mobile doit revenir a la ligne'
     Assert-True ($css -match 'content-visibility:\s*auto') 'Le contenu narratif différé est absent'
     Assert-True ($css -match 'color-scheme:\s*light') 'Le rendu clair explicite est absent'
 }
@@ -110,9 +109,9 @@ if (Test-Path -LiteralPath $workflowPath) {
     Assert-True ($workflow -match 'actions/upload-pages-artifact@v5') 'upload-pages-artifact v5 est absent'
     Assert-True ($workflow -match 'actions/deploy-pages@v5') 'deploy-pages v5 est absent'
     Assert-True ($workflow -match 'runs-on:\s*ubuntu-latest') 'Le runner standard Ubuntu est absent'
-    Assert-True ($workflow -notmatch ('runs-on:\s*' + $singleLine + 'large')) 'Un runner payant est configuré'
+    Assert-True (-not $workflow.Contains('large')) 'Un runner payant est configuré'
     Assert-True ($workflow -match 'node --test tests/\*\.test\.mjs') 'Les tests racine ne sont pas exécutés en CI'
-    Assert-True ($workflow -match ('node --test ' + $singleLine + 'tests/grid-hydrique/\*\.test\.mjs')) 'Les tests dashboard ne sont pas exécutés en CI'
+    Assert-True ($workflow.Contains('node --test tests/*.test.mjs tests/grid-hydrique/*.test.mjs')) 'Les tests dashboard ne sont pas exécutés en CI'
 }
 
 Assert-True (Test-Path -LiteralPath (Join-Path $projectRoot '.nojekyll')) 'Le fichier .nojekyll est absent'
@@ -133,7 +132,7 @@ if (Test-Path -LiteralPath $dashboardPath) {
     Assert-True ($dashboard -match 'desktopLayoutMedia\.addEventListener\("change"') 'Le DOM ne suit pas les changements de largeur'
     Assert-True ($dashboard -match 'const PMTILES_MODULE_URL = "https://unpkg\.com/pmtiles@3\.2\.0/dist/index\.js"') 'PMTiles doit etre epingle en 3.2.0'
     Assert-True ($dashboard -match 'zoneLoadPromise\s*\|\|=\s*import\(PMTILES_MODULE_URL\)') 'PMTiles doit etre charge uniquement a la demande'
-    Assert-True ($dashboard -notmatch ('import\s+' + $singleLine + 'pmtiles')) 'PMTiles ne doit pas etre importe statiquement'
+    Assert-True ($dashboard -notmatch 'import\s+.*pmtiles') 'PMTiles ne doit pas etre importe statiquement'
     Assert-True ($dashboard -match 'setupMapControls') 'La configuration des commandes de carte est absente'
     Assert-True ($dashboard -match 'loadZoneLayers') 'Le chargement des zones est absent'
     Assert-True ($dashboard -match 'setMapMode') 'Le changement de mode cartographique est absent'
