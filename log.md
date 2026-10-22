@@ -1,5 +1,11 @@
 # Journal du projet
 
+## 2026-10-22 12:32:46 +02:00 - Clarification du plan initial
+
+**Question soumise :** L'utilisateur a demande si le fichier `docs/superpowers/plans/2026-08-29 - dashboard_plan.md` avait ete execute.
+
+**Reponse / constat :** Pas litteralement. Le plan proposait Next.js, TypeScript, React et Vercel ; le dashboard realise a pris une voie statique adaptee au site existant : HTML, CSS, JavaScript, MapLibre et GitHub Pages. L'essentiel du MVP est couvert (carte VigiEau, indicateurs, stations, historiques, simulation Grid en trois phases, responsive, accessibilite, SEO, tests et deploiement). Les elements non realises ou non verifies sont le cache serveur Next.js, les routes API, la page detail dediee par station, les mesures Lighthouse et le monitoring. Le plan est donc une feuille de route initiale obsolete, pas un livrable entierement inexécute.
+
 ## 2026-10-22 12:30:16 +02:00 - Correction des points mineurs de la revue
 
 **Demande :** L'utilisateur a demande la correction des points mineurs identifies pendant la revue locale.
