@@ -1,12 +1,12 @@
 # Journal du projet
 
-## 2026-10-22 13:05:30 +02:00 - Publication GitHub Pages retablie
+## 2026-10-22 13:38:02 +02:00 - Publication GitHub Pages retablie
 
 **Probleme soumis :** Le workflow `Deploy static site to Pages` echouait pendant `build`, donc le deploiement etait ignore.
 
-**Solution :** Les validateurs PowerShell ont ete rendus compatibles avec PowerShell 7 sur Ubuntu en remplacant les assertions regex fragiles par des controles de contenu portables. Aucun comportement du site n'a ete modifie.
+**Diagnostic et solution :** Le validateur `tests/validate-grid-hydrique.ps1` rencontrait plusieurs incompatibilites PowerShell 7/Linux : parsing de regex, resolution de chemin et lecture de contenu HTML. Les assertions fragiles ont ete remplacees par des controles portables, puis le runner GitHub a ete epingle sur Ubuntu 24.04 pour eviter la migration automatique de `ubuntu-latest`. Aucun comportement du site n'a ete modifie.
 
-**Verification :** Les validateurs locaux et `node --test` (69 tests) passent. Le commit `bc1f46b` est pousse. Le workflow GitHub Actions `39767884416` est vert (build, report et deploy), et `https://alaindusaule.fr/grid-hydrique/` ainsi que le sitemap repondent HTTP 200.
+**Verification :** Les validateurs locaux, `node --test` (69 tests) et `git diff --check` passent. Les commits `ca46f22`, `483da1a`, `d38f056` et `47ce2f7` sont pousses. Le workflow GitHub Actions `39771793015` est vert (build, validation et deploy), et la page publique ainsi que le sitemap repondent HTTP 200.
 
 ## 2026-10-22 12:39:26 +02:00 - Second diagnostic de la CI
 
