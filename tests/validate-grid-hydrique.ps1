@@ -122,12 +122,12 @@ $dashboardPath = Join-Path $projectRoot 'assets/js/grid-hydrique/dashboard.mjs'
 Assert-True (Test-Path -LiteralPath $dashboardPath) 'Le module principal est absent'
 if (Test-Path -LiteralPath $dashboardPath) {
     $dashboard = Get-Content -Raw -Encoding UTF8 -LiteralPath $dashboardPath
-    Assert-True ($dashboard -match 'unpkg\.com/maplibre-gl@6\.6\.0/dist/maplibre-gl\.mjs') 'Le module MapLibre doit etre epingle en 6.6.0'
-    Assert-True ($dashboard -match 'unpkg\.com/maplibre-gl@6\.6\.0/dist/maplibre-gl\.css') 'La feuille MapLibre doit etre epinglee en 6.6.0'
-    Assert-True ($dashboard -match 'requestIdleCallback') 'Le chargement de la carte doit laisser le contenu prioritaire se peindre'
-    Assert-True ($dashboard -match '15\s*\*\s*60\s*\*\s*1000') 'L’intervalle de quinze minutes est absent'
-    Assert-True ($dashboard -match 'visibilitychange') 'La suspension en arrière-plan est absente'
-    Assert-True ($dashboard -match 'Promise\.allSettled') 'La dégradation indépendante des sources est absente'
+    Assert-True ($dashboard -match "unpkg\.com/maplibre-gl@6\.6\.0/dist/maplibre-gl\.mjs") "Le module MapLibre doit etre epingle en 6.6.0"
+    Assert-True ($dashboard -match "unpkg\.com/maplibre-gl@6\.6\.0/dist/maplibre-gl\.css") "La feuille MapLibre doit etre epinglee en 6.6.0"
+    Assert-True ($dashboard -match "requestIdleCallback") "Le chargement de la carte doit laisser le contenu prioritaire se peindre"
+    Assert-True ($dashboard -match "15\s*\*\s*60\s*\*\s*1000") "L’intervalle de quinze minutes est absent"
+    Assert-True ($dashboard -match "visibilitychange") "La suspension en arrière-plan est absente"
+    Assert-True ($dashboard -match "Promise\.allSettled") "La dégradation indépendante des sources est absente"
     Assert-True ($dashboard.Contains("matchMedia") -and $dashboard.Contains("min-width: 48rem")) "Le breakpoint DOM responsive est absent"
     Assert-True ($dashboard.Contains("desktopLayoutMedia.addEventListener")) "Le DOM ne suit pas les changements de largeur"
     Assert-True ($dashboard.Contains("PMTILES_MODULE_URL") -and $dashboard.Contains("pmtiles@3.2.0")) "PMTiles doit etre epingle en 3.2.0"
