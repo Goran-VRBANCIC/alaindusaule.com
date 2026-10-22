@@ -50,6 +50,7 @@ foreach ($page in $pages) {
     Assert-True (([regex]::Matches($html, '<h1(?:\s|>)', 'IgnoreCase')).Count -eq 1) "$page doit avoir un seul h1"
     Assert-True ($html -match 'class="skip-link"') "$page doit avoir un lien d’évitement"
     Assert-True ($html -match 'assets/css/site\.css|\.\./assets/css/site\.css') "$page doit charger site.css"
+    Assert-True ($html -match '(?:\.\./)?assets/css/site\.css\?v=[^"]+') "$page doit versionner site.css pour eviter un ancien cache"
     Assert-True ($html -notmatch 'TODO|TBD|placeholder') "$page contient un marqueur incomplet"
     Assert-True ($html -notmatch '<img[^>]+src="https?://') "$page ne doit pas charger d’image distante"
 

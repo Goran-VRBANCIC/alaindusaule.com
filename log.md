@@ -1,5 +1,15 @@
 # Journal du projet
 
+## 2026-10-22 15:22:19 +02:00 - Lecteur documentaire invisible
+
+**Probleme soumis :** La section du documentaire apparait sans lecteur, sans poster et sans mise en forme.
+
+**Cause :** Le navigateur conservait l'ancienne URL de `site.css` en cache pendant que le HTML avait deja ete mis a jour.
+
+**Solution :** Versionner les URLs de `site.css` sur les six pages et de `documentary-video.js` sur l'accueil. Ajouter une validation pour eviter le retour d'un ancien cache.
+
+**Verification :** Le test statique echoue avant la correction puis reussit apres correction ; validation du site, syntaxe JavaScript, 5 tests Node et controle du diff reussis.
+
 ## 2026-10-22 15:12:12 +02:00 - Report de la question de qualite video
 
 **Decision utilisateur :** Laisser pour l'instant la lecture YouTube en qualite automatique.
