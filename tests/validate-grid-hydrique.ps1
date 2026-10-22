@@ -106,7 +106,7 @@ if (Test-Path -LiteralPath $workflowPath) {
     Assert-True ($workflow -match 'actions/configure-pages@v6') 'configure-pages v6 est absent'
     Assert-True ($workflow -match 'actions/upload-pages-artifact@v5') 'upload-pages-artifact v5 est absent'
     Assert-True ($workflow -match 'actions/deploy-pages@v5') 'deploy-pages v5 est absent'
-    Assert-True ($workflow -match 'runs-on:\s*ubuntu-latest') 'Le runner standard Ubuntu est absent'
+    Assert-True ($workflow -match 'runs-on:\s*ubuntu-24\.04') 'Le runner Ubuntu 24.04 est absent'
     Assert-True (-not $workflow.Contains('large')) 'Un runner payant est configuré'
     Assert-True ($workflow -match 'node --test tests/\*\.test\.mjs') 'Les tests racine ne sont pas exécutés en CI'
     Assert-True ($workflow.Contains('node --test tests/*.test.mjs tests/grid-hydrique/*.test.mjs')) 'Les tests dashboard ne sont pas exécutés en CI'
