@@ -128,22 +128,22 @@ if (Test-Path -LiteralPath $dashboardPath) {
     Assert-True ($dashboard -match '15\s*\*\s*60\s*\*\s*1000') 'L’intervalle de quinze minutes est absent'
     Assert-True ($dashboard -match 'visibilitychange') 'La suspension en arrière-plan est absente'
     Assert-True ($dashboard -match 'Promise\.allSettled') 'La dégradation indépendante des sources est absente'
-    Assert-True ($dashboard.Contains('matchMedia') -and $dashboard.Contains('min-width: 48rem')) 'Le breakpoint DOM responsive est absent'
-    Assert-True ($dashboard.Contains('desktopLayoutMedia.addEventListener')) 'Le DOM ne suit pas les changements de largeur'
-    Assert-True ($dashboard.Contains('PMTILES_MODULE_URL') -and $dashboard.Contains('pmtiles@3.2.0')) 'PMTiles doit etre epingle en 3.2.0'
-    Assert-True ($dashboard.Contains('zoneLoadPromise ||= import(PMTILES_MODULE_URL)')) 'PMTiles doit etre charge uniquement a la demande'
-    Assert-True (-not $dashboard.Contains('from pmtiles')) 'PMTiles ne doit pas etre importe statiquement'
-    Assert-True ($dashboard.Contains('setupMapControls')) 'La configuration des commandes de carte est absente'
-    Assert-True ($dashboard.Contains('loadZoneLayers')) 'Le chargement des zones est absent'
-    Assert-True ($dashboard.Contains('setMapMode')) 'Le changement de mode cartographique est absent'
-    Assert-True ($dashboard.Contains('setZoneResource')) 'Le filtre de ressource zonale est absent'
-    Assert-True ($dashboard.Contains('renderZoneDetail')) 'Le detail zonal est absent'
-    Assert-True ($dashboard.Contains('setSimulationPhase')) 'Le changement de phase simulée est absent'
-    Assert-True ($dashboard.Contains('renderSimulationDetail')) 'Le détail simulé est absent'
-    Assert-True ($dashboard.Contains('layerControlsElement.hidden = simulated')) 'Les contrôles de stations ne sont pas masqués en simulation'
-    Assert-True ($dashboard.Contains('normalizeZones')) 'La normalisation des zones est absente'
-    Assert-True ($dashboard.Contains('Vue ') -and $dashboard.Contains('partements') -and $dashboard.Contains('tablie')) 'Le texte de repli vers Departements est absent'
-    Assert-True ($dashboard.Contains('zoneLoadPromise = undefined')) 'La promesse de chargement doit etre reinitialisee apres echec'
+    Assert-True ($dashboard.Contains("matchMedia") -and $dashboard.Contains("min-width: 48rem")) "Le breakpoint DOM responsive est absent"
+    Assert-True ($dashboard.Contains("desktopLayoutMedia.addEventListener")) "Le DOM ne suit pas les changements de largeur"
+    Assert-True ($dashboard.Contains("PMTILES_MODULE_URL") -and $dashboard.Contains("pmtiles@3.2.0")) "PMTiles doit etre epingle en 3.2.0"
+    Assert-True ($dashboard.Contains("zoneLoadPromise ||= import(PMTILES_MODULE_URL)")) "PMTiles doit etre charge uniquement a la demande"
+    Assert-True (-not $dashboard.Contains("from pmtiles")) "PMTiles ne doit pas etre importe statiquement"
+    Assert-True ($dashboard.Contains("setupMapControls")) "La configuration des commandes de carte est absente"
+    Assert-True ($dashboard.Contains("loadZoneLayers")) "Le chargement des zones est absent"
+    Assert-True ($dashboard.Contains("setMapMode")) "Le changement de mode cartographique est absent"
+    Assert-True ($dashboard.Contains("setZoneResource")) "Le filtre de ressource zonale est absent"
+    Assert-True ($dashboard.Contains("renderZoneDetail")) "Le detail zonal est absent"
+    Assert-True ($dashboard.Contains("setSimulationPhase")) "Le changement de phase simulée est absent"
+    Assert-True ($dashboard.Contains("renderSimulationDetail")) "Le détail simulé est absent"
+    Assert-True ($dashboard.Contains("layerControlsElement.hidden = simulated")) "Les contrôles de stations ne sont pas masqués en simulation"
+    Assert-True ($dashboard.Contains("normalizeZones")) "La normalisation des zones est absente"
+    Assert-True ($dashboard.Contains("Vue ") -and $dashboard.Contains("partements") -and $dashboard.Contains("tablie")) "Le texte de repli vers Departements est absent"
+    Assert-True ($dashboard.Contains("zoneLoadPromise = undefined")) "La promesse de chargement doit etre reinitialisee apres echec"
 }
 
 if ($failures.Count -gt 0) {
@@ -151,4 +151,4 @@ if ($failures.Count -gt 0) {
     exit 1
 }
 
-Write-Host 'Validation dashboard reussie.'
+Write-Host "Validation dashboard reussie."
